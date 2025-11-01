@@ -1,7 +1,15 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
-import { validate, CreateFlightSchema, FlightIdParamSchema, FlightsQuerySchema } from './validation';
+import {
+  validate,
+  CreateFlightSchema,
+  FlightIdParamSchema,
+  FlightsQuerySchema,
+  CreateFlightInput,
+  FlightIdParam,
+  FlightsQuery
+} from './validation';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,7 +27,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Flight Routes
 
 // POST /api/flights - Create a new flight entry
-app.post('/api/flights', validate(CreateFlightSchema, 'body'), async (req: Request, res: Response) => {
+app.post('/api/flights', validate(CreateFlightSchema, 'body'), async (req: Request<{}, {}, CreateFlightInput>, res: Response) => {
   try {
     const { pilotId, uploadId, departureAirfield, tailNumber, depDate, hours } = req.body;
 
@@ -50,7 +58,7 @@ app.post('/api/flights', validate(CreateFlightSchema, 'body'), async (req: Reque
 });
 
 // GET /api/flights/:id - Get a single flight by ID
-app.get('/api/flights/:id', validate(FlightIdParamSchema, 'params'), async (req: Request, res: Response) => {
+app.get('/api/flights/:id', validate(FlightIdParamSchema, 'params'), async (req: Request<FlightIdParam>, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -78,12 +86,12 @@ app.get('/api/flights/:id', validate(FlightIdParamSchema, 'params'), async (req:
 });
 
 // GET /api/flights - Get all flights, optionally filtered by pilotId
-app.get('/api/flights', validate(FlightsQuerySchema, 'query'), async (req: Request, res: Response) => {
+app.get('/api/flights', validate(FlightsQuerySchema, 'query'), async (req: Request<{}, {}, {}, FlightsQuery>, res: Response) => {
   try {
     const { pilotId } = req.query;
 
     const flights = await prisma.flightEntry.findMany({
-      where: pilotId ? { pilotId: pilotId as string } : undefined,
+      where: pilotId ? { pilotId } : undefined,
       include: {
         pilot: {
           include: {

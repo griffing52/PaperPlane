@@ -26,6 +26,11 @@ export const FlightsQuerySchema = z.object({
   pilotId: z.string().uuid({ message: 'Invalid pilot ID format' }).optional(),
 });
 
+// Inferred TypeScript types from schemas (for autocomplete!)
+export type CreateFlightInput = z.infer<typeof CreateFlightSchema>;
+export type FlightIdParam = z.infer<typeof FlightIdParamSchema>;
+export type FlightsQuery = z.infer<typeof FlightsQuerySchema>;
+
 // Type to specify what part of the request to validate
 type RequestProperty = 'body' | 'query' | 'params';
 
