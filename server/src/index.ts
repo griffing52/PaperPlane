@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { PrismaClient } from '@prisma/client';
+import { validate, CreateFlightSchema, FlightIdParamSchema, FlightsQuerySchema } from './validation';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,7 +19,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 // Flight Routes
 
 // POST /api/flights - Create a new flight entry
-app.post('/api/flights', async (req: Request, res: Response) => {
+app.post('/api/flights', validate(CreateFlightSchema, 'body'), async (req: Request, res: Response) => {
   try {
     const { pilotId, uploadId, departureAirfield, tailNumber, depDate, hours } = req.body;
 
@@ -49,7 +50,7 @@ app.post('/api/flights', async (req: Request, res: Response) => {
 });
 
 // GET /api/flights/:id - Get a single flight by ID
-app.get('/api/flights/:id', async (req: Request, res: Response) => {
+app.get('/api/flights/:id', validate(FlightIdParamSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -77,7 +78,7 @@ app.get('/api/flights/:id', async (req: Request, res: Response) => {
 });
 
 // GET /api/flights - Get all flights, optionally filtered by pilotId
-app.get('/api/flights', async (req: Request, res: Response) => {
+app.get('/api/flights', validate(FlightsQuerySchema, 'query'), async (req: Request, res: Response) => {
   try {
     const { pilotId } = req.query;
 
@@ -103,11 +104,17 @@ app.get('/api/flights', async (req: Request, res: Response) => {
   }
 });
 
-process.on('SIGINT', async () => {
-  await prisma.$disconnect();
-  process.exit(0);
-});
+// Export app for testing
+export { app, prisma };
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Only start server if this file is run directly
+if (require.main === module) {
+  process.on('SIGINT', async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
