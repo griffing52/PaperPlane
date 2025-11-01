@@ -10,7 +10,8 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
-    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "seed": "npm --prefix server run seed --"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",
