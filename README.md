@@ -3,7 +3,7 @@
 First, make sure you have the dependencies installed:
 
 ```bash
-npm install
+npm install:all
 ```
 
 (copy and pasted from Gemini)
