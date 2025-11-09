@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import { app } from './index';
-import { createTestPilot, createTestFlight } from './test-helpers/factories';
+import { createTestPilot, createTestFlight, createTestLogbookUpload } from './test-helpers/factories';
 
 describe('API Endpoints', () => {
   describe('GET /api/health', () => {
@@ -17,7 +17,7 @@ describe('API Endpoints', () => {
   });
 
   describe('POST /api/flights', () => {
-    it('should create a new flight entry with valid data', async () => {
+    it('should return 405 Method Not Allowed', async () => {
       const pilot = await createTestPilot();
 
       const flightData = {
@@ -33,66 +33,26 @@ describe('API Endpoints', () => {
         .send(flightData)
         .set('Content-Type', 'application/json');
 
-      expect(response.status).toBe(201);
-      expect(response.body).toMatchObject({
-        pilotId: pilot.userId,
-        departureAirfield: 'KLAX',
-        tailNumber: 'N54321',
-        hours: '3.5', // Prisma Decimal returns as string
-      });
-      expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('createdAt');
-      expect(response.body.pilot).toBeDefined();
-      expect(response.body.pilot.user.email).toBe(pilot.user.email);
-    });
-
-    it('should reject invalid pilotId format', async () => {
-      const flightData = {
-        pilotId: 'invalid-uuid',
-        departureAirfield: 'KLAX',
-        tailNumber: 'N12345',
-        depDate: new Date().toISOString(),
-        hours: 2.0,
-      };
-
-      const response = await request(app)
-        .post('/api/flights')
-        .send(flightData)
-        .set('Content-Type', 'application/json');
-
-      expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
-      expect(response.body.errors[0].field).toBe('pilotId');
-    });
-
-    it('should reject missing required fields', async () => {
-      const response = await request(app)
-        .post('/api/flights')
-        .send({
-          pilotId: '123e4567-e89b-12d3-a456-426614174000',
-          // Missing required fields
-        })
-        .set('Content-Type', 'application/json');
-
-      expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
+      expect(response.status).toBe(405);
+      expect(response.body.error).toBe('Creating flights manually is not allowed. Please submit a logbook instead.');
     });
 
     describe('GET /api/flights/:id', () => {
       it('should return a flight by ID', async () => {
         const pilot = await createTestPilot();
-        const flight = await createTestFlight(pilot.userId, {
+        const flightEntry = await createTestFlight(pilot.userId, {
           departureAirfield: 'KSFO',
           tailNumber: 'N77777',
           hours: 4.2,
         });
 
-        const response = await request(app).get(`/api/flights/${flight.id}`);
+        const response = await request(app).get(`/api/flights/${flightEntry.id}`);
 
         expect(response.status).toBe(200);
-        expect(response.body.id).toBe(flight.id);
-        expect(response.body.departureAirfield).toBe('KSFO');
-        expect(response.body.tailNumber).toBe('N77777');
+        expect(response.body.id).toBe(flightEntry.id);
+        expect(response.body.flight).toBeDefined();
+        expect(response.body.flight.tailNumber).toBe('N77777');
+        expect(response.body.flight.originAirportIcao).toBe('KSFO');
         expect(response.body.pilot).toBeDefined();
       });
 
@@ -142,6 +102,119 @@ describe('API Endpoints', () => {
         expect(response.body[1].pilotId).toBe(pilot1.userId);
       });
 
+    });
+  });
+
+  describe('POST /api/logbooks', () => {
+    it('should create a new logbook upload with valid data', async () => {
+      const pilot = await createTestPilot();
+
+      const logbookData = {
+        pilotId: pilot.userId,
+        filePath: '/uploads/logbook-test.pdf',
+        source: 'MANUAL',
+        status: 'PENDING',
+      };
+
+      const response = await request(app)
+        .post('/api/logbooks')
+        .send(logbookData)
+        .set('Content-Type', 'application/json');
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject({
+        pilotId: pilot.userId,
+        filePath: '/uploads/logbook-test.pdf',
+        source: 'MANUAL',
+        status: 'PENDING',
+      });
+      expect(response.body).toHaveProperty('id');
+      expect(response.body).toHaveProperty('createdAt');
+      expect(response.body.pilot).toBeDefined();
+      expect(response.body.pilot.user.email).toBe(pilot.user.email);
+    });
+
+    it('should reject invalid pilotId format', async () => {
+      const logbookData = {
+        pilotId: 'invalid-uuid',
+        filePath: '/uploads/logbook-test.pdf',
+        source: 'MANUAL',
+      };
+
+      const response = await request(app)
+        .post('/api/logbooks')
+        .send(logbookData)
+        .set('Content-Type', 'application/json');
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+      expect(response.body.errors[0].field).toBe('pilotId');
+    });
+
+    it('should reject invalid source', async () => {
+      const pilot = await createTestPilot();
+
+      const logbookData = {
+        pilotId: pilot.userId,
+        filePath: '/uploads/logbook-test.pdf',
+        source: 'INVALID',
+      };
+
+      const response = await request(app)
+        .post('/api/logbooks')
+        .send(logbookData)
+        .set('Content-Type', 'application/json');
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
+
+    it('should reject missing required fields', async () => {
+      const response = await request(app)
+        .post('/api/logbooks')
+        .send({
+          pilotId: '123e4567-e89b-12d3-a456-426614174000',
+          // Missing required fields
+        })
+        .set('Content-Type', 'application/json');
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
+    });
+  });
+
+  describe('GET /api/logbooks/:id', () => {
+    it('should return a logbook by ID', async () => {
+      const pilot = await createTestPilot();
+      const logbook = await createTestLogbookUpload(pilot.userId, {
+        filePath: '/uploads/test-logbook.pdf',
+        source: 'OCR',
+        status: 'DONE',
+      });
+
+      const response = await request(app).get(`/api/logbooks/${logbook.id}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.id).toBe(logbook.id);
+      expect(response.body.filePath).toBe('/uploads/test-logbook.pdf');
+      expect(response.body.source).toBe('OCR');
+      expect(response.body.status).toBe('DONE');
+      expect(response.body.pilot).toBeDefined();
+    });
+
+    it('should return 404 for non-existent logbook', async () => {
+      const fakeId = '123e4567-e89b-12d3-a456-426614174000';
+      const response = await request(app).get(`/api/logbooks/${fakeId}`);
+
+      expect(response.status).toBe(404);
+      expect(response.body.error).toBe('Logbook not found');
+    });
+
+    it('should return 400 for invalid UUID format', async () => {
+      const response = await request(app).get('/api/logbooks/invalid-uuid');
+
+      expect(response.status).toBe(400);
+      expect(response.body.errors).toBeDefined();
     });
   });
 }

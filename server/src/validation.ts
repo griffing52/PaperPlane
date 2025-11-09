@@ -26,10 +26,25 @@ export const FlightsQuerySchema = z.object({
   pilotId: z.string().uuid({ message: 'Invalid pilot ID format' }).optional(),
 });
 
+// Schema for creating a logbook upload
+export const CreateLogbookSchema = z.object({
+  pilotId: z.string().uuid({ message: 'Invalid pilot ID format' }),
+  filePath: z.string().min(1, { message: 'File path is required' }),
+  source: z.enum(['OCR', 'MANUAL'], { message: 'Source must be either OCR or MANUAL' }),
+  status: z.enum(['PENDING', 'PROCESSING', 'DONE', 'FAILED']).optional().default('PENDING'),
+});
+
+// Schema for logbook ID parameter validation
+export const LogbookIdParamSchema = z.object({
+  id: z.string().uuid({ message: 'Invalid logbook ID format' }),
+});
+
 // Inferred TypeScript types from schemas (for autocomplete!)
 export type CreateFlightInput = z.infer<typeof CreateFlightSchema>;
 export type FlightIdParam = z.infer<typeof FlightIdParamSchema>;
 export type FlightsQuery = z.infer<typeof FlightsQuerySchema>;
+export type CreateLogbookInput = z.infer<typeof CreateLogbookSchema>;
+export type LogbookIdParam = z.infer<typeof LogbookIdParamSchema>;
 
 // Type to specify what part of the request to validate
 type RequestProperty = 'body' | 'query' | 'params';

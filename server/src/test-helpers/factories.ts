@@ -86,13 +86,27 @@ export async function createTestFlight(
     hours?: number;
   } = {}
 ) {
+  // First create a Flight record
+  const tailNumber = overrides.tailNumber || 'N12345';
+  const departureAirfield = overrides.departureAirfield || 'KJFK';
+  const depDate = overrides.depDate || new Date().toISOString();
+
+  const flight = await testPrisma.flight.create({
+    data: {
+      tailNumber,
+      aircraftModel: 'Cessna 172',
+      manufacturer: 'Cessna',
+      originAirportIcao: departureAirfield,
+      destinationAirportIcao: 'KLAX',
+      departureTime: depDate,
+      arrivalTime: new Date(new Date(depDate).getTime() + (overrides.hours || 2.5) * 3600000).toISOString(),
+    },
+  });
+
   const data: any = {
     pilotId,
+    flightId: flight.id,
     uploadId: overrides.uploadId === undefined ? null : overrides.uploadId,
-    departureAirfield: overrides.departureAirfield || 'KJFK',
-    tailNumber: overrides.tailNumber || 'N12345',
-    depDate: overrides.depDate || new Date().toISOString(),
-    hours: overrides.hours || 2.5,
   };
 
   if (overrides.id) {
@@ -108,6 +122,7 @@ export async function createTestFlight(
         },
       },
       upload: true,
+      flight: true,
     },
   });
 }
