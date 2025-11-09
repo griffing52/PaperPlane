@@ -1,8 +1,23 @@
 import { PrismaClient, UploadStatus, FlightSource } from '@prisma/client';
-import { Decimal } from '@prisma/client/runtime/library';
 import { Command } from 'commander';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const prisma = new PrismaClient();
+
+// TypeScript interface for real flight data
+interface RealFlightData {
+  icao24: string;
+  tail_number: string;
+  aircraft_model: string;
+  manufacturer: string | null;
+  origin_airport_icao: string;
+  destination_airport_icao: string | null;
+  departure_time: string;
+  arrival_time: string;
+  pilot_id: number;
+  flight_number: number;
+}
 
 // Seeded random number generator
 class SeededRandom {
@@ -26,36 +41,6 @@ const rng = new SeededRandom(42);
 const firstNames = ['James', 'Sarah', 'Michael', 'Emily', 'Robert', 'Jennifer', 'David', 'Lisa', 'John', 'Amanda'];
 const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
 
-// Southern California training airports (where student pilots actually train)
-const airports = [
-  'KVNY', // Van Nuys - Very popular training airport
-  'KBUR', // Burbank
-  'KSNA', // John Wayne/Orange County
-  'KFUL', // Fullerton - Major training airport
-  'KCNO', // Chino - Lots of flight schools
-  'KPOC', // Brackett Field - Popular training
-  'KWHP', // Whiteman - Student pilot friendly
-  'KSBD', // San Bernardino
-  'KRAL', // Riverside
-  'KCMA', // Camarillo - Great training airport
-  'KOXR', // Oxnard
-  'KSBA', // Santa Barbara
-  'KCRQ', // Carlsbad/McClellan-Palomar
-  'KMYF', // Montgomery-Gibbs (San Diego)
-  'KSEE', // Gillespie Field (San Diego)
-  'KSDM', // Brown Field (San Diego)
-  'KTOA', // Torrance
-  'KLGB', // Long Beach
-];
-
-const aircraftTypes = [
-  { prefix: 'N', numbers: '172' }, // Cessna 172 - Most common trainer
-  { prefix: 'N', numbers: '152' }, // Cessna 152 - Budget trainer
-  { prefix: 'N', numbers: '182' }, // Cessna 182
-  { prefix: 'N', numbers: 'Cherokee' }, // Piper Cherokee
-  { prefix: 'N', numbers: 'Warrior' }, // Piper Warrior
-];
-
 // Helper functions
 function randomElement<T>(array: T[]): T {
   return array[Math.floor(rng.next() * array.length)];
@@ -72,39 +57,6 @@ function generateEmail(firstName: string, lastName: string): string {
 
 function generateLicenseNumber(): string {
   return `PPL-${randomInt(100000, 999999)}`;
-}
-
-function generateTailNumber(): string {
-  const type = randomElement(aircraftTypes);
-  // Format: N + 3-5 numbers + optional 1-2 letters
-  // e.g., N12345, N172SP, N8294V
-  const numDigits = randomInt(3, 5);
-  let number = '';
-  for (let i = 0; i < numDigits; i++) {
-    number += randomInt(0, 9);
-  }
-  // 50% chance of adding suffix letters
-  if (rng.next() > 0.5) {
-    const letters = String.fromCharCode(65 + randomInt(0, 25)) +
-      (rng.next() > 0.5 ? String.fromCharCode(65 + randomInt(0, 25)) : '');
-    return `${type.prefix}${number}${letters}`;
-  }
-  return `${type.prefix}${number}`;
-}
-
-function generateFlightHours(): Decimal {
-  // Student pilot training flights are typically 1.0 to 3.5 hours
-  const hours = (rng.next() * 2.5 + 1.0).toFixed(1);
-  return new Decimal(hours);
-}
-
-function generateDate(yearOffset: number = 0, monthOffset: number = 0): string {
-  const date = new Date();
-  date.setFullYear(date.getFullYear() - yearOffset);
-  date.setMonth(date.getMonth() - monthOffset);
-  date.setDate(randomInt(1, 28)); // Safe day range
-
-  return date.toISOString().split('T')[0]; // YYYY-MM-DD format
 }
 
 function generateFilePath(pilotName: string, uploadNumber: number, source: FlightSource): string {
@@ -134,14 +86,20 @@ async function seed(force: boolean) {
   console.log('🌱 Starting database seed...');
   console.log('🎲 Using seed value: 42 (change SeededRandom(42) to get different data)');
 
+  // Load real flight data
+  const realFlightsPath = path.join(__dirname, '../../data/real_flights.json');
+  const realFlightsData: RealFlightData[] = JSON.parse(fs.readFileSync(realFlightsPath, 'utf-8'));
+  console.log(`📁 Loaded ${realFlightsData.length} real flights from JSON\n`);
+
   // Check if data exists
   {
     const userCount = await prisma.user.count();
     const pilotCount = await prisma.pilot.count();
     const uploadCount = await prisma.logbookUpload.count();
     const flightCount = await prisma.flightEntry.count();
+    const realFlightCount = await prisma.flight.count();
 
-    const hasData = userCount > 0 || pilotCount > 0 || uploadCount > 0 || flightCount > 0;
+    const hasData = userCount > 0 || pilotCount > 0 || uploadCount > 0 || flightCount > 0 || realFlightCount > 0;
 
     if (hasData && !force) {
       console.error('❌ Error: Database already contains data!');
@@ -151,6 +109,7 @@ async function seed(force: boolean) {
       console.error(`   Pilots: ${pilotCount}`);
       console.error(`   Logbook Uploads: ${uploadCount}`);
       console.error(`   Flight Entries: ${flightCount}`);
+      console.error(`   Flights: ${realFlightCount}`);
       console.error('');
       console.error('To delete existing data and proceed with seeding, use the -f flag:');
       console.error('  npm run seed -- -f');
@@ -161,14 +120,16 @@ async function seed(force: boolean) {
       // Clear existing data
       console.log('🗑️  Clearing existing data...');
       await prisma.flightEntry.deleteMany();
+      await prisma.flight.deleteMany();
       await prisma.logbookUpload.deleteMany();
       await prisma.pilot.deleteMany();
       await prisma.user.deleteMany();
     }
   }
 
-  console.log('✨ Creating users and logbook data...\n');
+  console.log('✨ Creating users and pilots...\n');
 
+  const pilots = [];
   for (let i = 0; i < 5; i++) {
     const firstName = randomElement(firstNames);
     const lastName = randomElement(lastNames);
@@ -193,63 +154,82 @@ async function seed(force: boolean) {
       },
     });
 
-    // Create 2 logbook uploads (1 OCR, 1 MANUAL)
-    const sources: FlightSource[] = ['OCR', 'MANUAL'];
+    // Create 1 logbook upload per pilot
+    console.log(`  📄 Creating MANUAL logbook upload`);
 
-    for (let uploadIndex = 0; uploadIndex < 2; uploadIndex++) {
-      const source = sources[uploadIndex];
-      const uploadNumber = uploadIndex + 1;
+    const upload = await prisma.logbookUpload.create({
+      data: {
+        pilotId: pilot.userId,
+        filePath: generateFilePath(fullName, 1, 'MANUAL'),
+        status: UploadStatus.DONE,
+        source: 'MANUAL',
+        time: new Date(),
+      },
+    });
 
-      console.log(`  📄 Creating ${source} logbook upload ${uploadNumber}/2`);
-
-      const upload = await prisma.logbookUpload.create({
-        data: {
-          pilotId: pilot.userId,
-          filePath: generateFilePath(fullName, uploadNumber, source),
-          status: UploadStatus.DONE,
-          source: source,
-          time: new Date(),
-        },
-      });
-
-      // Create 5 flights for this upload
-      const flightPromises = [];
-      for (let flightIndex = 0; flightIndex < 5; flightIndex++) {
-        const monthsAgo = uploadIndex * 6 + flightIndex; // Spread flights across time
-
-        flightPromises.push(
-          prisma.flightEntry.create({
-            data: {
-              pilotId: pilot.userId,
-              uploadId: upload.id,
-              departureAirfield: randomElement(airports),
-              tailNumber: generateTailNumber(),
-              depDate: generateDate(0, monthsAgo),
-              hours: generateFlightHours(),
-            },
-          })
-        );
-      }
-
-      await Promise.all(flightPromises);
-      console.log(`    ✈️  Created 5 flight entries`);
-    }
-
+    pilots.push({ pilot, upload });
     console.log();
   }
+
+  console.log('✈️  Creating real flight data...\n');
+
+  // Create Flight records from real data
+  const createdFlights = [];
+  for (const flightData of realFlightsData) {
+    // Use placeholders for missing data
+    const manufacturer = flightData.manufacturer || 'Unknown';
+    const destinationAirport = flightData.destination_airport_icao || flightData.origin_airport_icao;
+
+    const flight = await prisma.flight.create({
+      data: {
+        tailNumber: flightData.tail_number.trim(),
+        aircraftModel: flightData.aircraft_model,
+        manufacturer: manufacturer,
+        originAirportIcao: flightData.origin_airport_icao,
+        destinationAirportIcao: destinationAirport,
+        departureTime: new Date(flightData.departure_time),
+        arrivalTime: new Date(flightData.arrival_time),
+      },
+    });
+
+    createdFlights.push({ flight, originalPilotId: flightData.pilot_id });
+  }
+
+  console.log(`  ✅ Created ${createdFlights.length} Flight records\n`);
+
+  console.log('🔗 Creating flight entries (linking flights to pilots)...\n');
+
+  // Create FlightEntry records, mapping JSON pilot_ids to our 5 pilots
+  for (const { flight, originalPilotId } of createdFlights) {
+    // Map original pilot_id (1-13) to one of our 5 pilots (0-4)
+    const pilotIndex = (originalPilotId - 1) % 5;
+    const { pilot, upload } = pilots[pilotIndex];
+
+    await prisma.flightEntry.create({
+      data: {
+        flightId: flight.id,
+        pilotId: pilot.userId,
+        uploadId: upload.id,
+      },
+    });
+  }
+
+  console.log(`  ✅ Created ${createdFlights.length} FlightEntry records\n`);
 
   // Print summary
   const userCount = await prisma.user.count();
   const pilotCount = await prisma.pilot.count();
   const uploadCount = await prisma.logbookUpload.count();
-  const flightCount = await prisma.flightEntry.count();
+  const flightCount = await prisma.flight.count();
+  const flightEntryCount = await prisma.flightEntry.count();
 
   console.log('✅ Seed completed successfully!\n');
   console.log('📊 Summary:');
   console.log(`   Users: ${userCount}`);
   console.log(`   Pilots: ${pilotCount}`);
   console.log(`   Logbook Uploads: ${uploadCount}`);
-  console.log(`   Flight Entries: ${flightCount}`);
+  console.log(`   Flights: ${flightCount}`);
+  console.log(`   Flight Entries: ${flightEntryCount}`);
 }
 
 // Run the seed
