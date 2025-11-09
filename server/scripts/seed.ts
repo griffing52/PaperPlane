@@ -65,6 +65,52 @@ function generateFilePath(pilotName: string, uploadNumber: number, source: Fligh
   return `uploads/${sanitizedName}/logbook_${uploadNumber}_${source.toLowerCase()}_${timestamp}.pdf`;
 }
 
+function randomDecimal(min: number, max: number, precision: number = 1): number {
+  const value = rng.next() * (max - min) + min;
+  return Math.round(value * Math.pow(10, precision)) / Math.pow(10, precision);
+}
+
+// Generate plausible flight time data based on actual flight duration
+function generateFlightTimes(departureTime: Date, arrivalTime: Date) {
+  // Calculate actual flight duration in hours
+  const durationMs = arrivalTime.getTime() - departureTime.getTime();
+  const totalFlightTime = Math.round((durationMs / (1000 * 60 * 60)) * 10) / 10; // Round to 1 decimal
+
+  // All pilots are student pilots - mix of dual received and solo
+  let soloTime = 0;
+  let dualReceivedTime = 0;
+
+  // Student pilot - mix of dual received and solo (60% dual, 40% solo)
+  if (rng.next() < 0.6) {
+    dualReceivedTime = totalFlightTime;
+  } else {
+    soloTime = totalFlightTime;
+  }
+
+  // Special conditions (can overlap with above times)
+  // Cross country: ~40% of flights, must be >50nm
+  const crossCountryTime = rng.next() < 0.4 ? totalFlightTime : 0;
+
+  // Night time: ~20% of flights
+  const nightTime = rng.next() < 0.2 ? randomDecimal(0, totalFlightTime, 1) : 0;
+
+  // Actual instrument: ~15% of flights (when conditions are IMC)
+  const actualInstrumentTime = rng.next() < 0.15 ? randomDecimal(0, totalFlightTime * 0.8, 1) : 0;
+
+  // Simulated instrument: ~40% of flights (student pilots training)
+  const simulatedInstrumentTime = rng.next() < 0.4 ? randomDecimal(0, totalFlightTime * 0.9, 1) : 0;
+
+  return {
+    totalFlightTime,
+    soloTime,
+    dualReceivedTime,
+    crossCountryTime,
+    nightTime,
+    actualInstrumentTime,
+    simulatedInstrumentTime,
+  };
+}
+
 // Set up CLI with commander
 const program = new Command();
 
@@ -205,11 +251,21 @@ async function seed(force: boolean) {
     const pilotIndex = (originalPilotId - 1) % 5;
     const { pilot, upload } = pilots[pilotIndex];
 
+    // Generate plausible flight times
+    const flightTimes = generateFlightTimes(flight.departureTime, flight.arrivalTime);
+
     await prisma.flightEntry.create({
       data: {
         flightId: flight.id,
         pilotId: pilot.userId,
         uploadId: upload.id,
+        totalFlightTime: flightTimes.totalFlightTime,
+        soloTime: flightTimes.soloTime,
+        dualReceivedTime: flightTimes.dualReceivedTime,
+        crossCountryTime: flightTimes.crossCountryTime,
+        nightTime: flightTimes.nightTime,
+        actualInstrumentTime: flightTimes.actualInstrumentTime,
+        simulatedInstrumentTime: flightTimes.simulatedInstrumentTime,
       },
     });
   }

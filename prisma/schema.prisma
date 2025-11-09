@@ -108,13 +108,10 @@ model FlightEntry {
   pilotId            String       @map("pilot_id")
   uploadId           String?      @map("upload_id")
 
-  // Flight time categories - required for certificates/ratings
+  // Flight time categories - for student pilots
   totalFlightTime           Decimal  @default(0)  // Total duration of this flight
-  picTime                   Decimal  @default(0)  // Pilot in Command
-  sicTime                   Decimal  @default(0)  // Second in Command
   soloTime                  Decimal  @default(0)  // Solo (student pilot)
   dualReceivedTime          Decimal  @default(0)  // Training with instructor
-  dualGivenTime             Decimal  @default(0)  // Time instructing (CFI)
 
   // Special conditions - required for ratings
   crossCountryTime          Decimal  @default(0)  // XC (>50nm + landing elsewhere)
