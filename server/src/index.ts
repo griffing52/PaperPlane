@@ -89,34 +89,6 @@ app.get('/api/flights', validate(FlightsQuerySchema, 'query'), async (req: Reque
 
 // Logbook Routes
 
-// POST /api/logbooks - Submit a new logbook upload
-app.post('/api/logbooks', validate(CreateLogbookSchema, 'body'), async (req: Request<{}, {}, CreateLogbookInput>, res: Response) => {
-  try {
-    const { pilotId, filePath, source, status } = req.body;
-
-    const logbook = await prisma.logbookUpload.create({
-      data: {
-        pilotId,
-        filePath,
-        source,
-        status: status || 'PENDING',
-      },
-      include: {
-        pilot: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
-
-    res.status(201).json(logbook);
-  } catch (error) {
-    console.error('Error creating logbook upload:', error);
-    res.status(500).json({ error: 'Failed to create logbook upload' });
-  }
-});
-
 // GET /api/logbooks/:id - Get a single logbook by ID
 app.get('/api/logbooks/:id', validate(LogbookIdParamSchema, 'params'), async (req: Request<LogbookIdParam>, res: Response) => {
   try {

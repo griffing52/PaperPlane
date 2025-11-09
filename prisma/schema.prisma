@@ -107,13 +107,28 @@ model FlightEntry {
   flightId           String       @map("flight_id")
   pilotId            String       @map("pilot_id")
   uploadId           String?      @map("upload_id")
+
+  // Flight time categories - required for certificates/ratings
+  totalFlightTime           Decimal  @default(0)  // Total duration of this flight
+  picTime                   Decimal  @default(0)  // Pilot in Command
+  sicTime                   Decimal  @default(0)  // Second in Command
+  soloTime                  Decimal  @default(0)  // Solo (student pilot)
+  dualReceivedTime          Decimal  @default(0)  // Training with instructor
+  dualGivenTime             Decimal  @default(0)  // Time instructing (CFI)
+
+  // Special conditions - required for ratings
+  crossCountryTime          Decimal  @default(0)  // XC (>50nm + landing elsewhere)
+  nightTime                 Decimal  @default(0)  // Night (civil twilight to twilight)
+  actualInstrumentTime      Decimal  @default(0)  // Actual IMC
+  simulatedInstrumentTime   Decimal  @default(0)  // Hood/foggles
+
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
-  
+
   flight             Flight       @relation(fields: [flightId], references: [id], onDelete: Cascade)
   pilot              Pilot        @relation(fields: [pilotId], references: [userId], onDelete: Cascade)
   upload             LogbookUpload? @relation(fields: [uploadId], references: [id])
-  
+
   @@map("flight_entries")
 }
 
