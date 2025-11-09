@@ -1,6 +1,5 @@
 [
   {
-    "icao24": "N399EA  ",
     "tail_number": "N399EA  ",
     "aircraft_model": "Unknown",
     "manufacturer": null,
@@ -12,7 +11,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N399EA  ",
     "tail_number": "N399EA  ",
     "aircraft_model": "Unknown",
     "manufacturer": null,
@@ -24,7 +22,6 @@
     "flight_number": 2
   },
   {
-    "icao24": "N399EA  ",
     "tail_number": "N399EA  ",
     "aircraft_model": "Unknown",
     "manufacturer": null,
@@ -36,7 +33,6 @@
     "flight_number": 3
   },
   {
-    "icao24": "N103LU",
     "tail_number": "N103LU",
     "aircraft_model": "172R",
     "manufacturer": null,
@@ -48,7 +44,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N103LU",
     "tail_number": "N103LU",
     "aircraft_model": "172R",
     "manufacturer": null,
@@ -60,7 +55,6 @@
     "flight_number": 2
   },
   {
-    "icao24": "N103LU",
     "tail_number": "N103LU",
     "aircraft_model": "172R",
     "manufacturer": null,
@@ -72,7 +66,6 @@
     "flight_number": 3
   },
   {
-    "icao24": "N3864M",
     "tail_number": "N3864M",
     "aircraft_model": "PA-28-181",
     "manufacturer": null,
@@ -84,7 +77,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N3864M",
     "tail_number": "N3864M",
     "aircraft_model": "PA-28-181",
     "manufacturer": null,
@@ -96,7 +88,6 @@
     "flight_number": 2
   },
   {
-    "icao24": "N4332N",
     "tail_number": "N4332N",
     "aircraft_model": "PA-28-161",
     "manufacturer": null,
@@ -108,7 +99,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N4332N",
     "tail_number": "N4332N",
     "aircraft_model": "PA-28-161",
     "manufacturer": null,
@@ -120,7 +110,6 @@
     "flight_number": 2
   },
   {
-    "icao24": "N733PV",
     "tail_number": "N733PV",
     "aircraft_model": "172N",
     "manufacturer": null,
@@ -132,7 +121,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N733PV",
     "tail_number": "N733PV",
     "aircraft_model": "172N",
     "manufacturer": null,
@@ -144,7 +132,6 @@
     "flight_number": 2
   },
   {
-    "icao24": "N172AL",
     "tail_number": "N172AL",
     "aircraft_model": "172S",
     "manufacturer": null,
@@ -156,7 +143,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N172AL",
     "tail_number": "N172AL",
     "aircraft_model": "172S",
     "manufacturer": null,
@@ -168,7 +154,6 @@
     "flight_number": 2
   },
   {
-    "icao24": "N787MD",
     "tail_number": "N787MD",
     "aircraft_model": "182T",
     "manufacturer": null,
@@ -180,7 +165,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N825CQ",
     "tail_number": "N825CQ",
     "aircraft_model": "Cirrus SR20",
     "manufacturer": null,
@@ -192,7 +176,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N28077",
     "tail_number": "N28077",
     "aircraft_model": "PA-28-181",
     "manufacturer": null,
@@ -204,7 +187,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N737QF",
     "tail_number": "N737QF",
     "aircraft_model": "172N",
     "manufacturer": null,
@@ -216,7 +198,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N28020",
     "tail_number": "N28020",
     "aircraft_model": "PA-28-181",
     "manufacturer": null,
@@ -228,7 +209,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N1823E",
     "tail_number": "N1823E",
     "aircraft_model": "172S",
     "manufacturer": null,
@@ -240,7 +220,6 @@
     "flight_number": 1
   },
   {
-    "icao24": "N496AV",
     "tail_number": "N496AV",
     "aircraft_model": "Cirrus SR20",
     "manufacturer": null,
