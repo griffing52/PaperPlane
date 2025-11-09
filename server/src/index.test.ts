@@ -118,5 +118,3 @@ describe('GET /api/logbooks/:id', () => {
     expect(response.body.errors).toBeDefined();
   });
 });
-}
-);
