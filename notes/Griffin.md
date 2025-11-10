@@ -1,5 +1,9 @@
 # What I did if you're unsure
 
+## Test AWS Textract and paddleocr
+
+Testing new OCRs specialized in table recognition after Tesseract wasn't performing well
+
 ## Collect OCR test images and start Tesseract testing
 
 Collected template files from tesseract docs for testing. Gathered images off web as examples.
