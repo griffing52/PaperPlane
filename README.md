@@ -3,7 +3,20 @@
 First, make sure you have the dependencies installed:
 
 ```bash
-npm install
+npm install:all
+```
+
+Init the database.
+
+```
+# sets the database location in prisma/dev.dbs
+cp .env.sample .env
+# creates the database
+npx prisma migrate dev --name initial_migration
+# generates prisma library to interact with database
+npx prisma generate
+# generate test data
+npm run seed
 ```
 
 (copy and pasted from Gemini)
@@ -20,7 +33,7 @@ npm run build: This command creates a production-ready build of your application
 npm run preview: After building, this command serves the production build locally, allowing you to test it before deployment.
 npm run test: If you have configured testing with a framework like Vitest, this command will run your tests. The specific setup for testing might require additional configuration in your package.json and a testing configuration file (e.g., vite.config.ts).
 
-# Vite default README:
+# Vite default README (for client)
 
 # React + TypeScript + Vite
 
@@ -95,3 +108,7 @@ export default defineConfig([
   },
 ])
 ```
+
+# Server notes
+
+`npm test` in the server runs unit tests.
