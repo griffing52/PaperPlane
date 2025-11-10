@@ -5,6 +5,11 @@
 Followed the prerequisite instructions listed here: https://docs.aws.amazon.com/textract/latest/dg/examples-blocks.html#examples-prerequisites
 and used the example skeleton code from this: https://docs.aws.amazon.com/textract/latest/dg/how-it-works-tables.html
 
+After that, you can run (after activating the .venv):
+    python textract_python_table_parser.py file
+
+For .venv, create python .venv. Install requirements in requirements.txt
+
 ## Test AWS Textract and paddleocr
 
 Testing new OCRs specialized in table recognition after Tesseract wasn't performing well
