@@ -58,8 +58,9 @@ def get_table_csv_results(file_name):
 
     # process using image bytes
     # get the results
-    session = boto3.Session(profile_name='profile-name')
-    client = session.client('textract', region_name='region')
+    session = boto3.Session(profile_name='default') # see your .aws/credentials file for profile names
+    # session = boto3.Session(profile_name='profile-name')
+    client = session.client('textract', region_name='us-west-1')
     response = client.analyze_document(Document={'Bytes': bytes_test}, FeatureTypes=['TABLES'])
 
     # Get the text blocks

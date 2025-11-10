@@ -1,5 +1,10 @@
 # What I did if you're unsure
 
+## Configured and tested AWS Textract
+
+Followed the prerequisite instructions listed here: https://docs.aws.amazon.com/textract/latest/dg/examples-blocks.html#examples-prerequisites
+and used the example skeleton code from this: https://docs.aws.amazon.com/textract/latest/dg/how-it-works-tables.html
+
 ## Test AWS Textract and paddleocr
 
 Testing new OCRs specialized in table recognition after Tesseract wasn't performing well

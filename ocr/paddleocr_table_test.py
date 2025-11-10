@@ -1,3 +1,5 @@
+# currently unused test file for paddleocr table recognition model
+
 from paddleocr import TableStructureRecognition
 model = TableStructureRecognition(model_name="SLANet_plus")
 output = model.predict(input="./ocr/test_images/example2.png", batch_size=1)
