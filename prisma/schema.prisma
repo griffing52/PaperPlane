@@ -60,28 +60,9 @@ model Pilot {
   
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  logbookUploads LogbookUpload[]
-  flights        FlightEntry[]
+  flights        FlightLog[]
 
   @@map("pilots")
-}
-
-model LogbookUpload {
-  id             String       @id @default(uuid())
-  pilotId        String
-  filePath       String       // or storage URL
-  status         UploadStatus @default(PENDING)
-  time DateTime?
-  errorMessage   String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  
-  pilot   Pilot     @relation(fields: [pilotId], references: [userId], onDelete: Cascade)
-
-  // TODO: What are the units?
-  // ocrConfidence  Float?
-  source         FlightSource
-  flights        FlightEntry[]
 }
 
 model Flight {
@@ -97,16 +78,17 @@ model Flight {
   updatedAt               DateTime      @updatedAt
   
   // Relations
-  flightEntries           FlightEntry[]
+  flightEntries           FlightLog[]
   
   @@map("flights")
 }
 
-model FlightEntry {
+model FlightLog {
   id                 String       @id @default(uuid())
   flightId           String       @map("flight_id")
   pilotId            String       @map("pilot_id")
   uploadId           String?      @map("upload_id")
+  logbookURL         String?      @map("logbook_url")
 
   // Flight time categories - for student pilots
   totalFlightTime           Decimal  @default(0)  // Total duration of this flight
@@ -124,7 +106,6 @@ model FlightEntry {
 
   flight             Flight       @relation(fields: [flightId], references: [id], onDelete: Cascade)
   pilot              Pilot        @relation(fields: [pilotId], references: [userId], onDelete: Cascade)
-  upload             LogbookUpload? @relation(fields: [uploadId], references: [id])
 
   @@map("flight_entries")
 }

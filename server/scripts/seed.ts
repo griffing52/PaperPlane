@@ -159,7 +159,7 @@ async function seed(force: boolean) {
     const userCount = await prisma.user.count();
     const pilotCount = await prisma.pilot.count();
     const uploadCount = await prisma.logbookUpload.count();
-    const flightCount = await prisma.flightEntry.count();
+    const flightCount = await prisma.flightLog.count();
     const realFlightCount = await prisma.flight.count();
 
     const hasData = userCount > 0 || pilotCount > 0 || uploadCount > 0 || flightCount > 0 || realFlightCount > 0;
@@ -182,7 +182,7 @@ async function seed(force: boolean) {
     if (hasData) {
       // Clear existing data
       console.log('🗑️  Clearing existing data...');
-      await prisma.flightEntry.deleteMany();
+      await prisma.flightLog.deleteMany();
       await prisma.flight.deleteMany();
       await prisma.logbookUpload.deleteMany();
       await prisma.pilot.deleteMany();
@@ -262,7 +262,7 @@ async function seed(force: boolean) {
 
   console.log('🔗 Creating flight entries (linking flights to pilots)...\n');
 
-  // Create FlightEntry records, mapping JSON pilot_ids to our 5 pilots
+  // Create FlightLog records, mapping JSON user_ids to our 5 users
   for (const { flight, originalPilotId } of createdFlights) {
     // Map original pilot_id (1-13) to one of our 5 pilots (0-4)
     const pilotIndex = (originalPilotId - 1) % 5;
@@ -271,7 +271,7 @@ async function seed(force: boolean) {
     // Generate plausible flight times
     const flightTimes = generateFlightTimes(flight.departureTime, flight.arrivalTime);
 
-    await prisma.flightEntry.create({
+    await prisma.flightLog.create({
       data: {
         flightId: flight.id,
         pilotId: pilot.userId,
@@ -294,7 +294,7 @@ async function seed(force: boolean) {
   const pilotCount = await prisma.pilot.count();
   const uploadCount = await prisma.logbookUpload.count();
   const flightCount = await prisma.flight.count();
-  const flightEntryCount = await prisma.flightEntry.count();
+  const flightEntryCount = await prisma.flightLog.count();
 
   console.log('✅ Seed completed successfully!\n');
   console.log('📊 Summary:');
