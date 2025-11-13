@@ -5,6 +5,23 @@ import * as path from 'path';
 
 const prisma = new PrismaClient();
 
+// AI Disclosure by Bolun Thompson:
+// This script was AI generated, but reviewed and looks to be good enough for now.
+// The approximate prompt is below. I used Claude Code with Sonnet 4.5 with thinking enabled.
+// Note: I iterated over this multiple times as my requirements changed, but I only include the
+// approximate final prompt.
+//
+// Prompt 1:
+// Ultrathink. Write clean and elegant code.
+// Write a script to generate fake pilot data in server/scripts/seed.ts.
+// Add a script to the package.json to run it.
+// Use data/flight_data.json to put in the flight data.
+// Seed randomness.
+//
+// Prompt 2:
+// Add a clean command line interface using a argument parsing library
+// Take a  "-f" flag to force overwrite DB data.
+
 // TypeScript interface for real flight data
 interface RealFlightData {
   icao24: string;

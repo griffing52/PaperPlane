@@ -1,56 +1,26 @@
 import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 
-// Schema for creating a new flight entry
-export const CreateFlightSchema = z.object({
-  pilotId: z.string().uuid({ message: 'Invalid pilot ID format' }),
-  uploadId: z.string().uuid({ message: 'Invalid upload ID format' }).nullable().optional(),
-  departureAirfield: z.string().min(1, { message: 'Departure airfield is required' }),
-  tailNumber: z.string().min(1, { message: 'Tail number is required' }),
-  depDate: z.string().datetime({ message: 'Invalid date format, expected ISO 8601 datetime' }),
-  hours: z.number().positive({ message: 'Hours must be a positive number' }).or(
-    z.string().refine(
-      (val) => !isNaN(parseFloat(val)) && parseFloat(val) > 0,
-      { message: 'Hours must be a positive number' }
-    )
-  ),
-});
-
-// Schema for flight ID parameter validation
-export const FlightIdParamSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid flight ID format' }),
-});
-
-// Schema for flights query parameters
-export const FlightsQuerySchema = z.object({
-  pilotId: z.string().uuid({ message: 'Invalid pilot ID format' }).optional(),
-});
-
-// Schema for creating a logbook upload
-export const CreateLogbookSchema = z.object({
-  pilotId: z.string().uuid({ message: 'Invalid pilot ID format' }),
-  filePath: z.string().min(1, { message: 'File path is required' }),
-  source: z.enum(['OCR', 'MANUAL'], { message: 'Source must be either OCR or MANUAL' }),
-  status: z.enum(['PENDING', 'PROCESSING', 'DONE', 'FAILED']).optional().default('PENDING'),
-});
-
-// Schema for logbook ID parameter validation
-export const LogbookIdParamSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid logbook ID format' }),
-});
-
-// Inferred TypeScript types from schemas (for autocomplete!)
-export type CreateFlightInput = z.infer<typeof CreateFlightSchema>;
-export type FlightIdParam = z.infer<typeof FlightIdParamSchema>;
-export type FlightsQuery = z.infer<typeof FlightsQuerySchema>;
-export type CreateLogbookInput = z.infer<typeof CreateLogbookSchema>;
-export type LogbookIdParam = z.infer<typeof LogbookIdParamSchema>;
-
-// Type to specify what part of the request to validate
-type RequestProperty = 'body' | 'query' | 'params';
-
 // Generic validation middleware factory
-export const validate = (schema: z.ZodSchema, property: RequestProperty = 'body') => {
+// AI Disclosure by Bolun Thompson. I used Claude Code with Sonnet 4.5 with Thinking enabled.
+// The previous API endpoints in this repo were
+// (1): not based on real requirements
+// (2): AI generated
+// They were useful to test that I'd setup the DB correctly,
+// and for an example as to how to use express and prisma and zod,
+// but I've replaced them with hand-written endpoints expressing our buisneiss logic.
+//
+// I've kept this zod middleware for validation, since its precisely what
+// I want for validation.
+//
+// The prompt for validate the old endpoints was as follows:
+// Use Zod to implement request validation for the implemented endpoints.
+// Make sure that the validation code is elegant and clean, returning properly
+// typed typescript.
+
+type RequestProperty = 'body' | 'params' | 'query';
+
+export const validate = (schema: z.ZodSchema, property: RequestProperty) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req[property]);
@@ -58,7 +28,7 @@ export const validate = (schema: z.ZodSchema, property: RequestProperty = 'body'
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const errors = error.issues.map((err: z.ZodIssue) => ({
+        const errors = error.issues.map((err) => ({
           field: err.path.join('.'),
           message: err.message,
         }));
