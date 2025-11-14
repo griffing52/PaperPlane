@@ -39,10 +39,14 @@ app.get('/health', (_req: Request, res: Response) => {
   }
 });
 
-app.get('/flight_logs/:id', validate(flightLogQuerySchema, 'params'), async (req: Request, res: Response) => {
+app.get('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as unknown as FlightLogGetParams;
     const flight = await prisma.flightLog.findUnique({ where: { id } });
+    if (!flight) {
+      res.status(404).json({ error: 'Flight log not found' });
+      return;
+    }
     res.json(flight);
   } catch (error) {
     res.status(500).json({

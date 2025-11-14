@@ -37,5 +37,18 @@ describe('API Endpoints', () => {
         crossCountryTime: "1.5",
       });
     });
+
+    it('should 400 when the flight id is bad', async () => {
+      const response = await request(app)
+        .get(`/flight_logs/FAKE`);
+      expect(response.status).toBe(400);
+    });
+
+    it('should 404 when the flight id is not found', async () => {
+      const fake_uuid = "10000000-1000-4000-8000-100000000000"
+      const response = await request(app)
+        .get(`/flight_logs/${fake_uuid}`);
+      expect(response.status).toBe(404);
+    });
   });
 });
