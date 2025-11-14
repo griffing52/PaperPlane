@@ -47,22 +47,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  pilot Pilot?
-
-  @@map("users")
-}
-
-model Pilot {
-  userId        String   @id
   licenseNumber String   @unique
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   flights        FlightLog[]
 
-  @@map("pilots")
+  @@map("users")
 }
 
 model Flight {
@@ -86,7 +74,7 @@ model Flight {
 model FlightLog {
   id                 String       @id @default(uuid())
   flightId           String       @map("flight_id")
-  pilotId            String       @map("pilot_id")
+  userId            String       @map("user_id")
   uploadId           String?      @map("upload_id")
   logbookURL         String?      @map("logbook_url")
 
@@ -105,7 +93,7 @@ model FlightLog {
   updatedAt          DateTime     @updatedAt
 
   flight             Flight       @relation(fields: [flightId], references: [id], onDelete: Cascade)
-  pilot              Pilot        @relation(fields: [pilotId], references: [userId], onDelete: Cascade)
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("flight_entries")
 }

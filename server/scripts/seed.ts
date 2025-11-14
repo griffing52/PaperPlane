@@ -1,4 +1,4 @@
-import { PrismaClient, UploadStatus, FlightSource } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -32,7 +32,7 @@ interface RealFlightData {
   destination_airport_icao: string | null;
   departure_time: string;
   arrival_time: string;
-  pilot_id: number;
+  user_id: number;
   flight_number: number;
 }
 
@@ -74,12 +74,6 @@ function generateEmail(firstName: string, lastName: string): string {
 
 function generateLicenseNumber(): string {
   return `PPL-${randomInt(100000, 999999)}`;
-}
-
-function generateFilePath(pilotName: string, uploadNumber: number, source: FlightSource): string {
-  const timestamp = Date.now();
-  const sanitizedName = pilotName.replace(/\s+/g, '_').toLowerCase();
-  return `uploads/${sanitizedName}/logbook_${uploadNumber}_${source.toLowerCase()}_${timestamp}.pdf`;
 }
 
 function randomDecimal(min: number, max: number, precision: number = 1): number {
@@ -157,20 +151,16 @@ async function seed(force: boolean) {
   // Check if data exists
   {
     const userCount = await prisma.user.count();
-    const pilotCount = await prisma.pilot.count();
-    const uploadCount = await prisma.logbookUpload.count();
     const flightCount = await prisma.flightLog.count();
     const realFlightCount = await prisma.flight.count();
 
-    const hasData = userCount > 0 || pilotCount > 0 || uploadCount > 0 || flightCount > 0 || realFlightCount > 0;
+    const hasData = userCount > 0 || flightCount > 0 || realFlightCount > 0;
 
     if (hasData && !force) {
       console.error('❌ Error: Database already contains data!');
       console.error('');
       console.error('📊 Current data:');
       console.error(`   Users: ${userCount}`);
-      console.error(`   Pilots: ${pilotCount}`);
-      console.error(`   Logbook Uploads: ${uploadCount}`);
       console.error(`   Flight Entries: ${flightCount}`);
       console.error(`   Flights: ${realFlightCount}`);
       console.error('');
@@ -184,15 +174,13 @@ async function seed(force: boolean) {
       console.log('🗑️  Clearing existing data...');
       await prisma.flightLog.deleteMany();
       await prisma.flight.deleteMany();
-      await prisma.logbookUpload.deleteMany();
-      await prisma.pilot.deleteMany();
       await prisma.user.deleteMany();
     }
   }
 
-  console.log('✨ Creating users and pilots...\n');
+  console.log('✨ Creating users...\n');
 
-  const pilots = [];
+  const users = [];
   for (let i = 0; i < 5; i++) {
     const firstName = randomElement(firstNames);
     const lastName = randomElement(lastNames);
@@ -206,31 +194,11 @@ async function seed(force: boolean) {
       data: {
         email,
         name: fullName,
-      },
-    });
-
-    // Create pilot
-    const pilot = await prisma.pilot.create({
-      data: {
-        userId: user.id,
         licenseNumber: generateLicenseNumber(),
       },
     });
 
-    // Create 1 logbook upload per pilot
-    console.log(`  📄 Creating MANUAL logbook upload`);
-
-    const upload = await prisma.logbookUpload.create({
-      data: {
-        pilotId: pilot.userId,
-        filePath: generateFilePath(fullName, 1, 'MANUAL'),
-        status: UploadStatus.DONE,
-        source: 'MANUAL',
-        time: new Date(),
-      },
-    });
-
-    pilots.push({ pilot, upload });
+    users.push(user);
     console.log();
   }
 
@@ -255,18 +223,18 @@ async function seed(force: boolean) {
       },
     });
 
-    createdFlights.push({ flight, originalPilotId: flightData.pilot_id });
+    createdFlights.push({ flight, originalPilotId: flightData.user_id });
   }
 
   console.log(`  ✅ Created ${createdFlights.length} Flight records\n`);
 
-  console.log('🔗 Creating flight entries (linking flights to pilots)...\n');
+  console.log('🔗 Creating flight entries (linking flights to users)...\n');
 
   // Create FlightLog records, mapping JSON user_ids to our 5 users
   for (const { flight, originalPilotId } of createdFlights) {
-    // Map original pilot_id (1-13) to one of our 5 pilots (0-4)
-    const pilotIndex = (originalPilotId - 1) % 5;
-    const { pilot, upload } = pilots[pilotIndex];
+    // Map original user_id (1-13) to one of our 5 users (0-4)
+    const userIndex = (originalPilotId - 1) % 5;
+    const user = users[userIndex];
 
     // Generate plausible flight times
     const flightTimes = generateFlightTimes(flight.departureTime, flight.arrivalTime);
@@ -274,8 +242,7 @@ async function seed(force: boolean) {
     await prisma.flightLog.create({
       data: {
         flightId: flight.id,
-        pilotId: pilot.userId,
-        uploadId: upload.id,
+        userId: user.id,
         totalFlightTime: flightTimes.totalFlightTime,
         soloTime: flightTimes.soloTime,
         dualReceivedTime: flightTimes.dualReceivedTime,
@@ -291,16 +258,12 @@ async function seed(force: boolean) {
 
   // Print summary
   const userCount = await prisma.user.count();
-  const pilotCount = await prisma.pilot.count();
-  const uploadCount = await prisma.logbookUpload.count();
   const flightCount = await prisma.flight.count();
   const flightEntryCount = await prisma.flightLog.count();
 
   console.log('✅ Seed completed successfully!\n');
   console.log('📊 Summary:');
   console.log(`   Users: ${userCount}`);
-  console.log(`   Pilots: ${pilotCount}`);
-  console.log(`   Logbook Uploads: ${uploadCount}`);
   console.log(`   Flights: ${flightCount}`);
   console.log(`   Flight Entries: ${flightEntryCount}`);
 }
