@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from './index';
-import { createTestFlightLog } from './test-factories';
+import { createTestFlightLog, createTestUser } from './test-factories';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -105,12 +105,12 @@ describe('API Endpoints', () => {
 
     afterAll(async () => {
       await prisma.user.delete({ where: { id: createdUserId } }).catch(() => { });
-    }
-    );
+    });
 
     it('should create a user and store in DB', async () => {
       const email = `test-${Date.now()}@example.com`;
       const user = { name: 'Test', email, licenseNumber: '12345' };
+
       const response = await request(app)
         .post('/user/')
         .send(user);
@@ -172,5 +172,29 @@ describe('API Endpoints', () => {
 
       expect(response.status).toBe(400);
     });
+  });
+
+  describe('POST /logbook/', () => {
+    let cleanup: Awaited<ReturnType<typeof createTestUser>>;
+
+    beforeAll(async () => {
+      cleanup = await createTestUser();
+    });
+
+    afterAll(async () => {
+      await cleanup();
+    });
+
+    // TODO: This should fail once we do proper parsing, since the buffer is invalid
+    it('should return a flight log with an id when passed a buffer', async () => {
+      const response = await request(app)
+        .post('/logbook/')
+        .attach('image', Buffer.from('fake-image-data'), 'test.png')
+        .field('userId', cleanup.user.id);
+
+      expect(response.status).toBe(201);
+      expect(response.body.data.id).toBeDefined();
+    });
+
   });
 });

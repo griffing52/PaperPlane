@@ -1,26 +1,35 @@
-import { PrismaClient, FlightLog } from '@prisma/client';
+import { PrismaClient, FlightLog, User } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function createTestUser() {
+type UserCleanupFunction = (() => Promise<void>) & { user: User };
+
+export async function createTestUser(): Promise<UserCleanupFunction> {
   const d = Date.now();
-  return await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       email: `${d}@example.com`,
       name: 'Jebadiah',
       licenseNumber: `${d}`,
     },
   });
+
+  const cleanup = async () => {
+    await prisma.flightLog.deleteMany({ where: { userId: user.id } });
+    await prisma.user.deleteMany({ where: { id: user.id } });
+  };
+
+  return Object.assign(cleanup, { user });
 }
 
 type CleanupFunction = (() => Promise<void>) & { flightLog: FlightLog };
 
 export async function createTestFlightLog(overrides: Partial<any> = {}): Promise<CleanupFunction> {
-  const user = await createTestUser();
+  const userCleanup = await createTestUser();
 
   const flightLog = await prisma.flightLog.create({
     data: {
-      userId: user.id,
+      userId: userCleanup.user.id,
       totalFlightTime: 1.5,
       soloTime: 0,
       dualReceivedTime: 1.5,
@@ -33,8 +42,7 @@ export async function createTestFlightLog(overrides: Partial<any> = {}): Promise
   });
 
   const cleanup = async () => {
-    await prisma.flightLog.deleteMany({ where: { id: flightLog.id } });
-    await prisma.user.deleteMany({ where: { id: user.id } });
+    await userCleanup();
   };
 
   return Object.assign(cleanup, { flightLog });
