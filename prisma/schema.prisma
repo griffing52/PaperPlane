@@ -73,7 +73,7 @@ model Flight {
 
 model FlightLog {
   id                 String       @id @default(uuid())
-  flightId           String       @map("flight_id")
+  flightId           String?       @map("flight_id")
   userId            String       @map("user_id")
   uploadId           String?      @map("upload_id")
   logbookURL         String?      @map("logbook_url")
@@ -92,7 +92,7 @@ model FlightLog {
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
-  flight             Flight       @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  flight             Flight?       @relation(fields: [flightId], references: [id], onDelete: Cascade)
   user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("flight_entries")
