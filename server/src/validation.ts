@@ -41,8 +41,8 @@ export const validate = (schema: z.ZodSchema, property: RequestProperty) => {
 };
 
 export const flightLogQuerySchema = z.object({
-  userId: z.uuid().nullable(),
-  flightId: z.uuid().nullable(),
+  userId: z.uuid().optional(),
+  flightId: z.uuid().optional(),
 });
 
 export type FlightLogQueryParams = z.infer<typeof flightLogQuerySchema>;
