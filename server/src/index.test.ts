@@ -28,11 +28,13 @@ describe('API Endpoints', () => {
         .get(`/flight_logs/${testFlightLog.id}`);
 
       expect(response.status).toBe(200);
+      // NOTE: Everything must be a string
+      // since we aren't reparsing it
       expect(response.body).toMatchObject({
         id: testFlightLog.id,
         userId: testFlightLog.userId,
-        totalFlightTime: 1.5,
-        crossCountryTime: 1.5,
+        totalFlightTime: "1.5",
+        crossCountryTime: "1.5",
       });
     });
   });
