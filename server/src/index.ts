@@ -3,7 +3,7 @@ import cors from 'cors';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
 import { validate, flightLogQuerySchema, flightLogGetSchema, userPostSchema, logbookPostSchema, FlightLogQueryParams, FlightLogGetParams, UserPostBodyParams, LogbookPostBodyParams } from './validation';
-import { ocrImage } from './ocr';
+import { ocrImage, LogbookOCRResult } from './ocr';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +23,52 @@ const upload = multer({
     }
   },
 });
+
+// Hack: prisma complains if we pass in an object with too many fields
+// so we trim them here
+function mapOcrToFlightData(ocrResult: LogbookOCRResult) {
+  const {
+    tailNumber,
+    aircraftModel,
+    manufacturer,
+    originAirportIcao,
+    destinationAirportIcao,
+    departureTime,
+    arrivalTime,
+  } = ocrResult;
+
+  return {
+    tailNumber,
+    aircraftModel,
+    manufacturer,
+    originAirportIcao,
+    destinationAirportIcao,
+    departureTime,
+    arrivalTime,
+  };
+}
+
+function mapOcrToFlightLogMetrics(ocrResult: LogbookOCRResult) {
+  const {
+    totalFlightTime,
+    soloTime,
+    dualReceivedTime,
+    crossCountryTime,
+    nightTime,
+    actualInstrumentTime,
+    simulatedInstrumentTime,
+  } = ocrResult;
+
+  return {
+    totalFlightTime,
+    soloTime,
+    dualReceivedTime,
+    crossCountryTime,
+    nightTime,
+    actualInstrumentTime,
+    simulatedInstrumentTime,
+  };
+}
 
 
 app.use(cors());
@@ -130,12 +176,18 @@ app.post(
 
       const ocrResult = await ocrImage(req.file.buffer);
 
-      // TODO: Support custom params
-      const flightLog = await prisma.flightLog.create({
-        data: {
-          userId,
-          ...ocrResult,
-        }
+      const flightLog = await prisma.$transaction(async (tx) => {
+        const flight = await tx.flight.create({
+          data: mapOcrToFlightData(ocrResult),
+        });
+
+        return tx.flightLog.create({
+          data: {
+            userId,
+            flightId: flight.id,
+            ...mapOcrToFlightLogMetrics(ocrResult),
+          },
+        });
       });
 
       res.status(201).json({
