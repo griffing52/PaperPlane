@@ -6,9 +6,13 @@ import {
   CreateFlightSchema,
   FlightIdParamSchema,
   FlightsQuerySchema,
+  CreateLogbookSchema,
+  LogbookIdParamSchema,
   CreateFlightInput,
   FlightIdParam,
-  FlightsQuery
+  FlightsQuery,
+  CreateLogbookInput,
+  LogbookIdParam
 } from './validation';
 
 const app = express();
@@ -26,37 +30,6 @@ app.get('/api/health', (_req: Request, res: Response) => {
 
 // Flight Routes
 
-// POST /api/flights - Create a new flight entry
-app.post('/api/flights', validate(CreateFlightSchema, 'body'), async (req: Request<{}, {}, CreateFlightInput>, res: Response) => {
-  try {
-    const { pilotId, uploadId, departureAirfield, tailNumber, depDate, hours } = req.body;
-
-    const flight = await prisma.flightEntry.create({
-      data: {
-        pilotId,
-        uploadId: uploadId || null,
-        departureAirfield,
-        tailNumber,
-        depDate,
-        hours,
-      },
-      include: {
-        pilot: {
-          include: {
-            user: true,
-          },
-        },
-        upload: true,
-      },
-    });
-
-    res.status(201).json(flight);
-  } catch (error) {
-    console.error('Error creating flight:', error);
-    res.status(500).json({ error: 'Failed to create flight entry' });
-  }
-});
-
 // GET /api/flights/:id - Get a single flight by ID
 app.get('/api/flights/:id', validate(FlightIdParamSchema, 'params'), async (req: Request<FlightIdParam>, res: Response) => {
   try {
@@ -71,6 +44,7 @@ app.get('/api/flights/:id', validate(FlightIdParamSchema, 'params'), async (req:
           },
         },
         upload: true,
+        flight: true,
       },
     });
 
@@ -99,6 +73,7 @@ app.get('/api/flights', validate(FlightsQuerySchema, 'query'), async (req: Reque
           },
         },
         upload: true,
+        flight: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -109,6 +84,36 @@ app.get('/api/flights', validate(FlightsQuerySchema, 'query'), async (req: Reque
   } catch (error) {
     console.error('Error fetching flights:', error);
     res.status(500).json({ error: 'Failed to fetch flights' });
+  }
+});
+
+// Logbook Routes
+
+// GET /api/logbooks/:id - Get a single logbook by ID
+app.get('/api/logbooks/:id', validate(LogbookIdParamSchema, 'params'), async (req: Request<LogbookIdParam>, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const logbook = await prisma.logbookUpload.findUnique({
+      where: { id },
+      include: {
+        pilot: {
+          include: {
+            user: true,
+          },
+        },
+        flights: true,
+      },
+    });
+
+    if (!logbook) {
+      return res.status(404).json({ error: 'Logbook not found' });
+    }
+
+    res.json(logbook);
+  } catch (error) {
+    console.error('Error fetching logbook:', error);
+    res.status(500).json({ error: 'Failed to fetch logbook' });
   }
 });
 

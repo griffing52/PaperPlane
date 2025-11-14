@@ -84,21 +84,47 @@ model LogbookUpload {
   flights        FlightEntry[]
 }
 
+model Flight {
+  id                      String        @id @default(uuid())
+  tailNumber              String        @map("tail_number")
+  aircraftModel           String        @map("aircraft_model")
+  manufacturer            String
+  originAirportIcao       String        @map("origin_airport_icao")
+  destinationAirportIcao  String        @map("destination_airport_icao")
+  departureTime           DateTime      @map("departure_time")
+  arrivalTime             DateTime      @map("arrival_time")
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  
+  // Relations
+  flightEntries           FlightEntry[]
+  
+  @@map("flights")
+}
 
 model FlightEntry {
   id                 String       @id @default(uuid())
-  pilotId            String
-  uploadId           String?
-  departureAirfield  String
-  tailNumber         String
-  depDate            String
-  hours              Decimal
+  flightId           String       @map("flight_id")
+  pilotId            String       @map("pilot_id")
+  uploadId           String?      @map("upload_id")
+
+  // Flight time categories - for student pilots
+  totalFlightTime           Decimal  @default(0)  // Total duration of this flight
+  soloTime                  Decimal  @default(0)  // Solo (student pilot)
+  dualReceivedTime          Decimal  @default(0)  // Training with instructor
+
+  // Special conditions - required for ratings
+  crossCountryTime          Decimal  @default(0)  // XC (>50nm + landing elsewhere)
+  nightTime                 Decimal  @default(0)  // Night (civil twilight to twilight)
+  actualInstrumentTime      Decimal  @default(0)  // Actual IMC
+  simulatedInstrumentTime   Decimal  @default(0)  // Hood/foggles
+
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
-  pilot              Pilot                 @relation(fields: [pilotId], references: [userId], onDelete: Cascade)
-  upload             LogbookUpload?        @relation(fields: [uploadId], references: [id])
-  // verificationResult VerificationResult?
+  flight             Flight       @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  pilot              Pilot        @relation(fields: [pilotId], references: [userId], onDelete: Cascade)
+  upload             LogbookUpload? @relation(fields: [uploadId], references: [id])
 
   @@map("flight_entries")
 }
