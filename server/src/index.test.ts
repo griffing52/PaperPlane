@@ -7,6 +7,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
+const TEST_LICENSE_NUMBER = '12345';
 
 describe('API Endpoints', () => {
   describe('GET /health', () => {
@@ -102,6 +103,10 @@ describe('API Endpoints', () => {
   // I refactored it slightly afterwards.
   describe('POST /user/', () => {
     let createdUserId: string;
+    beforeAll(async () => {
+      // cleanup if other tests forgot to
+      await prisma.user.deleteMany({ where: { licenseNumber: TEST_LICENSE_NUMBER } });
+    });
 
     afterAll(async () => {
       await prisma.user.delete({ where: { id: createdUserId } }).catch(() => { });
@@ -109,7 +114,7 @@ describe('API Endpoints', () => {
 
     it('should create a user and store in DB', async () => {
       const email = `test-${Date.now()}@example.com`;
-      const user = { name: 'Test', email, licenseNumber: '12345' };
+      const user = { name: 'Test', email, licenseNumber: TEST_LICENSE_NUMBER };
 
       const response = await request(app)
         .post('/user/')
