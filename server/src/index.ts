@@ -1,17 +1,147 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
+import { validate, flightLogQuerySchema, flightLogGetSchema, userPostSchema, logbookPostSchema, FlightLogQueryParams, FlightLogGetParams, UserPostBodyParams, LogbookPostBodyParams } from './validation';
+import { ocrImage } from './ocr';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB
+  },
+  fileFilter: (_req, file, cb) => {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'));
+    }
+  },
+});
+
+
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', message: 'Server is running' });
+app.get('/health', (_req: Request, res: Response) => {
+  try {
+    res.json({ status: 'ok', message: 'Server is running' });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
 });
+
+app.get('/flight_logs/:id', validate(flightLogQuerySchema, 'params'), async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as unknown as FlightLogGetParams;
+    const flight = await prisma.flightLog.findUnique({ where: { id } });
+    res.json(flight);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.delete('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params as unknown as FlightLogGetParams;
+    const flight = await prisma.flightLog.delete({ where: { id } });
+    res.json(flight);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.get('/flight_logs/', validate(flightLogQuerySchema, 'query'), async (req: Request, res: Response) => {
+  try {
+    const { userId, flightId } = req.query as unknown as FlightLogQueryParams;
+    // hack to only filter if not null
+    const flight = await prisma.flightLog.findMany({
+      where: {
+        ...(userId !== null && { userId }),
+        ...(flightId !== null && { flightId }),
+      }
+    });
+    res.status(201).json(flight);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/user/', validate(userPostSchema, 'body'), async (req: Request, res: Response) => {
+  try {
+    const { name, email, licenseNumber } = req.body as unknown as UserPostBodyParams;
+    const flight = await prisma.user.create({
+      data: {
+        name,
+        email,
+        licenseNumber,
+      }
+    }
+    );
+    res.status(201).json(flight);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post(
+  '/logbook/',
+  upload.single('image'),
+  validate(logbookPostSchema, 'body'),
+  async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body as LogbookPostBodyParams;
+
+      if (!req.file) {
+        res.status(400).json({ error: 'No image file provided' });
+        return;
+      }
+
+      const ocrResult = await ocrImage(req.file.buffer);
+
+      // TODO: Support custom params
+      const flightLog = await prisma.flightLog.create({
+        data: {
+          userId,
+          ...ocrResult,
+        }
+      });
+
+      res.status(201).json({
+        success: true,
+        data: flightLog,
+        metadata: {
+          confidence: ocrResult.confidence,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  }
+);
 
 export { app, prisma };
 
