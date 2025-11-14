@@ -2,6 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from './index';
 import { createTestFlightLog } from './test-factories';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
 
@@ -90,6 +93,43 @@ describe('API Endpoints', () => {
       const response = await request(app)
         .delete(`/flight_logs/${FAKE_UUID}`);
       expect(response.status).toBe(404);
+    });
+  });
+
+  // AI Disclosure by Bolun Thompson:
+  // I used Claude Code Sonnet 4.5 to generate this test, since it's largely repititive. Prompt as follows:
+  // Add an anlogous user test. Make it short and to the point. Add a minimal test that its been stored in the DB.
+  // I refactored it slightly afterwards.
+  describe('POST /user/', () => {
+    let createdUserId: string;
+
+    afterAll(async () => {
+      await prisma.user.delete({ where: { id: createdUserId } }).catch(() => { });
+    }
+    );
+
+    it('should create a user and store in DB', async () => {
+      const email = `test-${Date.now()}@example.com`;
+      const user = { name: 'Test', email, licenseNumber: '12345' };
+      const response = await request(app)
+        .post('/user/')
+        .send(user);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject(user);
+      createdUserId = response.body.id;
+
+      const dbUser = await prisma.user.findUnique({ where: { id: response.body.id } });
+      expect(dbUser).not.toBeNull();
+      expect(dbUser?.email).toBe(email);
+    });
+
+    it('should 400 when body is invalid', async () => {
+      const response = await request(app)
+        .post('/user/')
+        .send({ name: 'Test' });
+
+      expect(response.status).toBe(400);
     });
   });
 
