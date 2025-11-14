@@ -24,7 +24,7 @@ export const validate = (schema: z.ZodSchema, property: RequestProperty) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req[property]);
-      req[property] = validated;
+      Object.assign(req[property], validated)
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
