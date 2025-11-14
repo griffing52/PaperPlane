@@ -59,7 +59,15 @@ app.get('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: 
 app.delete('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as unknown as FlightLogGetParams;
-    const flight = await prisma.flightLog.delete({ where: { id } });
+
+    let flight;
+    try {
+      flight = await prisma.flightLog.delete({ where: { id } });
+    } catch (error) {
+      res.status(404).json({ error: 'Flight log not found' });
+      return;
+    }
+
     res.json(flight);
   } catch (error) {
     res.status(500).json({

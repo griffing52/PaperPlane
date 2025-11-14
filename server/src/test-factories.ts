@@ -33,8 +33,8 @@ export async function createTestFlightLog(overrides: Partial<any> = {}): Promise
   });
 
   const cleanup = async () => {
-    await prisma.flightLog.delete({ where: { id: flightLog.id } });
-    await prisma.user.delete({ where: { id: user.id } });
+    await prisma.flightLog.deleteMany({ where: { id: flightLog.id } });
+    await prisma.user.deleteMany({ where: { id: user.id } });
   };
 
   return Object.assign(cleanup, { flightLog });
