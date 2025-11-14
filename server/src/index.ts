@@ -39,6 +39,24 @@ app.get('/health', (_req: Request, res: Response) => {
   }
 });
 
+app.get('/flight_logs/', validate(flightLogQuerySchema, 'query'), async (req: Request, res: Response) => {
+  try {
+    const { userId, flightId } = req.query as unknown as FlightLogQueryParams;
+    const flight = await prisma.flightLog.findMany({
+      where: {
+        ...(userId != null && { userId }),
+        ...(flightId != null && { flightId }),
+      }
+    });
+    res.status(201).json(flight);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 app.get('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as unknown as FlightLogGetParams;
@@ -69,25 +87,6 @@ app.delete('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (re
     }
 
     res.json(flight);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-app.get('/flight_logs/', validate(flightLogQuerySchema, 'query'), async (req: Request, res: Response) => {
-  try {
-    const { userId, flightId } = req.query as unknown as FlightLogQueryParams;
-    // hack to only filter if not null
-    const flight = await prisma.flightLog.findMany({
-      where: {
-        ...(userId !== null && { userId }),
-        ...(flightId !== null && { flightId }),
-      }
-    });
-    res.status(201).json(flight);
   } catch (error) {
     res.status(500).json({
       error: 'Internal server error',

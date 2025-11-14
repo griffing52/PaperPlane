@@ -92,4 +92,45 @@ describe('API Endpoints', () => {
       expect(response.status).toBe(404);
     });
   });
+
+  describe('GET /flight_logs/', () => {
+    let cleanup: Awaited<ReturnType<typeof createTestFlightLog>>;
+
+    beforeAll(async () => {
+      cleanup = await createTestFlightLog();
+    });
+
+    afterAll(async () => {
+      await cleanup();
+    });
+
+    it('should return flight logs filtered by userId', async () => {
+      const { flightLog: { userId } } = cleanup;
+      const response = await request(app)
+        .get(`/flight_logs/`)
+        .query({ userId });
+
+      expect(response.status).toBe(201);
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(1);
+      expect(response.body[0].userId).toBe(userId);
+    });
+
+    it('should return empty array when no flight logs match', async () => {
+      const response = await request(app)
+        .get(`/flight_logs/`)
+        .query({ flightId: FAKE_UUID });
+
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual([]);
+    });
+
+    it('should 400 when userId is invalid', async () => {
+      const response = await request(app)
+        .get(`/flight_logs/`)
+        .query({ userId: 'INVALID' });
+
+      expect(response.status).toBe(400);
+    });
+  });
 });
