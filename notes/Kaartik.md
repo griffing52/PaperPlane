@@ -1,7 +1,28 @@
-# Implmeneted user auth via tutorail below
 
-https://medium.com/@sajadshafi/implementing-firebase-auth-in-react-js-typescript-vite-js-88465ac84170
+
+# Making next.js skeleton app and installing firebase
+
+
+
+How to use:
+
+1. Follow ReadMe set up
 
 ```
-npm install react-router-dom axios jwt-decode
+npm run dev
 ```
+To see sign up:
+
+http://localhost:3000/signup
+
+To see dashboard:
+
+http://localhost:3000/dashboard
+
+To log in 
+
+http://localhost:3000/login
+
+example account that should be saved:
+test@gmail.com
+happyFACE123!
