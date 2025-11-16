@@ -1,21 +1,19 @@
-// features/support/world.ts
-import { setWorldConstructor } from "@cucumber/cucumber";
-import { MockFirebaseAuth } from "../../tests/mocks/firebaseAuthMock";
+import { setWorldConstructor, World } from "@cucumber/cucumber";
+import { Browser, Page, chromium } from "playwright";
 
-class CustomWorld {
-  firebase: any;
-  result: any;
-  error: any;
-  currentPage: string;
-  loggedIn: boolean;
+export class TestWorld extends World {
+  browser!: Browser;
+  page!: Page;
 
-  constructor() {
-    this.firebase = new MockFirebaseAuth();
-    this.result = null;
-    this.error = null;
-    this.currentPage = "/";
-    this.loggedIn = false;
+  async init() {
+    this.browser = await chromium.launch({ headless: false });
+    const context = await this.browser.newContext();
+    this.page = await context.newPage();
+  }
+
+  async close() {
+    await this.browser.close();
   }
 }
 
-setWorldConstructor(CustomWorld);
+setWorldConstructor(TestWorld);

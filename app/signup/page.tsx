@@ -36,14 +36,16 @@ export default function SignUpPage() {
       {error && <p className="text-red-500 text-center">{error}</p>}
       <form onSubmit={onSubmit} className="space-y-4">
         <input
-          type="email"
+          id="email"
+          data-testid="signup-email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="border w-full p-2 rounded"
         />
         <input
-          type="password"
+          id="password"
+          data-testid="signup-password"
           placeholder="Password"
           value={passwordOne}
           onChange={(e) => setPasswordOne(e.target.value)}
@@ -52,11 +54,12 @@ export default function SignUpPage() {
         <input
           type="password"
           placeholder="Confirm Password"
+          data-testid="confirm-password"
           value={passwordTwo}
           onChange={(e) => setPasswordTwo(e.target.value)}
           className="border w-full p-2 rounded"
         />
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
+        <button type="submit" data-testid="submit-button" className="w-full bg-blue-600 text-white py-2 rounded">
           Create Account
         </button>
       </form>

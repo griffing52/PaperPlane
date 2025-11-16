@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:cucumber": "cucumber-js --require-module ts-node/register/transpile-only --require ./features/step_definitions/**/*.ts"
+    "test:cucumber": "cucumber-js --require-module ts-node/register/transpile-only --require ./features/step_definitions/**/*.ts",
+    "test:e2e": "cucumber-js --require-module ts-node/register --require ./features/**/*.ts"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

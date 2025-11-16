@@ -46,7 +46,8 @@ export default function LoginPage() {
         <div>
           <label className="block text-sm mb-1">Email</label>
           <input
-            type="email"
+            id="email"
+            data-testid="email-input"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -58,7 +59,8 @@ export default function LoginPage() {
         <div>
           <label className="block text-sm mb-1">Password</label>
           <input
-            type="password"
+            id="password"
+            data-testid="password-input"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -71,6 +73,7 @@ export default function LoginPage() {
 
         <button
           type="submit"
+          data-testid="login-button"
           disabled={submitting}
           className="w-full rounded px-3 py-2 border"
         >
