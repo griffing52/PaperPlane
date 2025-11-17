@@ -150,7 +150,7 @@ export default function DashboardPage() {
         {/* Top bar */}
         <header className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1 className="text-3xl font-semibold tracking-tight"> data-testid = "dashboard-header"
               Pilot Dashboard
             </h1>
             <p className="text-sm text-slate-400 mt-1">

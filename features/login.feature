@@ -3,17 +3,17 @@ Feature: User Login
 
 Scenario: User logs in with valid credentials
   Given I am on the login page
-  When I enter correct email {string} and password {string}
+  When I enter correct email "test@gmail.com" and password "happyFACE123!"
   Then I should be redirected to the dashboard
 
 Scenario: User cannot log in with the wrong password
   Given I am on the login page
-  When I enter a known email {string} but an incorrect password {string}
+  When I enter a known email "test@gmail.com" but an incorrect password "happyFACE123"
   Then I should see "Incorrect password" or a similar error
 
 Scenario: User cannot log in with a non-existent account
   Given I am on the login page
-  When I enter an email {string} not associated with any account
+  When I enter an email "meow@gmail.com" not associated with any account
   Then I should see a "No account found" error
 
 Scenario: User can navigate from login page to sign-up page

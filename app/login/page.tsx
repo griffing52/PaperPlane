@@ -1,4 +1,3 @@
-// app/login/page.tsx
 "use client";
 
 import { useState, FormEvent, useEffect } from "react";
@@ -47,7 +46,7 @@ export default function LoginPage() {
           <label className="block text-sm mb-1">Email</label>
           <input
             id="email"
-            data-testid="email-input"
+            data-testid="login-email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -60,7 +59,7 @@ export default function LoginPage() {
           <label className="block text-sm mb-1">Password</label>
           <input
             id="password"
-            data-testid="password-input"
+            data-testid="login-password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -69,7 +68,14 @@ export default function LoginPage() {
           />
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p
+            data-testid="login-error"
+            className="text-sm text-red-600 text-center"
+          >
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
@@ -83,7 +89,11 @@ export default function LoginPage() {
 
       <p className="mt-4 text-sm text-center">
         Don’t have an account?{" "}
-        <a href="/signup" className="underline">
+        <a
+          href="/signup"
+          data-testid="login-signup-link"
+          className="underline"
+        >
           Sign up
         </a>
       </p>

@@ -126,4 +126,134 @@ When("I enter a password that is not the valid one I put as password input", asy
   await this.page.fill('[data-testid="signup-confirm"]', "WrongPassword999!");
 });
 
+// -------------------------------
+// Login Step Definitions
+// -------------------------------
 
+// Navigate to login page
+Given("I am on the login page", async function () {
+  await this.page.goto("/login");
+});
+
+// -------------------------------
+// Scenario: User logs in with valid credentials
+// -------------------------------
+When(
+  "I enter correct email {string} and password {string}",
+  async function (email: string, password: string) {
+    await this.page.fill('[data-testid="login-email"]', email);
+    await this.page.fill('[data-testid="login-password"]', password);
+    await this.page.click('[data-testid="login-button"]');
+  }
+);
+
+Then("I should be redirected to the dashboard", async function () {
+  await this.page.waitForURL("**/dashboard");
+  expect(this.page.url()).toContain("/dashboard");
+});
+
+// -------------------------------
+// Scenario: User cannot log in with the wrong password
+// -------------------------------
+When(
+  "I enter a known email {string} but an incorrect password {string}",
+  async function (email: string, password: string) {
+    await this.page.fill('[data-testid="login-email"]', email);
+    await this.page.fill('[data-testid="login-password"]', password);
+    await this.page.click('[data-testid="login-button"]');
+  }
+);
+
+Then(
+  'I should see "Incorrect password" or a similar error',
+  async function () {
+    await this.page.waitForSelector('[data-testid="login-error"]', { state: 'visible' });
+    const visible = await this.page.locator('[data-testid="login-error"]').isVisible();
+    expect(visible).toBeTruthy();
+  }
+);
+
+// -------------------------------
+// Scenario: User cannot log in with a non-existent account
+// -------------------------------
+When(
+  "I enter an email {string} not associated with any account",
+  async function (email: string) {
+    await this.page.fill('[data-testid="login-email"]', email);
+    await this.page.fill('[data-testid="login-password"]', "SomePassword123!");
+    await this.page.click('[data-testid="login-button"]');
+  }
+);
+
+Then('I should see a "No account found" error', async function () {
+  await this.page.waitForSelector('[data-testid="login-error"]', { state: 'visible' });
+  const visible = await this.page.locator('[data-testid="login-error"]').isVisible();
+  expect(visible).toBeTruthy();
+});
+
+// -------------------------------
+// Scenario: User can navigate from login page to sign-up page
+// -------------------------------
+When('I click "Sign Up"', async function () {
+  await this.page.click('[data-testid="login-signup-link"]');
+});
+
+Then("I should be taken to the sign-up page", async function () {
+  await this.page.waitForURL("**/signup");
+  expect(this.page.url()).toContain("/signup");
+});
+
+// -------------------------------
+// Helpers for auth state
+// -------------------------------
+
+Given("I am logged in", async function () {
+  // Assume you have a test user already created
+  const email = "test@gmail.com";
+  const password = "happyFACE123!";
+  await this.page.goto("/login");
+  await this.page.fill('[data-testid="email-input"]', email);
+  await this.page.fill('[data-testid="password-input"]', password);
+  await this.page.click('[data-testid="login-button"]');
+  // Wait for dashboard redirect
+  await this.page.waitForURL("**/dashboard");
+});
+
+Given("I am logged out", async function () {
+  // Could be same as "not logged in"
+  //await signOut(auth);
+});
+
+// -------------------------------
+// Accessing pages
+// -------------------------------
+When("I try to access the page {string}", async function (path: string) {
+  await this.page.goto(path);
+});
+
+When("I visit the page {string}", async function (path: string) {
+  await this.page.goto(path);
+});
+
+When("I view any page", async function () {
+  await this.page.goto("/"); // Home or a default page
+});
+
+// -------------------------------
+// Assertions
+// -------------------------------
+Then('I should see a "Page Not Found" or be redirected to login', async function () {
+  const url = this.page.url();
+  expect(url.includes("/login") || url.includes("/404")).toBeTruthy();
+});
+
+Then("I should see the dashboard content", async function () {
+  // Example: look for dashboard-specific header
+  const dashboardHeader = await this.page.locator('[data-testid="dashboard-header"]');
+  expect(await dashboardHeader.isVisible()).toBeTruthy();
+});
+
+Then('I should not see user-only components such as the "Log Out" button', async function () {
+  const dashboardHeader = await this.page.locator('[data-testid="dashboard-header"]');
+  expect(await dashboardHeader.isVisible()).toBeFalsy();
+});
