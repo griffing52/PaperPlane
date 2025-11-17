@@ -54,12 +54,12 @@ export default function SignUpPage() {
         <input
           type="password"
           placeholder="Confirm Password"
-          data-testid="confirm-password"
+          data-testid="signup-confirm"
           value={passwordTwo}
           onChange={(e) => setPasswordTwo(e.target.value)}
           className="border w-full p-2 rounded"
         />
-        <button type="submit" data-testid="submit-button" className="w-full bg-blue-600 text-white py-2 rounded">
+        <button type="submit" data-testid="signup-button" className="w-full bg-blue-600 text-white py-2 rounded">
           Create Account
         </button>
       </form>
