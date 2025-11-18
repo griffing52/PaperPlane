@@ -217,7 +217,7 @@ Given("I am logged in", async function () {
   await this.page.click('[data-testid="login-button"]');
   // Wait for dashboard redirect
   await this.page.waitForURL("**/dashboard");
-});
+}); 
 
 Given("I am logged out", async function () {
   // Could be same as "not logged in"
@@ -253,7 +253,7 @@ Then("I should see the dashboard content", async function () {
   expect(await dashboardHeader.isVisible()).toBeTruthy();
 });
 
-Then('I should not see user-only components such as the "Log Out" button', async function () {
+Then('I should not see user-only components', async function () {
   const dashboardHeader = await this.page.locator('[data-testid="dashboard-header"]');
   expect(await dashboardHeader.isVisible()).toBeFalsy();
 });
