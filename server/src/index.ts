@@ -74,7 +74,7 @@ function mapOcrToFlightLogMetrics(ocrResult: LogbookOCRResult) {
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (_req: Request, res: Response) => {
+app.get('/api/v1/health', (_req: Request, res: Response) => {
   try {
     res.json({ status: 'ok', message: 'Server is running' });
   } catch (error) {
@@ -85,7 +85,7 @@ app.get('/health', (_req: Request, res: Response) => {
   }
 });
 
-app.get('/flight_entries/', validate(flightEntryQuerySchema, 'query'), async (req: Request, res: Response) => {
+app.get('/api/v1/flight_entries/', validate(flightEntryQuerySchema, 'query'), async (req: Request, res: Response) => {
   try {
     const { userId, flightId } = req.query as unknown as FlightEntryQueryParams;
     const flightEntries = await prisma.flightEntry.findMany({
@@ -103,7 +103,7 @@ app.get('/flight_entries/', validate(flightEntryQuerySchema, 'query'), async (re
   }
 });
 
-app.get('/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
+app.get('/api/v1/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as unknown as FlightEntryGetParams;
     const flightEntry = await prisma.flightEntry.findUnique({ where: { id } });
@@ -120,7 +120,7 @@ app.get('/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (
   }
 });
 
-app.delete('/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
+app.delete('/api/v1/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as unknown as FlightEntryGetParams;
 
@@ -141,7 +141,7 @@ app.delete('/flight_entries/:id', validate(flightEntryGetSchema, 'params'), asyn
   }
 });
 
-app.post('/user/', validate(userPostSchema, 'body'), async (req: Request, res: Response) => {
+app.post('/api/v1/user/', validate(userPostSchema, 'body'), async (req: Request, res: Response) => {
   try {
     const { name, email, licenseNumber } = req.body as unknown as UserPostBodyParams;
     const flight = await prisma.user.create({
@@ -162,7 +162,7 @@ app.post('/user/', validate(userPostSchema, 'body'), async (req: Request, res: R
 });
 
 app.post(
-  '/logbook/',
+  '/api/v1/logbook/',
   upload.single('image'),
   validate(logbookPostSchema, 'body'),
   async (req: Request, res: Response) => {

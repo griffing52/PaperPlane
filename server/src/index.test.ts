@@ -12,12 +12,12 @@ const TEST_LICENSE_NUMBER = '12345';
 describe('API Endpoints', () => {
   describe('GET /health', () => {
     it('should return health status', async () => {
-      const response = await request(app).get('/health');
+      const response = await request(app).get('/api/v1/health');
       expect(response.status).toBe(200);
     });
   });
 
-  describe('GET /flight_entries/:id', () => {
+  describe('GET /api/v1/flight_entries/:id', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
@@ -31,7 +31,7 @@ describe('API Endpoints', () => {
     it('should return a flight entry by id', async () => {
       const testFlightEntry = cleanup.flightEntry;
       const response = await request(app)
-        .get(`/flight_entries/${testFlightEntry.id}`);
+        .get(`/api/v1/flight_entries/${testFlightEntry.id}`);
 
       expect(response.status).toBe(200);
       // NOTE: Everything must be a string
@@ -46,18 +46,18 @@ describe('API Endpoints', () => {
 
     it('should 400 when the flight entry id is bad', async () => {
       const response = await request(app)
-        .get(`/flight_entries/FAKE`);
+        .get(`/api/v1/flight_entries/FAKE`);
       expect(response.status).toBe(400);
     });
 
     it('should 404 when the flight entry id is not found', async () => {
       const response = await request(app)
-        .get(`/flight_entries/${FAKE_UUID}`);
+        .get(`/api/v1/flight_entries/${FAKE_UUID}`);
       expect(response.status).toBe(404);
     });
   });
 
-  describe('DELETE /flight_entries/:id', () => {
+  describe('DELETE /api/v1/flight_entries/:id', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
@@ -72,7 +72,7 @@ describe('API Endpoints', () => {
       const flightEntry = cleanup.flightEntry;
 
       const response = await request(app)
-        .delete(`/flight_entries/${flightEntry.id}`);
+        .delete(`/api/v1/flight_entries/${flightEntry.id}`);
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(flightEntry.id);
@@ -86,13 +86,13 @@ describe('API Endpoints', () => {
 
     it('should 400 when the flight entry id is bad', async () => {
       const response = await request(app)
-        .delete(`/flight_entries/FAKE`);
+        .delete(`/api/v1/flight_entries/FAKE`);
       expect(response.status).toBe(400);
     });
 
     it('should 404 when the flight entry id is not found', async () => {
       const response = await request(app)
-        .delete(`/flight_entries/${FAKE_UUID}`);
+        .delete(`/api/v1/flight_entries/${FAKE_UUID}`);
       expect(response.status).toBe(404);
     });
   });
@@ -101,7 +101,7 @@ describe('API Endpoints', () => {
   // I used Claude Code Sonnet 4.5 to generate this test, since it's largely repititive. Prompt as follows:
   // Add an anlogous user test. Make it short and to the point. Add a minimal test that its been stored in the DB.
   // I refactored it slightly afterwards.
-  describe('POST /user/', () => {
+  describe('POST /api/v1/user/', () => {
     let createdUserId: string;
     beforeAll(async () => {
       // cleanup if other tests forgot to
@@ -117,7 +117,7 @@ describe('API Endpoints', () => {
       const user = { name: 'Test', email, licenseNumber: TEST_LICENSE_NUMBER };
 
       const response = await request(app)
-        .post('/user/')
+        .post('/api/v1/user/')
         .send(user);
 
       expect(response.status).toBe(201);
@@ -131,14 +131,14 @@ describe('API Endpoints', () => {
 
     it('should 400 when body is invalid', async () => {
       const response = await request(app)
-        .post('/user/')
+        .post('/api/v1/user/')
         .send({ name: 'Test' });
 
       expect(response.status).toBe(400);
     });
   });
 
-  describe('GET /flight_entries/', () => {
+  describe('GET /api/v1/flight_entries/', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
@@ -152,7 +152,7 @@ describe('API Endpoints', () => {
     it('should return flight entries filtered by userId', async () => {
       const { flightEntry: { userId } } = cleanup;
       const response = await request(app)
-        .get(`/flight_entries/`)
+        .get(`/api/v1/flight_entries/`)
         .query({ userId });
 
       expect(response.status).toBe(201);
@@ -163,7 +163,7 @@ describe('API Endpoints', () => {
 
     it('should return empty array when no flight entries match', async () => {
       const response = await request(app)
-        .get(`/flight_entries/`)
+        .get(`/api/v1/flight_entries/`)
         .query({ flightId: FAKE_UUID });
 
       expect(response.status).toBe(201);
@@ -172,14 +172,14 @@ describe('API Endpoints', () => {
 
     it('should 400 when userId is invalid', async () => {
       const response = await request(app)
-        .get(`/flight_entries/`)
+        .get(`/api/v1/flight_entries/`)
         .query({ userId: 'INVALID' });
 
       expect(response.status).toBe(400);
     });
   });
 
-  describe('POST /logbook/', () => {
+  describe('POST /api/v1/logbook/', () => {
     let cleanup: Awaited<ReturnType<typeof createTestUser>>;
 
     beforeAll(async () => {
@@ -193,7 +193,7 @@ describe('API Endpoints', () => {
     // TODO: This should fail once we do proper parsing, since the buffer is invalid
     it('should return a flight log with an id when passed a buffer', async () => {
       const response = await request(app)
-        .post('/logbook/')
+        .post('/api/v1/logbook/')
         .attach('image', Buffer.from('fake-image-data'), 'test.png')
         .field('userId', cleanup.user.id);
 
