@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from './index';
-import { createTestFlightLog, createTestUser } from './test-factories';
+import { createTestFlightEntry, createTestUser } from './test-factories';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -17,82 +17,82 @@ describe('API Endpoints', () => {
     });
   });
 
-  describe('GET /flight_logs/:id', () => {
-    let cleanup: Awaited<ReturnType<typeof createTestFlightLog>>;
+  describe('GET /flight_entries/:id', () => {
+    let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
-      cleanup = await createTestFlightLog();
+      cleanup = await createTestFlightEntry();
     });
 
     afterAll(async () => {
       await cleanup();
     });
 
-    it('should return a flight log by id', async () => {
-      const testFlightLog = cleanup.flightLog;
+    it('should return a flight entry by id', async () => {
+      const testFlightEntry = cleanup.flightEntry;
       const response = await request(app)
-        .get(`/flight_logs/${testFlightLog.id}`);
+        .get(`/flight_entries/${testFlightEntry.id}`);
 
       expect(response.status).toBe(200);
       // NOTE: Everything must be a string
       // since we aren't reparsing it
       expect(response.body).toMatchObject({
-        id: testFlightLog.id,
-        userId: testFlightLog.userId,
+        id: testFlightEntry.id,
+        userId: testFlightEntry.userId,
         totalFlightTime: "1.5",
         crossCountryTime: "1.5",
       });
     });
 
-    it('should 400 when the flight id is bad', async () => {
+    it('should 400 when the flight entry id is bad', async () => {
       const response = await request(app)
-        .get(`/flight_logs/FAKE`);
+        .get(`/flight_entries/FAKE`);
       expect(response.status).toBe(400);
     });
 
-    it('should 404 when the flight id is not found', async () => {
+    it('should 404 when the flight entry id is not found', async () => {
       const response = await request(app)
-        .get(`/flight_logs/${FAKE_UUID}`);
+        .get(`/flight_entries/${FAKE_UUID}`);
       expect(response.status).toBe(404);
     });
   });
 
-  describe('DELETE /flight_logs/:id', () => {
-    let cleanup: Awaited<ReturnType<typeof createTestFlightLog>>;
+  describe('DELETE /flight_entries/:id', () => {
+    let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
-      cleanup = await createTestFlightLog();
+      cleanup = await createTestFlightEntry();
     });
 
     afterAll(async () => {
       await cleanup();
     });
 
-    it('should delete a flight log by id', async () => {
-      const flightLog = cleanup.flightLog;
+    it('should delete a flight entry by id', async () => {
+      const flightEntry = cleanup.flightEntry;
 
       const response = await request(app)
-        .delete(`/flight_logs/${flightLog.id}`);
+        .delete(`/flight_entries/${flightEntry.id}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.id).toBe(flightLog.id);
+      expect(response.body.id).toBe(flightEntry.id);
 
       const getResponse = await request(app)
-        .get(`/flight_logs/${flightLog.id}`);
+        .get(`/flight_entries/${flightEntry.id}`);
       expect(getResponse.status).toBe(404);
 
       await cleanup();
     });
 
-    it('should 400 when the flight id is bad', async () => {
+    it('should 400 when the flight entry id is bad', async () => {
       const response = await request(app)
-        .delete(`/flight_logs/FAKE`);
+        .delete(`/flight_entries/FAKE`);
       expect(response.status).toBe(400);
     });
 
-    it('should 404 when the flight id is not found', async () => {
+    it('should 404 when the flight entry id is not found', async () => {
       const response = await request(app)
-        .delete(`/flight_logs/${FAKE_UUID}`);
+        .delete(`/flight_entries/${FAKE_UUID}`);
       expect(response.status).toBe(404);
     });
   });
@@ -138,21 +138,21 @@ describe('API Endpoints', () => {
     });
   });
 
-  describe('GET /flight_logs/', () => {
-    let cleanup: Awaited<ReturnType<typeof createTestFlightLog>>;
+  describe('GET /flight_entries/', () => {
+    let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
-      cleanup = await createTestFlightLog();
+      cleanup = await createTestFlightEntry();
     });
 
     afterAll(async () => {
       await cleanup();
     });
 
-    it('should return flight logs filtered by userId', async () => {
-      const { flightLog: { userId } } = cleanup;
+    it('should return flight entries filtered by userId', async () => {
+      const { flightEntry: { userId } } = cleanup;
       const response = await request(app)
-        .get(`/flight_logs/`)
+        .get(`/flight_entries/`)
         .query({ userId });
 
       expect(response.status).toBe(201);
@@ -161,9 +161,9 @@ describe('API Endpoints', () => {
       expect(response.body[0].userId).toBe(userId);
     });
 
-    it('should return empty array when no flight logs match', async () => {
+    it('should return empty array when no flight entries match', async () => {
       const response = await request(app)
-        .get(`/flight_logs/`)
+        .get(`/flight_entries/`)
         .query({ flightId: FAKE_UUID });
 
       expect(response.status).toBe(201);
@@ -172,7 +172,7 @@ describe('API Endpoints', () => {
 
     it('should 400 when userId is invalid', async () => {
       const response = await request(app)
-        .get(`/flight_logs/`)
+        .get(`/flight_entries/`)
         .query({ userId: 'INVALID' });
 
       expect(response.status).toBe(400);

@@ -151,7 +151,7 @@ async function seed(force: boolean) {
   // Check if data exists
   {
     const userCount = await prisma.user.count();
-    const flightCount = await prisma.flightLog.count();
+    const flightCount = await prisma.flightEntry.count();
     const realFlightCount = await prisma.flight.count();
 
     const hasData = userCount > 0 || flightCount > 0 || realFlightCount > 0;
@@ -172,7 +172,7 @@ async function seed(force: boolean) {
     if (hasData) {
       // Clear existing data
       console.log('🗑️  Clearing existing data...');
-      await prisma.flightLog.deleteMany();
+      await prisma.flightEntry.deleteMany();
       await prisma.flight.deleteMany();
       await prisma.user.deleteMany();
     }
@@ -230,7 +230,7 @@ async function seed(force: boolean) {
 
   console.log('🔗 Creating flight entries (linking flights to users)...\n');
 
-  // Create FlightLog records, mapping JSON user_ids to our 5 users
+  // Create FlightEntry records, mapping JSON user_ids to our 5 users
   for (const { flight, originalPilotId } of createdFlights) {
     // Map original user_id (1-13) to one of our 5 users (0-4)
     const userIndex = (originalPilotId - 1) % 5;
@@ -239,7 +239,7 @@ async function seed(force: boolean) {
     // Generate plausible flight times
     const flightTimes = generateFlightTimes(flight.departureTime, flight.arrivalTime);
 
-    await prisma.flightLog.create({
+    await prisma.flightEntry.create({
       data: {
         flightId: flight.id,
         userId: user.id,
@@ -259,7 +259,7 @@ async function seed(force: boolean) {
   // Print summary
   const userCount = await prisma.user.count();
   const flightCount = await prisma.flight.count();
-  const flightEntryCount = await prisma.flightLog.count();
+  const flightEntryCount = await prisma.flightEntry.count();
 
   console.log('✅ Seed completed successfully!\n');
   console.log('📊 Summary:');

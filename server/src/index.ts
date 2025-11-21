@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
-import { validate, flightLogQuerySchema, flightLogGetSchema, userPostSchema, logbookPostSchema, FlightLogQueryParams, FlightLogGetParams, UserPostBodyParams, LogbookPostBodyParams } from './validation';
+import { validate, flightEntryQuerySchema, flightEntryGetSchema, userPostSchema, logbookPostSchema, FlightEntryQueryParams, FlightEntryGetParams, UserPostBodyParams, LogbookPostBodyParams } from './validation';
 import { ocrImage, LogbookOCRResult } from './ocr';
 
 const app = express();
@@ -85,16 +85,16 @@ app.get('/health', (_req: Request, res: Response) => {
   }
 });
 
-app.get('/flight_logs/', validate(flightLogQuerySchema, 'query'), async (req: Request, res: Response) => {
+app.get('/flight_entries/', validate(flightEntryQuerySchema, 'query'), async (req: Request, res: Response) => {
   try {
-    const { userId, flightId } = req.query as unknown as FlightLogQueryParams;
-    const flight = await prisma.flightLog.findMany({
+    const { userId, flightId } = req.query as unknown as FlightEntryQueryParams;
+    const flightEntries = await prisma.flightEntry.findMany({
       where: {
         ...(userId != null && { userId }),
         ...(flightId != null && { flightId }),
       }
     });
-    res.status(201).json(flight);
+    res.status(201).json(flightEntries);
   } catch (error) {
     res.status(500).json({
       error: 'Internal server error',
@@ -103,15 +103,15 @@ app.get('/flight_logs/', validate(flightLogQuerySchema, 'query'), async (req: Re
   }
 });
 
-app.get('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: Request, res: Response) => {
+app.get('/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params as unknown as FlightLogGetParams;
-    const flight = await prisma.flightLog.findUnique({ where: { id } });
-    if (!flight) {
-      res.status(404).json({ error: 'Flight log not found' });
+    const { id } = req.params as unknown as FlightEntryGetParams;
+    const flightEntry = await prisma.flightEntry.findUnique({ where: { id } });
+    if (!flightEntry) {
+      res.status(404).json({ error: 'Flight entry not found' });
       return;
     }
-    res.json(flight);
+    res.json(flightEntry);
   } catch (error) {
     res.status(500).json({
       error: 'Internal server error',
@@ -120,19 +120,19 @@ app.get('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: 
   }
 });
 
-app.delete('/flight_logs/:id', validate(flightLogGetSchema, 'params'), async (req: Request, res: Response) => {
+app.delete('/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
-    const { id } = req.params as unknown as FlightLogGetParams;
+    const { id } = req.params as unknown as FlightEntryGetParams;
 
-    let flight;
+    let flightEntry;
     try {
-      flight = await prisma.flightLog.delete({ where: { id } });
+      flightEntry = await prisma.flightEntry.delete({ where: { id } });
     } catch (error) {
-      res.status(404).json({ error: 'Flight log not found' });
+      res.status(404).json({ error: 'Flight entry not found' });
       return;
     }
 
-    res.json(flight);
+    res.json(flightEntry);
   } catch (error) {
     res.status(500).json({
       error: 'Internal server error',
@@ -176,7 +176,7 @@ app.post(
 
       const ocrResult = await ocrImage(req.file.buffer);
 
-      const flightLog = await prisma.$transaction(async (tx) => {
+      const flightEntry = await prisma.$transaction(async (tx) => {
         const flight = await tx.flight.create({
           data: mapOcrToFlightData(ocrResult),
         });
@@ -192,7 +192,7 @@ app.post(
 
       res.status(201).json({
         success: true,
-        data: flightLog,
+        data: flightEntry,
         metadata: {
           confidence: ocrResult.confidence,
         },

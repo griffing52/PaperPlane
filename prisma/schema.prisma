@@ -48,7 +48,7 @@ model User {
   updatedAt DateTime @updatedAt
   
   licenseNumber String   @unique
-  flights        FlightLog[]
+  flights        FlightEntry[]
 
   @@map("users")
 }
@@ -66,12 +66,12 @@ model Flight {
   updatedAt               DateTime      @updatedAt
   
   // Relations
-  flightEntries           FlightLog[]
+  flightEntries           FlightEntry[]
   
   @@map("flights")
 }
 
-model FlightLog {
+model FlightEntry {
   id                 String       @id @default(uuid())
   flightId           String?       @map("flight_id")
   userId            String       @map("user_id")

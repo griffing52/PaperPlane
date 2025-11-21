@@ -40,19 +40,19 @@ export const validate = (schema: z.ZodSchema, property: RequestProperty) => {
   };
 };
 
-export const flightLogQuerySchema = z.object({
+export const flightEntryQuerySchema = z.object({
   userId: z.uuid().optional(),
   flightId: z.uuid().optional(),
 });
 
-export type FlightLogQueryParams = z.infer<typeof flightLogQuerySchema>;
+export type FlightEntryQueryParams = z.infer<typeof flightEntryQuerySchema>;
 
 
-export const flightLogGetSchema = z.object({
+export const flightEntryGetSchema = z.object({
   id: z.uuid()
 });
 
-export type FlightLogGetParams = z.infer<typeof flightLogGetSchema>;
+export type FlightEntryGetParams = z.infer<typeof flightEntryGetSchema>;
 
 export const userPostSchema = z.object({
   name: z.string().min(1),
