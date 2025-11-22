@@ -17,7 +17,7 @@ describe('API Endpoints', () => {
     });
   });
 
-  describe('GET /api/v1/flight_entries/:id', () => {
+  describe('GET /api/v1/flight_entry/:id', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
@@ -31,7 +31,7 @@ describe('API Endpoints', () => {
     it('should return a flight entry by id', async () => {
       const testFlightEntry = cleanup.flightEntry;
       const response = await request(app)
-        .get(`/api/v1/flight_entries/${testFlightEntry.id}`);
+        .get(`/api/v1/flight_entry/${testFlightEntry.id}`);
 
       expect(response.status).toBe(200);
       // NOTE: Everything must be a string
@@ -46,18 +46,18 @@ describe('API Endpoints', () => {
 
     it('should 400 when the flight entry id is bad', async () => {
       const response = await request(app)
-        .get(`/api/v1/flight_entries/FAKE`);
+        .get(`/api/v1/flight_entry/FAKE`);
       expect(response.status).toBe(400);
     });
 
     it('should 404 when the flight entry id is not found', async () => {
       const response = await request(app)
-        .get(`/api/v1/flight_entries/${FAKE_UUID}`);
+        .get(`/api/v1/flight_entry/${FAKE_UUID}`);
       expect(response.status).toBe(404);
     });
   });
 
-  describe('DELETE /api/v1/flight_entries/:id', () => {
+  describe('DELETE /api/v1/flight_entry/:id', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
@@ -72,13 +72,13 @@ describe('API Endpoints', () => {
       const flightEntry = cleanup.flightEntry;
 
       const response = await request(app)
-        .delete(`/api/v1/flight_entries/${flightEntry.id}`);
+        .delete(`/api/v1/flight_entry/${flightEntry.id}`);
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(flightEntry.id);
 
       const getResponse = await request(app)
-        .get(`/flight_entries/${flightEntry.id}`);
+        .get(`/api/v1/flight_entry/${flightEntry.id}`);
       expect(getResponse.status).toBe(404);
 
       await cleanup();
@@ -86,13 +86,13 @@ describe('API Endpoints', () => {
 
     it('should 400 when the flight entry id is bad', async () => {
       const response = await request(app)
-        .delete(`/api/v1/flight_entries/FAKE`);
+        .delete(`/api/v1/flight_entry/FAKE`);
       expect(response.status).toBe(400);
     });
 
     it('should 404 when the flight entry id is not found', async () => {
       const response = await request(app)
-        .delete(`/api/v1/flight_entries/${FAKE_UUID}`);
+        .delete(`/api/v1/flight_entry/${FAKE_UUID}`);
       expect(response.status).toBe(404);
     });
   });
@@ -138,7 +138,7 @@ describe('API Endpoints', () => {
     });
   });
 
-  describe('GET /api/v1/flight_entries/', () => {
+  describe('GET /api/v1/flight_entry/', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeAll(async () => {
@@ -152,7 +152,7 @@ describe('API Endpoints', () => {
     it('should return flight entries filtered by userId', async () => {
       const { flightEntry: { userId } } = cleanup;
       const response = await request(app)
-        .get(`/api/v1/flight_entries/`)
+        .get(`/api/v1/flight_entry`)
         .query({ userId });
 
       expect(response.status).toBe(201);
@@ -163,7 +163,7 @@ describe('API Endpoints', () => {
 
     it('should return empty array when no flight entries match', async () => {
       const response = await request(app)
-        .get(`/api/v1/flight_entries/`)
+        .get(`/api/v1/flight_entry`)
         .query({ flightId: FAKE_UUID });
 
       expect(response.status).toBe(201);
@@ -172,7 +172,7 @@ describe('API Endpoints', () => {
 
     it('should 400 when userId is invalid', async () => {
       const response = await request(app)
-        .get(`/api/v1/flight_entries/`)
+        .get(`/api/v1/flight_entry`)
         .query({ userId: 'INVALID' });
 
       expect(response.status).toBe(400);

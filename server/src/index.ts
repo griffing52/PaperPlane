@@ -39,7 +39,7 @@ app.get('/api/v1/health', (_req: Request, res: Response) => {
   }
 });
 
-app.get('/api/v1/flight_entries/', validate(flightEntryQuerySchema, 'query'), async (req: Request, res: Response) => {
+app.get('/api/v1/flight_entry', validate(flightEntryQuerySchema, 'query'), async (req: Request, res: Response) => {
   try {
     const { userId, flightId } = req.query as unknown as FlightEntryQueryParams;
     const flightEntries = await prisma.flightEntry.findMany({
@@ -57,7 +57,7 @@ app.get('/api/v1/flight_entries/', validate(flightEntryQuerySchema, 'query'), as
   }
 });
 
-app.get('/api/v1/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
+app.get('/api/v1/flight_entry/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as unknown as FlightEntryGetParams;
     const flightEntry = await prisma.flightEntry.findUnique({ where: { id } });
@@ -74,7 +74,7 @@ app.get('/api/v1/flight_entries/:id', validate(flightEntryGetSchema, 'params'), 
   }
 });
 
-app.delete('/api/v1/flight_entries/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
+app.delete('/api/v1/flight_entry/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
   try {
     const { id } = req.params as unknown as FlightEntryGetParams;
 
