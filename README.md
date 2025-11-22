@@ -2,7 +2,25 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+```bash
+npm install:all
+```
+
+Init the database.
+
+```
+# sets the database location in prisma/dev.dbs
+cp .env.sample .env
+# creates the database
+npx prisma migrate dev --name initial_migration
+# generates prisma library to interact with database
+npx prisma generate
+# generate test data
+npm run seed
+```
+
+(copy and pasted from Gemini)
+# Start the development server:
 
 ```bash
 npm run dev
@@ -14,6 +32,16 @@ pnpm dev
 bun dev
 ```
 
+This command launches the development server, typically accessible at http://localhost:5173 (or a similar port). Your React application will be served from this address, and any changes you make to the code will trigger a hot-reload in the browser.
+
+## Additional npm run commands:
+npm run build: This command creates a production-ready build of your application in the dist directory.
+npm run preview: After building, this command serves the production build locally, allowing you to test it before deployment.
+npm run test: If you have configured testing with a framework like Vitest, this command will run your tests. The specific setup for testing might require additional configuration in your package.json and a testing configuration file (e.g., vite.config.ts).
+
+# Vite default README (for client)
+
+# React + TypeScript + Vite
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
