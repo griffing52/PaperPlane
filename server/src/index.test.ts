@@ -1,23 +1,27 @@
-import { describe, it, expect,  beforeEach, afterEach } from 'vitest';
-import request from 'supertest';
-import { app } from './index';
-import { createTestFlightEntry, createTestUser, createTestFlight } from './test-factories';
-import { PrismaClient } from '@prisma/client';
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import request from "supertest";
+import { app } from "./index";
+import {
+  createTestFlightEntry,
+  createTestUser,
+  createTestFlight,
+} from "./test-factories";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
-const TEST_LICENSE_NUMBER = '12345';
+const TEST_LICENSE_NUMBER = "12345";
 
-describe('API Endpoints', () => {
-  describe('GET /health', () => {
-    it('should return health status', async () => {
-      const response = await request(app).get('/api/v1/health');
+describe("API Endpoints", () => {
+  describe("GET /health", () => {
+    it("should return health status", async () => {
+      const response = await request(app).get("/api/v1/health");
       expect(response.status).toBe(200);
     });
   });
 
-  describe('GET /api/v1/flight_entry/:id', () => {
+  describe("GET /api/v1/flight_entry/:id", () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeEach(async () => {
@@ -28,10 +32,11 @@ describe('API Endpoints', () => {
       await cleanup();
     });
 
-    it('should return a flight entry by id', async () => {
+    it("should return a flight entry by id", async () => {
       const testFlightEntry = cleanup.flightEntry;
-      const response = await request(app)
-        .get(`/api/v1/flight_entry/${testFlightEntry.id}`);
+      const response = await request(app).get(
+        `/api/v1/flight_entry/${testFlightEntry.id}`,
+      );
 
       expect(response.status).toBe(200);
       // NOTE: Everything must be a string
@@ -44,20 +49,20 @@ describe('API Endpoints', () => {
       });
     });
 
-    it('should 400 when the flight entry id is bad', async () => {
-      const response = await request(app)
-        .get(`/api/v1/flight_entry/FAKE`);
+    it("should 400 when the flight entry id is bad", async () => {
+      const response = await request(app).get(`/api/v1/flight_entry/FAKE`);
       expect(response.status).toBe(400);
     });
 
-    it('should 404 when the flight entry id is not found', async () => {
-      const response = await request(app)
-        .get(`/api/v1/flight_entry/${FAKE_UUID}`);
+    it("should 404 when the flight entry id is not found", async () => {
+      const response = await request(app).get(
+        `/api/v1/flight_entry/${FAKE_UUID}`,
+      );
       expect(response.status).toBe(404);
     });
   });
 
-  describe('DELETE /api/v1/flight_entry/:id', () => {
+  describe("DELETE /api/v1/flight_entry/:id", () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeEach(async () => {
@@ -68,36 +73,38 @@ describe('API Endpoints', () => {
       await cleanup();
     });
 
-    it('should delete a flight entry by id', async () => {
+    it("should delete a flight entry by id", async () => {
       const flightEntry = cleanup.flightEntry;
 
-      const response = await request(app)
-        .delete(`/api/v1/flight_entry/${flightEntry.id}`);
+      const response = await request(app).delete(
+        `/api/v1/flight_entry/${flightEntry.id}`,
+      );
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(flightEntry.id);
 
-      const getResponse = await request(app)
-        .get(`/api/v1/flight_entry/${flightEntry.id}`);
+      const getResponse = await request(app).get(
+        `/api/v1/flight_entry/${flightEntry.id}`,
+      );
       expect(getResponse.status).toBe(404);
 
       await cleanup();
     });
 
-    it('should 400 when the flight entry id is bad', async () => {
-      const response = await request(app)
-        .delete(`/api/v1/flight_entry/FAKE`);
+    it("should 400 when the flight entry id is bad", async () => {
+      const response = await request(app).delete(`/api/v1/flight_entry/FAKE`);
       expect(response.status).toBe(400);
     });
 
-    it('should 404 when the flight entry id is not found', async () => {
-      const response = await request(app)
-        .delete(`/api/v1/flight_entry/${FAKE_UUID}`);
+    it("should 404 when the flight entry id is not found", async () => {
+      const response = await request(app).delete(
+        `/api/v1/flight_entry/${FAKE_UUID}`,
+      );
       expect(response.status).toBe(404);
     });
   });
 
-  describe('POST /api/v1/flight_entry/', () => {
+  describe("POST /api/v1/flight_entry/", () => {
     let userCleanup: Awaited<ReturnType<typeof createTestUser>>;
     let createdFlightEntryId: string;
 
@@ -107,15 +114,17 @@ describe('API Endpoints', () => {
 
     afterEach(async () => {
       if (createdFlightEntryId) {
-        await prisma.flightEntry.delete({ where: { id: createdFlightEntryId } }).catch(() => { });
+        await prisma.flightEntry
+          .delete({ where: { id: createdFlightEntryId } })
+          .catch(() => {});
       }
       await userCleanup();
     });
 
-    it('should create a flight entry with all fields and store in DB', async () => {
+    it("should create a flight entry with all fields and store in DB", async () => {
       const flightEntryData = {
         userId: userCleanup.user.id,
-        logbookUrl: 'https://example.com/logbook.png',
+        logbookUrl: "https://example.com/logbook.png",
         totalFlightTime: 2.5,
         soloTime: 1.0,
         dualReceivedTime: 1.5,
@@ -126,7 +135,7 @@ describe('API Endpoints', () => {
       };
 
       const response = await request(app)
-        .post('/api/v1/flight_entry/')
+        .post("/api/v1/flight_entry/")
         .send(flightEntryData);
 
       expect(response.status).toBe(201);
@@ -144,18 +153,20 @@ describe('API Endpoints', () => {
       // for cleanup
       createdFlightEntryId = response.body.id;
 
-      const dbFlightEntry = await prisma.flightEntry.findUnique({ where: { id: createdFlightEntryId } });
+      const dbFlightEntry = await prisma.flightEntry.findUnique({
+        where: { id: createdFlightEntryId },
+      });
       expect(dbFlightEntry).not.toBeNull();
       expect(dbFlightEntry?.userId).toBe(flightEntryData.userId);
     });
 
-    it('should create a flight entry with only required fields', async () => {
+    it("should create a flight entry with only required fields", async () => {
       const flightEntryData = {
         userId: userCleanup.user.id,
       };
 
       const response = await request(app)
-        .post('/api/v1/flight_entry/')
+        .post("/api/v1/flight_entry/")
         .send(flightEntryData);
 
       expect(response.status).toBe(201);
@@ -171,9 +182,9 @@ describe('API Endpoints', () => {
       });
     });
 
-    it('should 400 when userId is missing', async () => {
+    it("should 400 when userId is missing", async () => {
       const response = await request(app)
-        .post('/api/v1/flight_entry/')
+        .post("/api/v1/flight_entry/")
         .send({ totalFlightTime: 1.5 });
 
       expect(response.status).toBe(400);
@@ -184,44 +195,48 @@ describe('API Endpoints', () => {
   // I used Claude Code Sonnet 4.5 to generate this test, since it's largely repititive. Prompt as follows:
   // Add an anlogous user test. Make it short and to the point. Add a minimal test that its been stored in the DB.
   // I refactored it slightly afterwards.
-  describe('POST /api/v1/user/', () => {
+  describe("POST /api/v1/user/", () => {
     let createdUserId: string;
     beforeEach(async () => {
       // cleanup if other tests forgot to
-      await prisma.user.deleteMany({ where: { licenseNumber: TEST_LICENSE_NUMBER } });
+      await prisma.user.deleteMany({
+        where: { licenseNumber: TEST_LICENSE_NUMBER },
+      });
     });
 
     afterEach(async () => {
-      await prisma.user.delete({ where: { id: createdUserId } }).catch(() => { });
+      await prisma.user
+        .delete({ where: { id: createdUserId } })
+        .catch(() => {});
     });
 
-    it('should create a user and store in DB', async () => {
+    it("should create a user and store in DB", async () => {
       const email = `test-${Date.now()}@example.com`;
-      const user = { name: 'Test', email, licenseNumber: TEST_LICENSE_NUMBER };
+      const user = { name: "Test", email, licenseNumber: TEST_LICENSE_NUMBER };
 
-      const response = await request(app)
-        .post('/api/v1/user/')
-        .send(user);
+      const response = await request(app).post("/api/v1/user/").send(user);
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject(user);
       createdUserId = response.body.id;
 
-      const dbUser = await prisma.user.findUnique({ where: { id: response.body.id } });
+      const dbUser = await prisma.user.findUnique({
+        where: { id: response.body.id },
+      });
       expect(dbUser).not.toBeNull();
       expect(dbUser?.email).toBe(email);
     });
 
-    it('should 400 when body is invalid', async () => {
+    it("should 400 when body is invalid", async () => {
       const response = await request(app)
-        .post('/api/v1/user/')
-        .send({ name: 'Test' });
+        .post("/api/v1/user/")
+        .send({ name: "Test" });
 
       expect(response.status).toBe(400);
     });
   });
 
-  describe('GET /api/v1/flight_entry/', () => {
+  describe("GET /api/v1/flight_entry/", () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
     beforeEach(async () => {
@@ -232,8 +247,10 @@ describe('API Endpoints', () => {
       await cleanup();
     });
 
-    it('should return flight entries filtered by userId', async () => {
-      const { flightEntry: { userId } } = cleanup;
+    it("should return flight entries filtered by userId", async () => {
+      const {
+        flightEntry: { userId },
+      } = cleanup;
       const response = await request(app)
         .get(`/api/v1/flight_entry`)
         .query({ userId });
@@ -244,7 +261,7 @@ describe('API Endpoints', () => {
       expect(response.body[0].userId).toBe(userId);
     });
 
-    it('should return empty array when no flight entries match', async () => {
+    it("should return empty array when no flight entries match", async () => {
       const response = await request(app)
         .get(`/api/v1/flight_entry`)
         .query({ flightId: FAKE_UUID });
@@ -253,16 +270,16 @@ describe('API Endpoints', () => {
       expect(response.body).toEqual([]);
     });
 
-    it('should 400 when userId is invalid', async () => {
+    it("should 400 when userId is invalid", async () => {
       const response = await request(app)
         .get(`/api/v1/flight_entry`)
-        .query({ userId: 'INVALID' });
+        .query({ userId: "INVALID" });
 
       expect(response.status).toBe(400);
     });
   });
 
-  describe('POST /api/v1/ocr/', () => {
+  describe("POST /api/v1/ocr/", () => {
     let cleanup: Awaited<ReturnType<typeof createTestUser>>;
 
     beforeEach(async () => {
@@ -273,10 +290,10 @@ describe('API Endpoints', () => {
       await cleanup();
     });
 
-    it('should return an OCR result when passed a buffer', async () => {
+    it("should return an OCR result when passed a buffer", async () => {
       const response = await request(app)
-        .post('/api/v1/ocr/')
-        .attach('image', Buffer.from('fake-image-data'), 'test.png');
+        .post("/api/v1/ocr/")
+        .attach("image", Buffer.from("fake-image-data"), "test.png");
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
@@ -284,10 +301,9 @@ describe('API Endpoints', () => {
         aircraftModel: expect.any(String),
       });
     });
-
   });
 
-  describe('POST /api/v1/verify/', () => {
+  describe("POST /api/v1/verify/", () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlight>>;
 
     beforeEach(async () => {
@@ -298,46 +314,39 @@ describe('API Endpoints', () => {
       await cleanup();
     });
 
-    it('should return a flight when it matches', async () => {
+    it("should return a flight when it matches", async () => {
       const { flight } = cleanup;
-      const response = await request(app)
-        .post('/api/v1/verify/')
-        .send({
-          // AI Disclosure by Bolun Thompson:
-          // Windsurf autocomplete makes long objects for testing
-          // much easier to write
-          tailNumber: flight.tailNumber,
-          aircraftModel: flight.aircraftModel,
-          manufacturer: flight.manufacturer,
-          originAirportIcao: flight.originAirportIcao,
-          destinationAirportIcao: flight.destinationAirportIcao,
-          departureTime: flight.departureTime.toISOString(),
-          arrivalTime: flight.arrivalTime.toISOString(),
-        });
+      const response = await request(app).post("/api/v1/verify/").send({
+        // AI Disclosure by Bolun Thompson:
+        // Windsurf autocomplete makes long objects for testing
+        // much easier to write
+        tailNumber: flight.tailNumber,
+        aircraftModel: flight.aircraftModel,
+        manufacturer: flight.manufacturer,
+        originAirportIcao: flight.originAirportIcao,
+        destinationAirportIcao: flight.destinationAirportIcao,
+        departureTime: flight.departureTime.toISOString(),
+        arrivalTime: flight.arrivalTime.toISOString(),
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe(flight.id);
     });
 
-    it('should return null when flight not found', async () => {
-      const response = await request(app)
-        .post('/api/v1/verify/')
-        .send({
-          tailNumber: 'N00000',
-       });
+    it("should return null when flight not found", async () => {
+      const response = await request(app).post("/api/v1/verify/").send({
+        tailNumber: "N00000",
+      });
 
       expect(response.body).toBeNull();
       expect(response.status).toBe(200);
     });
 
-    it('should return a flight when sent an empty object', async () => {
-      const response = await request(app)
-        .post('/api/v1/verify/')
-        .send({});
+    it("should return a flight when sent an empty object", async () => {
+      const response = await request(app).post("/api/v1/verify/").send({});
 
       expect(response.status).toBe(200);
       expect(response.body).not.toBeNull();
     });
-
   });
 });

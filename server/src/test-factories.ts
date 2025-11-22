@@ -1,19 +1,21 @@
-import { PrismaClient, FlightEntry, User, Flight } from '@prisma/client';
+import { PrismaClient, FlightEntry, User, Flight } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 type FlightCleanupFunction = (() => Promise<void>) & { flight: Flight };
 
-export async function createTestFlight(overrides: Partial<Flight> = {}): Promise<FlightCleanupFunction> {
+export async function createTestFlight(
+  overrides: Partial<Flight> = {},
+): Promise<FlightCleanupFunction> {
   const flight = await prisma.flight.create({
     data: {
-      tailNumber: 'N12345',
-      aircraftModel: 'C172',
-      manufacturer: 'Cessna',
-      originAirportIcao: 'KLAX',
-      destinationAirportIcao: 'KSFO',
-      departureTime: new Date('2023-01-01T10:00:00Z'),
-      arrivalTime: new Date('2023-01-01T12:00:00Z'),
+      tailNumber: "N12345",
+      aircraftModel: "C172",
+      manufacturer: "Cessna",
+      originAirportIcao: "KLAX",
+      destinationAirportIcao: "KSFO",
+      departureTime: new Date("2023-01-01T10:00:00Z"),
+      arrivalTime: new Date("2023-01-01T12:00:00Z"),
       ...overrides,
     },
   });
@@ -32,7 +34,7 @@ export async function createTestUser(): Promise<UserCleanupFunction> {
   const user = await prisma.user.create({
     data: {
       email: `${d}@example.com`,
-      name: 'Jebadiah',
+      name: "Jebadiah",
       licenseNumber: `${d}`,
     },
   });
@@ -47,7 +49,9 @@ export async function createTestUser(): Promise<UserCleanupFunction> {
 
 type CleanupFunction = (() => Promise<void>) & { flightEntry: FlightEntry };
 
-export async function createTestFlightEntry(overrides: Partial<any> = {}): Promise<CleanupFunction> {
+export async function createTestFlightEntry(
+  overrides: Partial<any> = {},
+): Promise<CleanupFunction> {
   const userCleanup = await createTestUser();
 
   const flightEntry = await prisma.flightEntry.create({

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { Request, Response, NextFunction } from 'express';
+import { z } from "zod";
+import { Request, Response, NextFunction } from "express";
 
 // Generic validation middleware factory
 // AI Disclosure by Bolun Thompson. I used Claude Code with Sonnet 4.5 with Thinking enabled.
@@ -18,24 +18,24 @@ import { Request, Response, NextFunction } from 'express';
 // Make sure that the validation code is elegant and clean, returning properly
 // typed typescript.
 
-type RequestProperty = 'body' | 'params' | 'query';
+type RequestProperty = "body" | "params" | "query";
 
 export const validate = (schema: z.ZodSchema, property: RequestProperty) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       const validated = schema.parse(req[property]);
-      Object.assign(req[property], validated)
+      Object.assign(req[property], validated);
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors = error.issues.map((err) => ({
-          field: err.path.join('.'),
+          field: err.path.join("."),
           message: err.message,
         }));
         res.status(400).json({ errors });
         return;
       }
-      res.status(500).json({ error: 'Validation failed' });
+      res.status(500).json({ error: "Validation failed" });
     }
   };
 };
@@ -47,9 +47,8 @@ export const flightEntryQuerySchema = z.object({
 
 export type FlightEntryQueryParams = z.infer<typeof flightEntryQuerySchema>;
 
-
 export const flightEntryGetSchema = z.object({
-  id: z.uuid()
+  id: z.uuid(),
 });
 
 export type FlightEntryGetParams = z.infer<typeof flightEntryGetSchema>;

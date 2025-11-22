@@ -27,13 +27,13 @@ export interface LogbookOCRResult {
 export async function ocrImage(imageBuffer: Buffer): Promise<LogbookOCRResult> {
   // Stub data
   return {
-    tailNumber: 'N12345',
-    aircraftModel: 'Cessna 172',
-    manufacturer: 'Cessna',
-    originAirportIcao: 'KSFO',
-    destinationAirportIcao: 'KLAX',
-    departureTime: new Date('2024-01-15T10:00:00Z'),
-    arrivalTime: new Date('2024-01-15T11:30:00Z'),
+    tailNumber: "N12345",
+    aircraftModel: "Cessna 172",
+    manufacturer: "Cessna",
+    originAirportIcao: "KSFO",
+    destinationAirportIcao: "KLAX",
+    departureTime: new Date("2024-01-15T10:00:00Z"),
+    arrivalTime: new Date("2024-01-15T11:30:00Z"),
     totalFlightTime: 1.5,
     soloTime: 0,
     dualReceivedTime: 1.5,
@@ -42,6 +42,6 @@ export async function ocrImage(imageBuffer: Buffer): Promise<LogbookOCRResult> {
     actualInstrumentTime: 0,
     simulatedInstrumentTime: 0.5,
     confidence: 0.85,
-    rawText: 'Mock OCR output - replace with actual implementation',
+    rawText: "Mock OCR output - replace with actual implementation",
   };
 }

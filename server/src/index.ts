@@ -1,10 +1,23 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import multer from 'multer';
-import { PrismaClient } from '@prisma/client';
-import { validate, flightEntryQuerySchema, flightEntryGetSchema, flightEntryPostSchema, userPostSchema, ocrSchema, flightSchema, FlightEntryQueryParams, FlightEntryGetParams, FlightEntryPostParams, UserPostBodyParams, FlightBodyParams } from './validation';
-import { ocrImage } from './ocr';
-import { verifyFlight } from './verify';
+import express, { Request, Response } from "express";
+import cors from "cors";
+import multer from "multer";
+import { PrismaClient } from "@prisma/client";
+import {
+  validate,
+  flightEntryQuerySchema,
+  flightEntryGetSchema,
+  flightEntryPostSchema,
+  userPostSchema,
+  ocrSchema,
+  flightSchema,
+  FlightEntryQueryParams,
+  FlightEntryGetParams,
+  FlightEntryPostParams,
+  UserPostBodyParams,
+  FlightBodyParams,
+} from "./validation";
+import { ocrImage } from "./ocr";
+import { verifyFlight } from "./verify";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,10 +30,10 @@ const upload = multer({
   },
   fileFilter: (_req, file, cb) => {
     // Accept only image files
-    if (file.mimetype.startsWith('image/')) {
+    if (file.mimetype.startsWith("image/")) {
       cb(null, true);
     } else {
-      cb(new Error('Only image files are allowed'));
+      cb(new Error("Only image files are allowed"));
     }
   },
 });
@@ -28,140 +41,177 @@ const upload = multer({
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/v1/health', (_req: Request, res: Response) => {
+app.get("/api/v1/health", (_req: Request, res: Response) => {
   try {
-    res.json({ status: 'ok', message: 'Server is running' });
+    res.json({ status: "ok", message: "Server is running" });
   } catch (error) {
     res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: "Internal server error",
+      details: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });
 
-app.get('/api/v1/flight_entry', validate(flightEntryQuerySchema, 'query'), async (req: Request, res: Response) => {
-  try {
-    const { userId, flightId } = req.query as unknown as FlightEntryQueryParams;
-    const flightEntries = await prisma.flightEntry.findMany({
-      where: {
-        ...(userId != null && { userId }),
-        ...(flightId != null && { flightId }),
-      }
-    });
-    res.status(201).json(flightEntries);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-app.get('/api/v1/flight_entry/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params as unknown as FlightEntryGetParams;
-    const flightEntry = await prisma.flightEntry.findUnique({ where: { id } });
-    if (!flightEntry) {
-      res.status(404).json({ error: 'Flight entry not found' });
-      return;
-    }
-    res.json(flightEntry);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-app.delete('/api/v1/flight_entry/:id', validate(flightEntryGetSchema, 'params'), async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params as unknown as FlightEntryGetParams;
-
-    let flightEntry;
+app.get(
+  "/api/v1/flight_entry",
+  validate(flightEntryQuerySchema, "query"),
+  async (req: Request, res: Response) => {
     try {
-      flightEntry = await prisma.flightEntry.delete({ where: { id } });
+      const { userId, flightId } =
+        req.query as unknown as FlightEntryQueryParams;
+      const flightEntries = await prisma.flightEntry.findMany({
+        where: {
+          ...(userId != null && { userId }),
+          ...(flightId != null && { flightId }),
+        },
+      });
+      res.status(201).json(flightEntries);
     } catch (error) {
-      res.status(404).json({ error: 'Flight entry not found' });
-      return;
+      res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
     }
+  },
+);
 
-    res.json(flightEntry);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-app.post('/api/v1/flight_entry/', validate(flightEntryPostSchema, 'body'), async (req: Request, res: Response) => {
-  try {
-    const { userId, logbookUrl, totalFlightTime, soloTime, dualReceivedTime, crossCountryTime, nightTime, actualInstrumentTime, simulatedInstrumentTime } = req.body as unknown as FlightEntryPostParams;
-
-    const flightEntry = await prisma.flightEntry.create({
-      data: {
-        userId,
-        logbookURL: logbookUrl,
-        totalFlightTime: totalFlightTime ?? 0,
-        soloTime: soloTime ?? 0,
-        dualReceivedTime: dualReceivedTime ?? 0,
-        crossCountryTime: crossCountryTime ?? 0,
-        nightTime: nightTime ?? 0,
-        actualInstrumentTime: actualInstrumentTime ?? 0,
-        simulatedInstrumentTime: simulatedInstrumentTime ?? 0,
+app.get(
+  "/api/v1/flight_entry/:id",
+  validate(flightEntryGetSchema, "params"),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params as unknown as FlightEntryGetParams;
+      const flightEntry = await prisma.flightEntry.findUnique({
+        where: { id },
+      });
+      if (!flightEntry) {
+        res.status(404).json({ error: "Flight entry not found" });
+        return;
       }
-    });
-    res.status(201).json(flightEntry);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
-
-app.post('/api/v1/user/', validate(userPostSchema, 'body'), async (req: Request, res: Response) => {
-  try {
-    const { name, email, licenseNumber } = req.body as unknown as UserPostBodyParams;
-    const flight = await prisma.user.create({
-      data: {
-        name,
-        email,
-        licenseNumber,
-      }
+      res.json(flightEntry);
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
     }
-    );
-    res.status(201).json(flight);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
+  },
+);
 
-app.post('/api/v1/verify/', validate(flightSchema, 'body'), async (req: Request, res: Response) => {
-  try {
-    const flightData = req.body as unknown as FlightBodyParams;
-    const verifiedFlight = await verifyFlight(flightData);
-    res.json(verifiedFlight);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
+app.delete(
+  "/api/v1/flight_entry/:id",
+  validate(flightEntryGetSchema, "params"),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params as unknown as FlightEntryGetParams;
+
+      let flightEntry;
+      try {
+        flightEntry = await prisma.flightEntry.delete({ where: { id } });
+      } catch (error) {
+        res.status(404).json({ error: "Flight entry not found" });
+        return;
+      }
+
+      res.json(flightEntry);
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
 
 app.post(
-  '/api/v1/ocr/',
-  upload.single('image'),
-  validate(ocrSchema, 'body'),
+  "/api/v1/flight_entry/",
+  validate(flightEntryPostSchema, "body"),
+  async (req: Request, res: Response) => {
+    try {
+      const {
+        userId,
+        logbookUrl,
+        totalFlightTime,
+        soloTime,
+        dualReceivedTime,
+        crossCountryTime,
+        nightTime,
+        actualInstrumentTime,
+        simulatedInstrumentTime,
+      } = req.body as unknown as FlightEntryPostParams;
+
+      const flightEntry = await prisma.flightEntry.create({
+        data: {
+          userId,
+          logbookURL: logbookUrl,
+          totalFlightTime: totalFlightTime ?? 0,
+          soloTime: soloTime ?? 0,
+          dualReceivedTime: dualReceivedTime ?? 0,
+          crossCountryTime: crossCountryTime ?? 0,
+          nightTime: nightTime ?? 0,
+          actualInstrumentTime: actualInstrumentTime ?? 0,
+          simulatedInstrumentTime: simulatedInstrumentTime ?? 0,
+        },
+      });
+      res.status(201).json(flightEntry);
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/v1/user/",
+  validate(userPostSchema, "body"),
+  async (req: Request, res: Response) => {
+    try {
+      const { name, email, licenseNumber } =
+        req.body as unknown as UserPostBodyParams;
+      const flight = await prisma.user.create({
+        data: {
+          name,
+          email,
+          licenseNumber,
+        },
+      });
+      res.status(201).json(flight);
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/v1/verify/",
+  validate(flightSchema, "body"),
+  async (req: Request, res: Response) => {
+    try {
+      const flightData = req.body as unknown as FlightBodyParams;
+      const verifiedFlight = await verifyFlight(flightData);
+      res.json(verifiedFlight);
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
+
+app.post(
+  "/api/v1/ocr/",
+  upload.single("image"),
+  validate(ocrSchema, "body"),
   async (req: Request, res: Response) => {
     try {
       if (!req.file) {
-        res.status(400).json({ error: 'No image file provided' });
+        res.status(400).json({ error: "No image file provided" });
         return;
       }
 
@@ -170,17 +220,17 @@ app.post(
       res.status(200).json(ocrResult);
     } catch (error) {
       res.status(500).json({
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : 'Unknown error',
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }
+  },
 );
 
 export { app, prisma };
 
 if (require.main === module) {
-  process.on('SIGINT', async () => {
+  process.on("SIGINT", async () => {
     await prisma.$disconnect();
     process.exit(0);
   });
