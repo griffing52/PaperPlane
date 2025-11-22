@@ -1,4 +1,4 @@
-name: CI
+name: Test Server
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
       run: npm run seed
 
     - name: Run tests
-      run: npm test
+      run: npm test:server
 
     - name: Build
-      run: npm run build
+      run: npm run build:server
