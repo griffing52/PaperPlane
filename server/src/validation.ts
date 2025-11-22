@@ -77,3 +77,17 @@ export const flightSchema = z.object({
 });
 
 export type FlightBodyParams = z.infer<typeof flightSchema>;
+
+export const flightEntryPostSchema = z.object({
+  userId: z.string().uuid(),
+  logbookUrl: z.string().url().optional(),
+  totalFlightTime: z.coerce.number().nonnegative().optional(),
+  soloTime: z.coerce.number().nonnegative().optional(),
+  dualReceivedTime: z.coerce.number().nonnegative().optional(),
+  crossCountryTime: z.coerce.number().nonnegative().optional(),
+  nightTime: z.coerce.number().nonnegative().optional(),
+  actualInstrumentTime: z.coerce.number().nonnegative().optional(),
+  simulatedInstrumentTime: z.coerce.number().nonnegative().optional(),
+});
+
+export type FlightEntryPostParams = z.infer<typeof flightEntryPostSchema>;

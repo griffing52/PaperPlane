@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
-import { validate, flightEntryQuerySchema, flightEntryGetSchema, userPostSchema, ocrSchema, flightSchema, FlightEntryQueryParams, FlightEntryGetParams, UserPostBodyParams, FlightBodyParams } from './validation';
+import { validate, flightEntryQuerySchema, flightEntryGetSchema, flightEntryPostSchema, userPostSchema, ocrSchema, flightSchema, FlightEntryQueryParams, FlightEntryGetParams, FlightEntryPostParams, UserPostBodyParams, FlightBodyParams } from './validation';
 import { ocrImage } from './ocr';
 import { verifyFlight } from './verify';
 
@@ -87,6 +87,32 @@ app.delete('/api/v1/flight_entry/:id', validate(flightEntryGetSchema, 'params'),
     }
 
     res.json(flightEntry);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/v1/flight_entry/', validate(flightEntryPostSchema, 'body'), async (req: Request, res: Response) => {
+  try {
+    const { userId, logbookUrl, totalFlightTime, soloTime, dualReceivedTime, crossCountryTime, nightTime, actualInstrumentTime, simulatedInstrumentTime } = req.body as unknown as FlightEntryPostParams;
+
+    const flightEntry = await prisma.flightEntry.create({
+      data: {
+        userId,
+        logbookURL: logbookUrl,
+        totalFlightTime: totalFlightTime ?? 0,
+        soloTime: soloTime ?? 0,
+        dualReceivedTime: dualReceivedTime ?? 0,
+        crossCountryTime: crossCountryTime ?? 0,
+        nightTime: nightTime ?? 0,
+        actualInstrumentTime: actualInstrumentTime ?? 0,
+        simulatedInstrumentTime: simulatedInstrumentTime ?? 0,
+      }
+    });
+    res.status(201).json(flightEntry);
   } catch (error) {
     res.status(500).json({
       error: 'Internal server error',

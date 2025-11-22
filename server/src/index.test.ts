@@ -97,6 +97,89 @@ describe('API Endpoints', () => {
     });
   });
 
+  describe('POST /api/v1/flight_entry/', () => {
+    let userCleanup: Awaited<ReturnType<typeof createTestUser>>;
+    let createdFlightEntryId: string;
+
+    beforeEach(async () => {
+      userCleanup = await createTestUser();
+    });
+
+    afterEach(async () => {
+      if (createdFlightEntryId) {
+        await prisma.flightEntry.delete({ where: { id: createdFlightEntryId } }).catch(() => { });
+      }
+      await userCleanup();
+    });
+
+    it('should create a flight entry with all fields and store in DB', async () => {
+      const flightEntryData = {
+        userId: userCleanup.user.id,
+        logbookUrl: 'https://example.com/logbook.png',
+        totalFlightTime: 2.5,
+        soloTime: 1.0,
+        dualReceivedTime: 1.5,
+        crossCountryTime: 2.0,
+        nightTime: 0.5,
+        actualInstrumentTime: 0.3,
+        simulatedInstrumentTime: 0.7,
+      };
+
+      const response = await request(app)
+        .post('/api/v1/flight_entry/')
+        .send(flightEntryData);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject({
+        userId: flightEntryData.userId,
+        logbookURL: flightEntryData.logbookUrl,
+        totalFlightTime: "2.5",
+        soloTime: "1",
+        dualReceivedTime: "1.5",
+        crossCountryTime: "2",
+        nightTime: "0.5",
+        actualInstrumentTime: "0.3",
+        simulatedInstrumentTime: "0.7",
+      });
+      // for cleanup
+      createdFlightEntryId = response.body.id;
+
+      const dbFlightEntry = await prisma.flightEntry.findUnique({ where: { id: createdFlightEntryId } });
+      expect(dbFlightEntry).not.toBeNull();
+      expect(dbFlightEntry?.userId).toBe(flightEntryData.userId);
+    });
+
+    it('should create a flight entry with only required fields', async () => {
+      const flightEntryData = {
+        userId: userCleanup.user.id,
+      };
+
+      const response = await request(app)
+        .post('/api/v1/flight_entry/')
+        .send(flightEntryData);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toMatchObject({
+        userId: flightEntryData.userId,
+        totalFlightTime: "0",
+        soloTime: "0",
+        dualReceivedTime: "0",
+        crossCountryTime: "0",
+        nightTime: "0",
+        actualInstrumentTime: "0",
+        simulatedInstrumentTime: "0",
+      });
+    });
+
+    it('should 400 when userId is missing', async () => {
+      const response = await request(app)
+        .post('/api/v1/flight_entry/')
+        .send({ totalFlightTime: 1.5 });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
   // AI Disclosure by Bolun Thompson:
   // I used Claude Code Sonnet 4.5 to generate this test, since it's largely repititive. Prompt as follows:
   // Add an anlogous user test. Make it short and to the point. Add a minimal test that its been stored in the DB.
