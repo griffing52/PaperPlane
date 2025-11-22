@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect,  beforeEach, afterEach } from 'vitest';
 import request from 'supertest';
 import { app } from './index';
 import { createTestFlightEntry, createTestUser, createTestFlight } from './test-factories';
@@ -20,11 +20,11 @@ describe('API Endpoints', () => {
   describe('GET /api/v1/flight_entry/:id', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       cleanup = await createTestFlightEntry();
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await cleanup();
     });
 
@@ -60,11 +60,11 @@ describe('API Endpoints', () => {
   describe('DELETE /api/v1/flight_entry/:id', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       cleanup = await createTestFlightEntry();
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await cleanup();
     });
 
@@ -103,12 +103,12 @@ describe('API Endpoints', () => {
   // I refactored it slightly afterwards.
   describe('POST /api/v1/user/', () => {
     let createdUserId: string;
-    beforeAll(async () => {
+    beforeEach(async () => {
       // cleanup if other tests forgot to
       await prisma.user.deleteMany({ where: { licenseNumber: TEST_LICENSE_NUMBER } });
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await prisma.user.delete({ where: { id: createdUserId } }).catch(() => { });
     });
 
@@ -141,11 +141,11 @@ describe('API Endpoints', () => {
   describe('GET /api/v1/flight_entry/', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlightEntry>>;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       cleanup = await createTestFlightEntry();
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await cleanup();
     });
 
@@ -182,11 +182,11 @@ describe('API Endpoints', () => {
   describe('POST /api/v1/ocr/', () => {
     let cleanup: Awaited<ReturnType<typeof createTestUser>>;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       cleanup = await createTestUser();
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await cleanup();
     });
 
@@ -207,11 +207,11 @@ describe('API Endpoints', () => {
   describe('POST /api/v1/verify/', () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlight>>;
 
-    beforeAll(async () => {
+    beforeEach(async () => {
       cleanup = await createTestFlight();
     });
 
-    afterAll(async () => {
+    afterEach(async () => {
       await cleanup();
     });
 
