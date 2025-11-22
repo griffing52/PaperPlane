@@ -2,8 +2,9 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
-import { validate, flightEntryQuerySchema, flightEntryGetSchema, userPostSchema, ocrSchema, FlightEntryQueryParams, FlightEntryGetParams, UserPostBodyParams } from './validation';
+import { validate, flightEntryQuerySchema, flightEntryGetSchema, userPostSchema, ocrSchema, flightSchema, FlightEntryQueryParams, FlightEntryGetParams, UserPostBodyParams, FlightBodyParams } from './validation';
 import { ocrImage } from './ocr';
+import { verifyFlight } from './verify';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -106,6 +107,19 @@ app.post('/api/v1/user/', validate(userPostSchema, 'body'), async (req: Request,
     }
     );
     res.status(201).json(flight);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+app.post('/api/v1/verify/', validate(flightSchema, 'body'), async (req: Request, res: Response) => {
+  try {
+    const flightData = req.body as unknown as FlightBodyParams;
+    const verifiedFlight = await verifyFlight(flightData);
+    res.json(verifiedFlight);
   } catch (error) {
     res.status(500).json({
       error: 'Internal server error',
