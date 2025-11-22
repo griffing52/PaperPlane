@@ -62,8 +62,6 @@ export const userPostSchema = z.object({
 
 export type UserPostBodyParams = z.infer<typeof userPostSchema>;
 
-export const logbookPostSchema = z.object({
-  userId: z.uuid(),
-});
+export const ocrSchema = z.object({});
 
-export type LogbookPostBodyParams = z.infer<typeof logbookPostSchema>;
+export type OcrBodyParams = z.infer<typeof ocrSchema>;

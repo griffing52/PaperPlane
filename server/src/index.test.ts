@@ -179,7 +179,7 @@ describe('API Endpoints', () => {
     });
   });
 
-  describe('POST /api/v1/logbook/', () => {
+  describe('POST /api/v1/ocr/', () => {
     let cleanup: Awaited<ReturnType<typeof createTestUser>>;
 
     beforeAll(async () => {
@@ -190,15 +190,16 @@ describe('API Endpoints', () => {
       await cleanup();
     });
 
-    // TODO: This should fail once we do proper parsing, since the buffer is invalid
-    it('should return a flight log with an id when passed a buffer', async () => {
+    it('should return an OCR result when passed a buffer', async () => {
       const response = await request(app)
-        .post('/api/v1/logbook/')
-        .attach('image', Buffer.from('fake-image-data'), 'test.png')
-        .field('userId', cleanup.user.id);
+        .post('/api/v1/ocr/')
+        .attach('image', Buffer.from('fake-image-data'), 'test.png');
 
-      expect(response.status).toBe(201);
-      expect(response.body.data.id).toBeDefined();
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({
+        tailNumber: expect.any(String),
+        aircraftModel: expect.any(String),
+      });
     });
 
   });

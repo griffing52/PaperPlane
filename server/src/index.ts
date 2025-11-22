@@ -2,8 +2,8 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
-import { validate, flightEntryQuerySchema, flightEntryGetSchema, userPostSchema, logbookPostSchema, FlightEntryQueryParams, FlightEntryGetParams, UserPostBodyParams, LogbookPostBodyParams } from './validation';
-import { ocrImage, LogbookOCRResult } from './ocr';
+import { validate, flightEntryQuerySchema, flightEntryGetSchema, userPostSchema, ocrSchema, FlightEntryQueryParams, FlightEntryGetParams, UserPostBodyParams } from './validation';
+import { ocrImage } from './ocr';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,53 +23,6 @@ const upload = multer({
     }
   },
 });
-
-// Hack: prisma complains if we pass in an object with too many fields
-// so we trim them here
-function mapOcrToFlightData(ocrResult: LogbookOCRResult) {
-  const {
-    tailNumber,
-    aircraftModel,
-    manufacturer,
-    originAirportIcao,
-    destinationAirportIcao,
-    departureTime,
-    arrivalTime,
-  } = ocrResult;
-
-  return {
-    tailNumber,
-    aircraftModel,
-    manufacturer,
-    originAirportIcao,
-    destinationAirportIcao,
-    departureTime,
-    arrivalTime,
-  };
-}
-
-function mapOcrToFlightLogMetrics(ocrResult: LogbookOCRResult) {
-  const {
-    totalFlightTime,
-    soloTime,
-    dualReceivedTime,
-    crossCountryTime,
-    nightTime,
-    actualInstrumentTime,
-    simulatedInstrumentTime,
-  } = ocrResult;
-
-  return {
-    totalFlightTime,
-    soloTime,
-    dualReceivedTime,
-    crossCountryTime,
-    nightTime,
-    actualInstrumentTime,
-    simulatedInstrumentTime,
-  };
-}
-
 
 app.use(cors());
 app.use(express.json());
@@ -162,13 +115,11 @@ app.post('/api/v1/user/', validate(userPostSchema, 'body'), async (req: Request,
 });
 
 app.post(
-  '/api/v1/logbook/',
+  '/api/v1/ocr/',
   upload.single('image'),
-  validate(logbookPostSchema, 'body'),
+  validate(ocrSchema, 'body'),
   async (req: Request, res: Response) => {
     try {
-      const { userId } = req.body as LogbookPostBodyParams;
-
       if (!req.file) {
         res.status(400).json({ error: 'No image file provided' });
         return;
@@ -176,27 +127,7 @@ app.post(
 
       const ocrResult = await ocrImage(req.file.buffer);
 
-      const flightEntry = await prisma.$transaction(async (tx) => {
-        const flight = await tx.flight.create({
-          data: mapOcrToFlightData(ocrResult),
-        });
-
-        return tx.flightLog.create({
-          data: {
-            userId,
-            flightId: flight.id,
-            ...mapOcrToFlightLogMetrics(ocrResult),
-          },
-        });
-      });
-
-      res.status(201).json({
-        success: true,
-        data: flightEntry,
-        metadata: {
-          confidence: ocrResult.confidence,
-        },
-      });
+      res.status(200).json(ocrResult);
     } catch (error) {
       res.status(500).json({
         error: 'Internal server error',
