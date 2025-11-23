@@ -81,12 +81,19 @@ export const flightEntryPostSchema = z.object({
   userId: z.string().uuid(),
   logbookUrl: z.string().url().optional(),
   totalFlightTime: z.coerce.number().nonnegative().optional(),
-  soloTime: z.coerce.number().nonnegative().optional(),
-  dualReceivedTime: z.coerce.number().nonnegative().optional(),
-  crossCountryTime: z.coerce.number().nonnegative().optional(),
-  nightTime: z.coerce.number().nonnegative().optional(),
-  actualInstrumentTime: z.coerce.number().nonnegative().optional(),
-  simulatedInstrumentTime: z.coerce.number().nonnegative().optional(),
+  soloTime: z.coerce.number().nonnegative().optional(), // useful
+  dualReceivedTime: z.coerce.number().nonnegative().optional(), // unused
+  crossCountryTime: z.coerce.number().nonnegative().optional(), // TODO: Remove
+  nightTime: z.coerce.number().nonnegative().optional(), // useful
+  actualInstrumentTime: z.coerce.number().nonnegative().optional(), // useful
+  simulatedInstrumentTime: z.coerce.number().nonnegative().optional(), // useful
 });
+
+// TODO to add:
+// tailNumber
+// src, dest
+
+// TODO: Create way to parse remarks for the fields listed
+// 
 
 export type FlightEntryPostParams = z.infer<typeof flightEntryPostSchema>;

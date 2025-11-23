@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "@/components/LogoutButton";
-import { useMemo, useState, FormEvent } from "react";
+import { useMemo, useState, useEffect, FormEvent } from "react";
 
 type LogEntry = {
   id: number;
@@ -19,8 +19,28 @@ type LogEntry = {
   remarks: string;
 };
 
+const fetchLogs = async (pilotId: string) => {
+  const response = await fetch("/api/v1/flight_entry", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pilotId }),
+  });
+  const data: LogEntry[] = await response.json();
+  return data;
+};
+
+
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
+  const { user, emailHash, loading } = useAuth();
+  if (user == null) {
+    return <></>
+  }
+
+  useEffect(() => {
+    fetchLogs(emailHash).then(setLogs);
+  }, []);
 
   const [logs, setLogs] = useState<LogEntry[]>([
     {
