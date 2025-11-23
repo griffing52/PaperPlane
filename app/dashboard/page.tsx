@@ -30,6 +30,8 @@ const fetchLogs = async (pilotId: string) => {
   const data: LogEntry[] = await response.json();
   return data;
 };
+// TODO: create endpoint for transferring logentry to server
+// file upload + manual entry field should be enabled at some point
 
 
 export default function DashboardPage() {
