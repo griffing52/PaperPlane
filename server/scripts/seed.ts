@@ -22,6 +22,10 @@ const prisma = new PrismaClient();
 // Add a clean command line interface using a argument parsing library
 // Take a  "-f" flag to force overwrite DB data.
 
+// Prompt 3:
+// Rewrite this wrt to the changes to the FlightEntry model in schema.prisma.
+// Ultrathink. Write clean and elegant code.
+
 // TypeScript interface for real flight data
 interface RealFlightData {
   icao24: string;
@@ -72,6 +76,11 @@ function generateEmail(firstName: string, lastName: string): string {
   return `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${randomElement(domains)}`;
 }
 
+function generateEmailHash(email: string): string {
+  const crypto = require('crypto');
+  return crypto.createHash('sha256').update(email).digest('hex');
+}
+
 function generateLicenseNumber(): string {
   return `PPL-${randomInt(100000, 999999)}`;
 }
@@ -87,38 +96,50 @@ function generateFlightTimes(departureTime: Date, arrivalTime: Date) {
   const durationMs = arrivalTime.getTime() - departureTime.getTime();
   const totalFlightTime = Math.round((durationMs / (1000 * 60 * 60)) * 10) / 10; // Round to 1 decimal
 
-  // All pilots are student pilots - mix of dual received and solo
-  let soloTime = 0;
-  let dualReceivedTime = 0;
+  // Determine if dual or solo (60% dual, 40% solo)
+  const solo = rng.next() >= 0.6;
+  const dualReceivedTime = solo ? 0 : totalFlightTime;
+  const picTime = solo ? totalFlightTime : 0;
 
-  // Student pilot - mix of dual received and solo (60% dual, 40% solo)
-  if (rng.next() < 0.6) {
-    dualReceivedTime = totalFlightTime;
-  } else {
-    soloTime = totalFlightTime;
+  // Special conditions (booleans)
+  const crossCountry = rng.next() < 0.4; // ~40% of flights
+  const night = rng.next() < 0.2; // ~20% of flights
+
+  // Instrument time: combination of actual (15%) and simulated (40%)
+  let instrumentTime = 0;
+  if (rng.next() < 0.15) {
+    instrumentTime += randomDecimal(0, totalFlightTime * 0.8, 1);
   }
+  if (rng.next() < 0.4) {
+    instrumentTime += randomDecimal(0, totalFlightTime * 0.9, 1);
+  }
+  instrumentTime = Math.min(instrumentTime, totalFlightTime);
 
-  // Special conditions (can overlap with above times)
-  // Cross country: ~40% of flights, must be >50nm
-  const crossCountryTime = rng.next() < 0.4 ? totalFlightTime : 0;
+  // Landings
+  const dayLandings = night ? 0 : randomInt(1, 3);
+  const nightLandings = night ? randomInt(1, 3) : 0;
 
-  // Night time: ~20% of flights
-  const nightTime = rng.next() < 0.2 ? randomDecimal(0, totalFlightTime, 1) : 0;
-
-  // Actual instrument: ~15% of flights (when conditions are IMC)
-  const actualInstrumentTime = rng.next() < 0.15 ? randomDecimal(0, totalFlightTime * 0.8, 1) : 0;
-
-  // Simulated instrument: ~40% of flights (student pilots training)
-  const simulatedInstrumentTime = rng.next() < 0.4 ? randomDecimal(0, totalFlightTime * 0.9, 1) : 0;
+  // Remarks
+  const remarks = [
+    'Good weather, smooth flight',
+    'Practiced touch and goes',
+    'Cross country navigation',
+    'Instrument approach practice',
+    'Pattern work',
+    'Solo flight milestone',
+  ][randomInt(0, 5)];
 
   return {
     totalFlightTime,
-    soloTime,
+    picTime,
     dualReceivedTime,
-    crossCountryTime,
-    nightTime,
-    actualInstrumentTime,
-    simulatedInstrumentTime,
+    solo,
+    crossCountry,
+    night,
+    instrumentTime,
+    dayLandings,
+    nightLandings,
+    remarks,
   };
 }
 
@@ -193,6 +214,7 @@ async function seed(force: boolean) {
     const user = await prisma.user.create({
       data: {
         email,
+        emailHash: generateEmailHash(email),
         name: fullName,
         licenseNumber: generateLicenseNumber(),
       },
@@ -239,17 +261,27 @@ async function seed(force: boolean) {
     // Generate plausible flight times
     const flightTimes = generateFlightTimes(flight.departureTime, flight.arrivalTime);
 
+    const route = `${flight.originAirportIcao} ${flight.destinationAirportIcao}`;
+
     await prisma.flightEntry.create({
       data: {
         flightId: flight.id,
         userId: user.id,
+        date: flight.departureTime,
+        tailNumber: flight.tailNumber,
+        srcIcao: flight.originAirportIcao,
+        destIcao: flight.destinationAirportIcao,
+        route,
         totalFlightTime: flightTimes.totalFlightTime,
-        soloTime: flightTimes.soloTime,
+        picTime: flightTimes.picTime,
         dualReceivedTime: flightTimes.dualReceivedTime,
-        crossCountryTime: flightTimes.crossCountryTime,
-        nightTime: flightTimes.nightTime,
-        actualInstrumentTime: flightTimes.actualInstrumentTime,
-        simulatedInstrumentTime: flightTimes.simulatedInstrumentTime,
+        solo: flightTimes.solo,
+        crossCountry: flightTimes.crossCountry,
+        night: flightTimes.night,
+        instrumentTime: flightTimes.instrumentTime,
+        dayLandings: flightTimes.dayLandings,
+        nightLandings: flightTimes.nightLandings,
+        remarks: flightTimes.remarks,
       },
     });
   }

@@ -41,7 +41,7 @@ export const validate = (schema: z.ZodSchema, property: RequestProperty) => {
 };
 
 export const flightEntryQuerySchema = z.object({
-  userId: z.uuid().optional(),
+  emailHash: z.string().optional(),
   flightId: z.uuid().optional(),
 });
 
@@ -56,6 +56,8 @@ export type FlightEntryGetParams = z.infer<typeof flightEntryGetSchema>;
 export const userPostSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
+  // This could be auto-generated if necessary
+  emailHash: z.string(),
   licenseNumber: z.string().min(1),
 });
 
@@ -80,20 +82,21 @@ export type FlightBodyParams = z.infer<typeof flightSchema>;
 export const flightEntryPostSchema = z.object({
   userId: z.string().uuid(),
   logbookUrl: z.string().url().optional(),
+  date: z.coerce.date(),
+  tailNumber: z.string().min(1),
+  srcIcao: z.string().length(4), // ICAO codes are 4 characters
+  destIcao: z.string().length(4),
+  route: z.string().optional(),
   totalFlightTime: z.coerce.number().nonnegative().optional(),
-  soloTime: z.coerce.number().nonnegative().optional(), // useful
-  dualReceivedTime: z.coerce.number().nonnegative().optional(), // unused
-  crossCountryTime: z.coerce.number().nonnegative().optional(), // TODO: Remove
-  nightTime: z.coerce.number().nonnegative().optional(), // useful
-  actualInstrumentTime: z.coerce.number().nonnegative().optional(), // useful
-  simulatedInstrumentTime: z.coerce.number().nonnegative().optional(), // useful
+  picTime: z.coerce.number().nonnegative().optional(),
+  dualReceivedTime: z.coerce.number().nonnegative().optional(),
+  crossCountry: z.coerce.boolean().optional(),
+  night: z.coerce.boolean().optional(),
+  solo: z.coerce.boolean().optional(),
+  instrumentTime: z.coerce.number().nonnegative().optional(),
+  dayLandings: z.coerce.number().int().nonnegative().optional(),
+  nightLandings: z.coerce.number().int().nonnegative().optional(),
+  remarks: z.string().optional(),
 });
-
-// TODO to add:
-// tailNumber
-// src, dest
-
-// TODO: Create way to parse remarks for the fields listed
-// 
 
 export type FlightEntryPostParams = z.infer<typeof flightEntryPostSchema>;

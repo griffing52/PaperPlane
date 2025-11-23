@@ -57,11 +57,11 @@ app.get(
   validate(flightEntryQuerySchema, "query"),
   async (req: Request, res: Response) => {
     try {
-      const { userId, flightId } =
+      const { emailHash, flightId } =
         req.query as unknown as FlightEntryQueryParams;
       const flightEntries = await prisma.flightEntry.findMany({
         where: {
-          ...(userId != null && { userId }),
+          ...(emailHash != null && { user: { emailHash } }),
           ...(flightId != null && { flightId }),
         },
       });
@@ -131,26 +131,46 @@ app.post(
       const {
         userId,
         logbookUrl,
+        date,
+        tailNumber,
+        srcIcao,
+        destIcao,
+        route,
         totalFlightTime,
-        soloTime,
+        picTime,
         dualReceivedTime,
-        crossCountryTime,
-        nightTime,
-        actualInstrumentTime,
-        simulatedInstrumentTime,
+        crossCountry,
+        night,
+        solo,
+        instrumentTime,
+        dayLandings,
+        nightLandings,
+        remarks,
       } = req.body as unknown as FlightEntryPostParams;
 
+      // Design Decision:
+      // All the fields are optionl except for userId, date, src, dest and tail number
+      // I think the requirements for what the frontend needs to show may change
+      // so I'd rather have too many fields and a flexible API rather than too few.
       const flightEntry = await prisma.flightEntry.create({
         data: {
           userId,
           logbookURL: logbookUrl,
+          date,
+          tailNumber,
+          srcIcao,
+          destIcao,
+          route,
           totalFlightTime: totalFlightTime ?? 0,
-          soloTime: soloTime ?? 0,
+          picTime: picTime ?? 0,
           dualReceivedTime: dualReceivedTime ?? 0,
-          crossCountryTime: crossCountryTime ?? 0,
-          nightTime: nightTime ?? 0,
-          actualInstrumentTime: actualInstrumentTime ?? 0,
-          simulatedInstrumentTime: simulatedInstrumentTime ?? 0,
+          crossCountry: crossCountry ?? false,
+          night: night ?? false,
+          solo: solo ?? false,
+          instrumentTime: instrumentTime ?? 0,
+          dayLandings: dayLandings ?? 0,
+          nightLandings: nightLandings ?? 0,
+          remarks,
         },
       });
       res.status(201).json(flightEntry);
@@ -168,16 +188,18 @@ app.post(
   validate(userPostSchema, "body"),
   async (req: Request, res: Response) => {
     try {
-      const { name, email, licenseNumber } =
+      const { name, email, emailHash, licenseNumber } =
         req.body as unknown as UserPostBodyParams;
-      const flight = await prisma.user.create({
+
+      const user = await prisma.user.create({
         data: {
           name,
           email,
+          emailHash,
           licenseNumber,
         },
       });
-      res.status(201).json(flight);
+      res.status(201).json(user);
     } catch (error) {
       res.status(500).json({
         error: "Internal server error",

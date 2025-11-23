@@ -45,7 +45,7 @@ describe("API Endpoints", () => {
         id: testFlightEntry.id,
         userId: testFlightEntry.userId,
         totalFlightTime: "1.5",
-        crossCountryTime: "1.5",
+        crossCountry: true,
       });
     });
 
@@ -125,13 +125,21 @@ describe("API Endpoints", () => {
       const flightEntryData = {
         userId: userCleanup.user.id,
         logbookUrl: "https://example.com/logbook.png",
+        date: new Date("2025-01-01"),
+        tailNumber: "N12345",
+        srcIcao: "KLAX",
+        destIcao: "KSFO",
+        route: "KLAX KSMO KSFO",
         totalFlightTime: 2.5,
-        soloTime: 1.0,
-        dualReceivedTime: 1.5,
-        crossCountryTime: 2.0,
-        nightTime: 0.5,
-        actualInstrumentTime: 0.3,
-        simulatedInstrumentTime: 0.7,
+        picTime: 2.5,
+        dualReceivedTime: 0,
+        crossCountry: true,
+        night: false,
+        solo: false,
+        instrumentTime: 1.0,
+        dayLandings: 2,
+        nightLandings: 0,
+        remarks: "Test flight",
       };
 
       const response = await request(app)
@@ -142,13 +150,18 @@ describe("API Endpoints", () => {
       expect(response.body).toMatchObject({
         userId: flightEntryData.userId,
         logbookURL: flightEntryData.logbookUrl,
+        tailNumber: flightEntryData.tailNumber,
+        srcIcao: flightEntryData.srcIcao,
+        destIcao: flightEntryData.destIcao,
         totalFlightTime: "2.5",
-        soloTime: "1",
-        dualReceivedTime: "1.5",
-        crossCountryTime: "2",
-        nightTime: "0.5",
-        actualInstrumentTime: "0.3",
-        simulatedInstrumentTime: "0.7",
+        picTime: "2.5",
+        dualReceivedTime: "0",
+        crossCountry: true,
+        night: false,
+        solo: false,
+        instrumentTime: "1",
+        dayLandings: 2,
+        nightLandings: 0,
       });
       // for cleanup
       createdFlightEntryId = response.body.id;
@@ -163,6 +176,10 @@ describe("API Endpoints", () => {
     it("should create a flight entry with only required fields", async () => {
       const flightEntryData = {
         userId: userCleanup.user.id,
+        date: new Date("2025-01-01"),
+        tailNumber: "N12345",
+        srcIcao: "KLAX",
+        destIcao: "KSFO",
       };
 
       const response = await request(app)
@@ -172,13 +189,18 @@ describe("API Endpoints", () => {
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject({
         userId: flightEntryData.userId,
+        tailNumber: flightEntryData.tailNumber,
+        srcIcao: flightEntryData.srcIcao,
+        destIcao: flightEntryData.destIcao,
         totalFlightTime: "0",
-        soloTime: "0",
+        picTime: "0",
         dualReceivedTime: "0",
-        crossCountryTime: "0",
-        nightTime: "0",
-        actualInstrumentTime: "0",
-        simulatedInstrumentTime: "0",
+        crossCountry: false,
+        night: false,
+        solo: false,
+        instrumentTime: "0",
+        dayLandings: 0,
+        nightLandings: 0,
       });
     });
 
@@ -212,7 +234,13 @@ describe("API Endpoints", () => {
 
     it("should create a user and store in DB", async () => {
       const email = `test-${Date.now()}@example.com`;
-      const user = { name: "Test", email, licenseNumber: TEST_LICENSE_NUMBER };
+      const emailHash = "123";
+      const user = {
+        name: "Test",
+        email,
+        emailHash,
+        licenseNumber: TEST_LICENSE_NUMBER,
+      };
 
       const response = await request(app).post("/api/v1/user/").send(user);
 

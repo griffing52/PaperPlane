@@ -31,9 +31,11 @@ type UserCleanupFunction = (() => Promise<void>) & { user: User };
 
 export async function createTestUser(): Promise<UserCleanupFunction> {
   const d = Date.now();
+  const email = `${d}@example.com`;
   const user = await prisma.user.create({
     data: {
-      email: `${d}@example.com`,
+      email,
+      emailHash: `hash_${email}`,
       name: "Jebadiah",
       licenseNumber: `${d}`,
     },
@@ -57,13 +59,21 @@ export async function createTestFlightEntry(
   const flightEntry = await prisma.flightEntry.create({
     data: {
       userId: userCleanup.user.id,
+      date: new Date("2023-01-01"),
+      tailNumber: "N12345",
+      srcIcao: "KLAX",
+      destIcao: "KSFO",
+      route: "KLAX KSMO KSFO",
       totalFlightTime: 1.5,
-      soloTime: 0,
-      dualReceivedTime: 1.5,
-      crossCountryTime: 1.5,
-      nightTime: 0,
-      actualInstrumentTime: 0,
-      simulatedInstrumentTime: 0,
+      picTime: 1.5,
+      dualReceivedTime: 0,
+      crossCountry: true,
+      night: false,
+      solo: false,
+      instrumentTime: 0,
+      dayLandings: 1,
+      nightLandings: 0,
+      remarks: "Test flight",
       ...overrides,
     },
   });

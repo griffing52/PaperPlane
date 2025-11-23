@@ -12,6 +12,7 @@ datasource db {
 }
 
 // Enums
+// TODO: Figure which of these we need to use.
 enum UploadStatus {
   PENDING
   PROCESSING
@@ -41,14 +42,15 @@ enum VerificationStatus {
 
 // Models
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  id            String   @id @default(uuid())
+  email         String   @unique
+  emailHash     String   @unique @map("email_hash")
+  name          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
   licenseNumber String   @unique
-  flights        FlightEntry[]
+  flights       FlightEntry[]
 
   @@map("users")
 }
@@ -73,43 +75,41 @@ model Flight {
 
 model FlightEntry {
   id                 String       @id @default(uuid())
-  flightId           String?       @map("flight_id")
-  userId            String       @map("user_id")
+  flightId           String?      @map("flight_id")
+  userId             String       @map("user_id")
   uploadId           String?      @map("upload_id")
   logbookURL         String?      @map("logbook_url")
 
-  // Flight time categories - for student pilots
-  totalFlightTime           Decimal  @default(0)  // Total duration of this flight
-  soloTime                  Decimal  @default(0)  // Solo (student pilot)
-  dualReceivedTime          Decimal  @default(0)  // Training with instructor
+  // Flight details. These should correspond to the Flight table
+  date               DateTime
+  tailNumber         String       @map("tail_number")
+  srcIcao            String       @map("src_icao")
+  destIcao           String       @map("dest_icao")
+  route              String?      // Full route including intermediate waypoints
 
-  // Special conditions - required for ratings
-  crossCountryTime          Decimal  @default(0)  // XC (>50nm + landing elsewhere)
-  nightTime                 Decimal  @default(0)  // Night (civil twilight to twilight)
-  actualInstrumentTime      Decimal  @default(0)  // Actual IMC
-  simulatedInstrumentTime   Decimal  @default(0)  // Hood/foggles
+  // Flight time categories 
+  totalFlightTime    Decimal      @default(0)  // Total duration of this flight
+  picTime            Decimal      @default(0)  // Pilot in Command
+  dualReceivedTime   Decimal      @default(0)  // Training with instructor
+
+  // Special conditions
+  crossCountry       Boolean      @default(false) @map("cross_country")  // XC (>50nm + landing elsewhere)
+  night              Boolean      @default(false)                         // Night (civil twilight to twilight)
+  solo               Boolean      @default(false)                         // Solo (student pilot)
+  instrumentTime     Decimal      @default(0)    @map("instrument_time") // Actual + Simulated IMC
+
+  // Landings
+  dayLandings        Int          @default(0)    @map("day_landings")
+  nightLandings      Int          @default(0)    @map("night_landings")
+
+  // Additional info
+  remarks            String?
 
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 
-  flight             Flight?       @relation(fields: [flightId], references: [id], onDelete: Cascade)
-  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  flight             Flight?      @relation(fields: [flightId], references: [id], onDelete: Cascade)
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("flight_entries")
 }
-
-// model VerificationResult {
-//   id               String             @id @default(uuid())
-//   entryId          String             @unique
-//   status           VerificationStatus
-//   score            Float
-//   reasonForFail    String?
-//   matchedHours     Decimal?
-//   notes            String?
-//   createdAt        DateTime           @default(now())
-//   updatedAt        DateTime           @updatedAt
-  
-//   entry FlightEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
-
-//   @@map("verification_results")
-// }

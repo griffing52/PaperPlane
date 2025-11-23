@@ -5,30 +5,57 @@ import LogoutButton from "@/components/LogoutButton";
 import { useMemo, useState, useEffect, FormEvent } from "react";
 
 type LogEntry = {
-  id: number;
+  id?: string;
   date: string; // YYYY-MM-DD
-  aircraftType: string;
   tailNumber: string;
-  route: string;
-  totalTime: number;
+  srcIcao: string;
+  destIcao: string;
+  route: string | null;
+  totalFlightTime: number;
   picTime: number;
+  dualReceivedTime: number;
   instrumentTime: number;
-  nightTime: number;
+  crossCountry: boolean;
+  night: boolean;
+  solo: boolean;
   dayLandings: number;
   nightLandings: number;
-  remarks: string;
+  remarks: string | null;
 };
 
-const fetchLogs = async (pilotId: string) => {
-  const response = await fetch("/api/v1/flight_entry", {
+const parseLogEntry = (data: any): LogEntry => {
+  // we use this instead of Json.parse for more flexiblity
+  return {
+    id: data.id,
+    date: data.date ? new Date(data.date).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+    tailNumber: data.tailNumber || "",
+    srcIcao: data.srcIcao || "",
+    destIcao: data.destIcao || "",
+    route: data.route?.replace(" ", " \u2192 "),
+    totalFlightTime: parseFloat(data.totalFlightTime || data.totalTime || "0"),
+    picTime: parseFloat(data.picTime || "0"),
+    dualReceivedTime: parseFloat(data.dualReceivedTime || "0"),
+    instrumentTime: parseFloat(data.instrumentTime || "0"),
+    crossCountry: !!data.crossCountry,
+    night: !!data.night || (parseFloat(data.nightTime || "0") > 0),
+    solo: data.solo,
+    dayLandings: parseInt(data.dayLandings || "0", 10),
+    nightLandings: parseInt(data.nightLandings || "0", 10),
+    remarks: data.remarks || null,
+  };
+};
+
+// NOTE:` use michael.smith@outlook.com for testing
+const fetchLogs = async (emailHash: string) => {
+  const query = new URLSearchParams({ emailHash });
+  const response = await fetch("https://paperplane.bolun.dev/api/v1/flight_entry?" + query.toString(), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ pilotId }),
   });
-  const data: LogEntry[] = await response.json();
-  return data;
+  const data = await response.json();
+  return data.map(parseLogEntry);
 };
 // TODO: create endpoint for transferring logentry to server
 // file upload + manual entry field should be enabled at some point
@@ -36,44 +63,8 @@ const fetchLogs = async (pilotId: string) => {
 
 export default function DashboardPage() {
   const { user, emailHash, loading } = useAuth();
-  if (user == null) {
-    return <></>
-  }
 
-  useEffect(() => {
-    fetchLogs(emailHash).then(setLogs);
-  }, []);
-
-  const [logs, setLogs] = useState<LogEntry[]>([
-    {
-      id: 1,
-      date: "2025-01-03",
-      aircraftType: "C172S",
-      tailNumber: "N739LP",
-      route: "KVNY → KSMO → KVNY",
-      totalTime: 1.6,
-      picTime: 1.2,
-      instrumentTime: 0.3,
-      nightTime: 0,
-      dayLandings: 5,
-      nightLandings: 0,
-      remarks: "Pattern work, short-field landings.",
-    },
-    {
-      id: 2,
-      date: "2025-01-12",
-      aircraftType: "C172R",
-      tailNumber: "N5223Q",
-      route: "KVNY → KSBP → KVNY",
-      totalTime: 2.3,
-      picTime: 2.3,
-      instrumentTime: 0.7,
-      nightTime: 0.5,
-      dayLandings: 2,
-      nightLandings: 1,
-      remarks: "XC with simulated instrument and night arrival.",
-    },
-  ]);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
 
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [formState, setFormState] = useState({
@@ -90,15 +81,20 @@ export default function DashboardPage() {
     remarks: "",
   });
 
+  useEffect(() => {
+    if (!emailHash) return;
+    fetchLogs(emailHash).then(setLogs);
+  }, [emailHash]);
+
   const stats = useMemo(() => {
-    const totalHours = logs.reduce((sum, log) => sum + log.totalTime, 0);
+    const totalHours = logs.reduce((sum, log) => sum + log.totalFlightTime, 0);
     const totalPIC = logs.reduce((sum, log) => sum + log.picTime, 0);
     const totalIFR = logs.reduce((sum, log) => sum + log.instrumentTime, 0);
-    const totalNight = logs.reduce((sum, log) => sum + log.nightTime, 0);
+    const totalNight = logs.reduce((sum, log) => log.night ? sum + log.totalFlightTime : sum, 0);
     const totalLandings =
       logs.reduce((sum, log) => sum + log.dayLandings + log.nightLandings, 0);
 
-    // Example “goals” for progress bars
+    // Example "goals" for progress bars
     const goals = {
       yearlyHours: 100,
       instrumentHours: 40,
@@ -134,21 +130,9 @@ export default function DashboardPage() {
   const handleAddEntry = (e: FormEvent) => {
     e.preventDefault();
 
-    const newEntry: LogEntry = {
-      id: logs.length ? logs[logs.length - 1].id + 1 : 1,
-      date: formState.date || new Date().toISOString().slice(0, 10),
-      aircraftType: formState.aircraftType || "C172",
-      tailNumber: formState.tailNumber || "N/A",
-      route: formState.route || "Local",
-      totalTime: parseFloat(formState.totalTime || "0"),
-      picTime: parseFloat(formState.picTime || "0"),
-      instrumentTime: parseFloat(formState.instrumentTime || "0"),
-      nightTime: parseFloat(formState.nightTime || "0"),
-      dayLandings: parseInt(formState.dayLandings || "0", 10),
-      nightLandings: parseInt(formState.nightLandings || "0", 10),
-      remarks: formState.remarks || "",
-    };
+    const newEntry = parseLogEntry(formState);
 
+    // TODO: Post into DB.
     setLogs((prev) => [...prev, newEntry]);
     setFormState({
       date: "",
@@ -242,11 +226,11 @@ export default function DashboardPage() {
                       >
                         <span className="truncate">{log.date}</span>
                         <span className="truncate">
-                          {log.aircraftType} • {log.tailNumber}
+                          {log.tailNumber}
                         </span>
                         <span className="truncate">{log.route}</span>
                         <span className="text-right">
-                          {log.totalTime.toFixed(1)} h
+                          {log.totalFlightTime.toFixed(1)} h
                         </span>
                         <span className="text-right">
                           {log.picTime.toFixed(1)} / {log.instrumentTime.toFixed(1)}
@@ -334,8 +318,8 @@ export default function DashboardPage() {
                 Quick currency notes (informational only)
               </p>
               <p>
-                • Day passenger currency: 3 takeoffs/landings in the last 90 days.  
-                • Night passenger currency: 3 full-stop landings at night in last 90 days.  
+                • Day passenger currency: 3 takeoffs/landings in the last 90 days.
+                • Night passenger currency: 3 full-stop landings at night in last 90 days.
                 • IFR: 6 approaches, holding, and tracking in the last 6 months.
               </p>
               <p className="text-slate-500">
