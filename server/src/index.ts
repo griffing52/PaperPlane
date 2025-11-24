@@ -52,6 +52,44 @@ app.get("/api/v1/health", (_req: Request, res: Response) => {
   }
 });
 
+// AI Disclosure by Bolun Thompson:
+// I used Claude Code with Sonnet 4.5, to refactor the following tests to take a constant emailHash
+// rather than a userId, because that's what we're using to connect front-end/back-end.
+// I also used it to do some threading work to hook up the backend and frontend.
+// Thinking was enabled for the planning phase but disabled for the implementation phase.
+// I've manually written all of these endpoints, so I believe I understand my code well enough to
+// be able to review AI code to make sure its reasonable quality, and I'm curious about the results.
+
+// You're a skilled senior developer developing endpoints. You have four tasks:
+// Implement them in sequence using sub-agents. Make a commit for each task.
+// Before implementing any of the tasks, write a comprehensive plan for what you plan to do.
+// Make sure to update or write simple tests for each endpoint as part of your plan
+// so I can review them to make sure they look good. Make your front-end changes
+// as minimal as possible so I can manually check if they look good.
+// Ultrathink and write a plan before you refactor. Work as long as you need to.
+
+// 1. Refactor the "flight_entry" get endpoint, that takes an "emailHash" use a constant
+// emailHash instead and filter on it. Likewise, refactor the POST endpoint to use the same
+// emailHash to look up the user to add the flight entry to.
+// Later, we intend to add auth using the emailHash as the id, but we want to use a constant for testing.
+// Key thie hash first to the hex sha-256 of michael.smith@outlook.com; make sure items in the DB
+// can be correctly looked up using it. Name your constant flightEntry,
+// (we're going to inline it as an argument at some point).
+// Make sure to change the front-end to aaccomadate (specifically, page.tsx).
+// Likewise, refactor the endpoints (GET ID, DELETE ID) to check whether the email hash matches before
+// doing the operation.
+
+// 2. Add a patch endpoint for flight_entry consistent with the others. Key it on the
+// id of the flight entry. Similarly, check the email hash before doing the operation.
+
+// 3. Hook up the front-end's page.tsx "manual entry" form to using the POST request here.
+// Write your code in a clean, elegant and factored way such that it is easy to change the design
+// of the form. Make sure the post request is in a separate function.
+
+// 4. Analogous to the front-ends manual entry post request, add PATCH and DELETE request functions.
+// Have them take IDs of the flight entries. They will be used in the future to implement
+// more UI features.
+
 app.get(
   "/api/v1/flight_entry",
   validate(flightEntryQuerySchema, "query"),
