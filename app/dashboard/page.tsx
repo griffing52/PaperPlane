@@ -56,8 +56,39 @@ const fetchLogs = async () => {
   const data = await response.json();
   return data.map(parseLogEntry);
 };
-// TODO: create endpoint for transferring logentry to server
-// file upload + manual entry field should be enabled at some point
+
+const createFlightEntry = async (entry: Omit<LogEntry, "id">) => {
+  const response = await fetch("https://paperplane.bolun.dev/api/v1/flight_entry", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      date: entry.date,
+      tailNumber: entry.tailNumber,
+      srcIcao: entry.srcIcao,
+      destIcao: entry.destIcao,
+      route: entry.route,
+      totalFlightTime: entry.totalFlightTime || 0,
+      picTime: entry.picTime || 0,
+      dualReceivedTime: entry.dualReceivedTime || 0,
+      crossCountry: entry.crossCountry || false,
+      night: entry.night || false,
+      solo: entry.solo || false,
+      instrumentTime: entry.instrumentTime || 0,
+      dayLandings: entry.dayLandings || 0,
+      nightLandings: entry.nightLandings || 0,
+      remarks: entry.remarks,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to create flight entry");
+  }
+
+  return response.json();
+};
 
 
 export default function DashboardPage() {
