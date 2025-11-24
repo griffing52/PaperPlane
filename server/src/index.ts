@@ -25,9 +25,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
-// Constant emailHash for testing (SHA-256 hex of michael.smith@outlook.com)
 // TODO: Replace with actual auth-based emailHash lookup once authentication is implemented
-const TEST_EMAIL_HASH = "1c61d3af9e95de4b161dc5c7d5d7e0cbc6de90f884defcfe6d49a5e8bce62806";
+const emailHash = "1c61d3af9e95de4b161dc5c7d5d7e0cbc6de90f884defcfe6d49a5e8bce62806";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -101,7 +100,7 @@ app.get(
 
       // Look up user by constant emailHash
       const user = await prisma.user.findUnique({
-        where: { emailHash: TEST_EMAIL_HASH },
+        where: { emailHash: emailHash },
       });
 
       if (!user) {
@@ -134,7 +133,7 @@ app.get(
 
       // Look up user by constant emailHash
       const user = await prisma.user.findUnique({
-        where: { emailHash: TEST_EMAIL_HASH },
+        where: { emailHash: emailHash },
       });
 
       if (!user) {
@@ -153,7 +152,7 @@ app.get(
       }
 
       // Verify the flight entry belongs to the user with the correct hash
-      if (flightEntry.user.emailHash !== TEST_EMAIL_HASH) {
+      if (flightEntry.user.emailHash !== emailHash) {
         res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
         return;
       }
@@ -178,7 +177,7 @@ app.delete(
 
       // Look up user by their emailHash
       const user = await prisma.user.findUnique({
-        where: { emailHash: TEST_EMAIL_HASH },
+        where: { emailHash: emailHash },
       });
 
       if (!user) {
@@ -198,7 +197,7 @@ app.delete(
       }
 
       // Verify the flight entry belongs to the user with TEST_EMAIL_HASH
-      if (flightEntry.user.emailHash !== TEST_EMAIL_HASH) {
+      if (flightEntry.user.emailHash !== emailHash) {
         res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
         return;
       }
@@ -227,7 +226,7 @@ app.patch(
 
       // Look up user by constant emailHash
       const user = await prisma.user.findUnique({
-        where: { emailHash: TEST_EMAIL_HASH },
+        where: { emailHash: emailHash },
       });
 
       if (!user) {
@@ -245,7 +244,7 @@ app.patch(
         return;
       }
 
-      if (flightEntry.user.emailHash !== TEST_EMAIL_HASH) {
+      if (flightEntry.user.emailHash !== emailHash) {
         res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
         return;
       }
@@ -297,7 +296,7 @@ app.post(
 
       // Look up user by constant emailHash
       const user = await prisma.user.findUnique({
-        where: { emailHash: TEST_EMAIL_HASH },
+        where: { emailHash: emailHash },
       });
 
       if (!user) {
