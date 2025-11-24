@@ -245,6 +245,60 @@ describe("API Endpoints", () => {
     });
   });
 
+  describe("PATCH /api/v1/flight_entry/:id", () => {
+    let cleanup: Awaited<ReturnType<typeof createTestFlightEntryForMichaelSmith>>;
+
+    beforeEach(async () => {
+      cleanup = await createTestFlightEntryForMichaelSmith();
+    });
+
+    afterEach(async () => {
+      await cleanup();
+    });
+
+    it("should update multiple fields", async () => {
+      const flightEntry = cleanup.flightEntry;
+      const updates = {
+        tailNumber: "N99999",
+        totalFlightTime: 5.5,
+        remarks: "Multi-field update",
+      };
+
+      const response = await request(app)
+        .patch(`/api/v1/flight_entry/${flightEntry.id}`)
+        .send(updates);
+
+      expect(response.status).toBe(200);
+      expect(response.body.tailNumber).toBe("N99999");
+      expect(response.body.totalFlightTime).toBe("5.5");
+      expect(response.body.remarks).toBe("Multi-field update");
+    });
+
+    it("should 403 when updating another user's flight entry", async () => {
+      const otherUserCleanup = await createTestFlightEntry();
+      const updates = {
+        remarks: "Trying to update someone else's entry",
+      };
+
+      const response = await request(app)
+        .patch(`/api/v1/flight_entry/${otherUserCleanup.flightEntry.id}`)
+        .send(updates);
+
+      expect(response.status).toBe(403);
+      expect(response.body.error).toContain("Forbidden");
+
+      await otherUserCleanup();
+    });
+
+    it("should 404 when flight entry not found", async () => {
+      const response = await request(app)
+        .patch(`/api/v1/flight_entry/${FAKE_UUID}`)
+        .send({ remarks: "test" });
+
+      expect(response.status).toBe(404);
+    });
+  });
+
   // AI Disclosure by Bolun Thompson:
   // I used Claude Code Sonnet 4.5 to generate this test, since it's largely repititive. Prompt as follows:
   // Add an anlogous user test. Make it short and to the point. Add a minimal test that its been stored in the DB.

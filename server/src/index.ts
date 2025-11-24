@@ -7,12 +7,14 @@ import {
   flightEntryQuerySchema,
   flightEntryGetSchema,
   flightEntryPostSchema,
+  flightEntryPatchSchema,
   userPostSchema,
   ocrSchema,
   flightSchema,
   FlightEntryQueryParams,
   FlightEntryGetParams,
   FlightEntryPostParams,
+  FlightEntryPatchParams,
   UserPostBodyParams,
   FlightBodyParams,
 } from "./validation";
@@ -209,6 +211,61 @@ app.delete(
       const deletedEntry = await prisma.flightEntry.delete({ where: { id } });
 
       res.json(deletedEntry);
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
+
+app.patch(
+  "/api/v1/flight_entry/:id",
+  validate(flightEntryGetSchema, "params"),
+  validate(flightEntryPatchSchema, "body"),
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params as unknown as FlightEntryGetParams;
+      const updates = req.body as unknown as FlightEntryPatchParams;
+
+      // Look up user by constant emailHash
+      const user = await prisma.user.findUnique({
+        where: { emailHash: TEST_EMAIL_HASH },
+      });
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      const flightEntry = await prisma.flightEntry.findUnique({
+        where: { id },
+        include: { user: true },
+      });
+
+      if (!flightEntry) {
+        res.status(404).json({ error: "Flight entry not found" });
+        return;
+      }
+
+      if (flightEntry.user.emailHash !== TEST_EMAIL_HASH) {
+        res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
+        return;
+      }
+
+      const { logbookUrl, ...restUpdates } = updates;
+
+      const updatedEntry = await prisma.flightEntry.update({
+        where: { id },
+        data: {
+          ...restUpdates,
+          // because the field is named differently in the DB
+          ...(logbookUrl !== undefined && { logbookURL: logbookUrl }),
+        },
+      });
+
+      res.json(updatedEntry);
     } catch (error) {
       res.status(500).json({
         error: "Internal server error",
