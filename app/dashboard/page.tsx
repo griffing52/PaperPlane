@@ -57,9 +57,19 @@ const fetchLogs = async () => {
   return data.map(parseLogEntry);
 };
 
-const createFlightEntry = async (entry: Omit<LogEntry, "id">) => {
-  const response = await fetch("https://paperplane.bolun.dev/api/v1/flight_entry", {
-    method: "POST",
+// NOTE: if method == PATCH, id must be provided
+// if method == POST, id must not be provided
+const saveFlightEntry = async (
+  method: "POST" | "PATCH",
+  entry: Partial<Omit<LogEntry, "id">>,
+  id?: string
+) => {
+  const url = id
+    ? `https://paperplane.bolun.dev/api/v1/flight_entry/${id}`
+    : "https://paperplane.bolun.dev/api/v1/flight_entry";
+
+  const response = await fetch(url, {
+    method,
     headers: {
       "Content-Type": "application/json",
     },
@@ -69,26 +79,31 @@ const createFlightEntry = async (entry: Omit<LogEntry, "id">) => {
       srcIcao: entry.srcIcao,
       destIcao: entry.destIcao,
       route: entry.route,
-      totalFlightTime: entry.totalFlightTime || 0,
-      picTime: entry.picTime || 0,
-      dualReceivedTime: entry.dualReceivedTime || 0,
-      crossCountry: entry.crossCountry || false,
-      night: entry.night || false,
-      solo: entry.solo || false,
-      instrumentTime: entry.instrumentTime || 0,
-      dayLandings: entry.dayLandings || 0,
-      nightLandings: entry.nightLandings || 0,
+      totalFlightTime: entry.totalFlightTime,
+      picTime: entry.picTime,
+      dualReceivedTime: entry.dualReceivedTime,
+      crossCountry: entry.crossCountry,
+      night: entry.night,
+      solo: entry.solo,
+      instrumentTime: entry.instrumentTime,
+      dayLandings: entry.dayLandings,
+      nightLandings: entry.nightLandings,
       remarks: entry.remarks,
     }),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Failed to create flight entry");
+    throw new Error(error.error || `Failed to ${method === "POST" ? "create" : "update"} flight entry`);
   }
 
   return response.json();
 };
+
+const createFlightEntry = (entry: Omit<LogEntry, "id">) => saveFlightEntry("POST", entry);
+
+const updateFlightEntry = (entry: LogEntry) =>
+  saveFlightEntry("PATCH", entry, entry.id);
 
 const deleteFlightEntry = async (id: string) => {
   const response = await fetch(`https://paperplane.bolun.dev/api/v1/flight_entry/${id}`, {
