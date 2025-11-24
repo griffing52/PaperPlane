@@ -90,6 +90,22 @@ const createFlightEntry = async (entry: Omit<LogEntry, "id">) => {
   return response.json();
 };
 
+const deleteFlightEntry = async (id: string) => {
+  const response = await fetch(`https://paperplane.bolun.dev/api/v1/flight_entry/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to delete flight entry");
+  }
+
+  return response.json();
+};
+
 
 export default function DashboardPage() {
   const { user, emailHash, loading } = useAuth();
