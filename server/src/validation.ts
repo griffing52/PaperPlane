@@ -41,7 +41,6 @@ export const validate = (schema: z.ZodSchema, property: RequestProperty) => {
 };
 
 export const flightEntryQuerySchema = z.object({
-  emailHash: z.string().optional(),
   flightId: z.uuid().optional(),
 });
 
@@ -80,7 +79,6 @@ export const flightSchema = z.object({
 export type FlightBodyParams = z.infer<typeof flightSchema>;
 
 export const flightEntryPostSchema = z.object({
-  userId: z.string().uuid(),
   logbookUrl: z.string().url().optional(),
   date: z.coerce.date(),
   tailNumber: z.string().min(1),

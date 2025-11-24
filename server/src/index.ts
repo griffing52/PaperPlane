@@ -23,6 +23,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const prisma = new PrismaClient();
 
+// Constant emailHash for testing (SHA-256 hex of michael.smith@outlook.com)
+// TODO: Replace with actual auth-based emailHash lookup once authentication is implemented
+const TEST_EMAIL_HASH = "1c61d3af9e95de4b161dc5c7d5d7e0cbc6de90f884defcfe6d49a5e8bce62806";
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -95,11 +99,21 @@ app.get(
   validate(flightEntryQuerySchema, "query"),
   async (req: Request, res: Response) => {
     try {
-      const { emailHash, flightId } =
-        req.query as unknown as FlightEntryQueryParams;
+      const { flightId } = req.query as unknown as FlightEntryQueryParams;
+
+      // Look up user by constant emailHash
+      const user = await prisma.user.findUnique({
+        where: { emailHash: TEST_EMAIL_HASH },
+      });
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
       const flightEntries = await prisma.flightEntry.findMany({
         where: {
-          ...(emailHash != null && { user: { emailHash } }),
+          userId: user.id,
           ...(flightId != null && { flightId }),
         },
       });
@@ -119,14 +133,35 @@ app.get(
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params as unknown as FlightEntryGetParams;
+
+      // Look up user by constant emailHash
+      const user = await prisma.user.findUnique({
+        where: { emailHash: TEST_EMAIL_HASH },
+      });
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
       const flightEntry = await prisma.flightEntry.findUnique({
         where: { id },
+        include: { user: true },
       });
+
       if (!flightEntry) {
         res.status(404).json({ error: "Flight entry not found" });
         return;
       }
-      res.json(flightEntry);
+
+      // Verify the flight entry belongs to the user with the correct hash
+      if (flightEntry.user.emailHash !== TEST_EMAIL_HASH) {
+        res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
+        return;
+      }
+      const { user: _, ...flightEntryWithoutUser } = flightEntry;
+
+      res.json(flightEntryWithoutUser);
     } catch (error) {
       res.status(500).json({
         error: "Internal server error",
@@ -143,15 +178,37 @@ app.delete(
     try {
       const { id } = req.params as unknown as FlightEntryGetParams;
 
-      let flightEntry;
-      try {
-        flightEntry = await prisma.flightEntry.delete({ where: { id } });
-      } catch (error) {
+      // Look up user by their emailHash
+      const user = await prisma.user.findUnique({
+        where: { emailHash: TEST_EMAIL_HASH },
+      });
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
+      // First fetch the entry to verify ownership
+      const flightEntry = await prisma.flightEntry.findUnique({
+        where: { id },
+        include: { user: true },
+      });
+
+      if (!flightEntry) {
         res.status(404).json({ error: "Flight entry not found" });
         return;
       }
 
-      res.json(flightEntry);
+      // Verify the flight entry belongs to the user with TEST_EMAIL_HASH
+      if (flightEntry.user.emailHash !== TEST_EMAIL_HASH) {
+        res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
+        return;
+      }
+
+      // Delete the entry after verification
+      const deletedEntry = await prisma.flightEntry.delete({ where: { id } });
+
+      res.json(deletedEntry);
     } catch (error) {
       res.status(500).json({
         error: "Internal server error",
@@ -167,7 +224,6 @@ app.post(
   async (req: Request, res: Response) => {
     try {
       const {
-        userId,
         logbookUrl,
         date,
         tailNumber,
@@ -186,13 +242,23 @@ app.post(
         remarks,
       } = req.body as unknown as FlightEntryPostParams;
 
+      // Look up user by constant emailHash
+      const user = await prisma.user.findUnique({
+        where: { emailHash: TEST_EMAIL_HASH },
+      });
+
+      if (!user) {
+        res.status(404).json({ error: "User not found" });
+        return;
+      }
+
       // Design Decision:
-      // All the fields are optionl except for userId, date, src, dest and tail number
+      // All the fields are optional except for date, src, dest and tail number
       // I think the requirements for what the frontend needs to show may change
       // so I'd rather have too many fields and a flexible API rather than too few.
       const flightEntry = await prisma.flightEntry.create({
         data: {
-          userId,
+          userId: user.id,
           logbookURL: logbookUrl,
           date,
           tailNumber,

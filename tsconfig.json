@@ -10,7 +10,7 @@
     "references": [
       { "path": "./tsconfig.app.json" },
       { "path": "./tsconfig.node.json" }
-    ]
+    ],
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "module": "esnext",

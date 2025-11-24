@@ -45,10 +45,9 @@ const parseLogEntry = (data: any): LogEntry => {
   };
 };
 
-// NOTE:` use michael.smith@outlook.com for testing
-const fetchLogs = async (emailHash: string) => {
-  const query = new URLSearchParams({ emailHash });
-  const response = await fetch("https://paperplane.bolun.dev/api/v1/flight_entry?" + query.toString(), {
+// NOTE: Backend now uses constant emailHash for michael.smith@outlook.com for testing
+const fetchLogs = async () => {
+  const response = await fetch("https://paperplane.bolun.dev/api/v1/flight_entry", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -83,7 +82,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!emailHash) return;
-    fetchLogs(emailHash).then(setLogs);
+    fetchLogs().then(setLogs);
   }, [emailHash]);
 
   const stats = useMemo(() => {
