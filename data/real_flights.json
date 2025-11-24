@@ -1,0 +1,233 @@
+[
+  {
+    "tail_number": "N399EA  ",
+    "aircraft_model": "Unknown",
+    "manufacturer": null,
+    "origin_airport_icao": "KPAN",
+    "destination_airport_icao": "KDVT",
+    "departure_time": "2025-11-08T13:51:54",
+    "arrival_time": "2025-11-08T14:33:56",
+    "user_id": 1,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N399EA  ",
+    "aircraft_model": "Unknown",
+    "manufacturer": null,
+    "origin_airport_icao": "KDVT",
+    "destination_airport_icao": "KPAN",
+    "departure_time": "2025-11-08T12:19:04",
+    "arrival_time": "2025-11-08T12:49:09",
+    "user_id": 1,
+    "flight_number": 2
+  },
+  {
+    "tail_number": "N399EA  ",
+    "aircraft_model": "Unknown",
+    "manufacturer": null,
+    "origin_airport_icao": "57AZ",
+    "destination_airport_icao": "KDVT",
+    "departure_time": "2025-11-08T10:09:35",
+    "arrival_time": "2025-11-08T11:12:13",
+    "user_id": 1,
+    "flight_number": 3
+  },
+  {
+    "tail_number": "N103LU",
+    "aircraft_model": "172R",
+    "manufacturer": null,
+    "origin_airport_icao": "KBCT",
+    "destination_airport_icao": "KX10",
+    "departure_time": "2025-11-08T12:58:48",
+    "arrival_time": "2025-11-08T13:14:47",
+    "user_id": 2,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N103LU",
+    "aircraft_model": "172R",
+    "manufacturer": null,
+    "origin_airport_icao": "FL41",
+    "destination_airport_icao": "KBCT",
+    "departure_time": "2025-11-08T11:07:36",
+    "arrival_time": "2025-11-08T11:33:49",
+    "user_id": 2,
+    "flight_number": 2
+  },
+  {
+    "tail_number": "N103LU",
+    "aircraft_model": "172R",
+    "manufacturer": null,
+    "origin_airport_icao": "KBCT",
+    "destination_airport_icao": "KPHK",
+    "departure_time": "2025-11-08T10:04:01",
+    "arrival_time": "2025-11-08T10:31:58",
+    "user_id": 2,
+    "flight_number": 3
+  },
+  {
+    "tail_number": "N3864M",
+    "aircraft_model": "PA-28-181",
+    "manufacturer": null,
+    "origin_airport_icao": "KVNY",
+    "destination_airport_icao": "KWHP",
+    "departure_time": "2025-11-08T14:08:03",
+    "arrival_time": "2025-11-08T14:59:52",
+    "user_id": 3,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N3864M",
+    "aircraft_model": "PA-28-181",
+    "manufacturer": null,
+    "origin_airport_icao": "KVNY",
+    "destination_airport_icao": "KVNY",
+    "departure_time": "2025-11-08T10:34:34",
+    "arrival_time": "2025-11-08T12:11:29",
+    "user_id": 3,
+    "flight_number": 2
+  },
+  {
+    "tail_number": "N4332N",
+    "aircraft_model": "PA-28-161",
+    "manufacturer": null,
+    "origin_airport_icao": "KBDR",
+    "destination_airport_icao": "KBDR",
+    "departure_time": "2025-11-08T14:40:11",
+    "arrival_time": "2025-11-08T14:59:52",
+    "user_id": 4,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N4332N",
+    "aircraft_model": "PA-28-161",
+    "manufacturer": null,
+    "origin_airport_icao": "KBDR",
+    "destination_airport_icao": "KBDR",
+    "departure_time": "2025-11-08T10:24:40",
+    "arrival_time": "2025-11-08T13:02:42",
+    "user_id": 4,
+    "flight_number": 2
+  },
+  {
+    "tail_number": "N733PV",
+    "aircraft_model": "172N",
+    "manufacturer": null,
+    "origin_airport_icao": "KHWD",
+    "destination_airport_icao": "KHWD",
+    "departure_time": "2025-11-08T14:03:02",
+    "arrival_time": "2025-11-08T14:59:52",
+    "user_id": 5,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N733PV",
+    "aircraft_model": "172N",
+    "manufacturer": null,
+    "origin_airport_icao": "KHWD",
+    "destination_airport_icao": "KHWD",
+    "departure_time": "2025-11-08T11:57:08",
+    "arrival_time": "2025-11-08T12:38:13",
+    "user_id": 5,
+    "flight_number": 2
+  },
+  {
+    "tail_number": "N172AL",
+    "aircraft_model": "172S",
+    "manufacturer": null,
+    "origin_airport_icao": "KPAO",
+    "destination_airport_icao": "KPAO",
+    "departure_time": "2025-11-08T14:00:01",
+    "arrival_time": "2025-11-08T14:52:21",
+    "user_id": 6,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N172AL",
+    "aircraft_model": "172S",
+    "manufacturer": null,
+    "origin_airport_icao": "KLVK",
+    "destination_airport_icao": "KPAO",
+    "departure_time": "2025-11-08T10:43:24",
+    "arrival_time": "2025-11-08T10:59:37",
+    "user_id": 6,
+    "flight_number": 2
+  },
+  {
+    "tail_number": "N787MD",
+    "aircraft_model": "182T",
+    "manufacturer": null,
+    "origin_airport_icao": "KMAC",
+    "destination_airport_icao": null,
+    "departure_time": "2025-11-09T09:18:47",
+    "arrival_time": "2025-11-09T09:54:51",
+    "user_id": 7,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N825CQ",
+    "aircraft_model": "Cirrus SR20",
+    "manufacturer": null,
+    "origin_airport_icao": "KTHV",
+    "destination_airport_icao": "KTHV",
+    "departure_time": "2025-11-08T11:22:31",
+    "arrival_time": "2025-11-08T12:16:06",
+    "user_id": 8,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N28077",
+    "aircraft_model": "PA-28-181",
+    "manufacturer": null,
+    "origin_airport_icao": "KFFZ",
+    "destination_airport_icao": "KFFZ",
+    "departure_time": "2025-11-08T11:31:45",
+    "arrival_time": "2025-11-08T13:19:09",
+    "user_id": 9,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N737QF",
+    "aircraft_model": "172N",
+    "manufacturer": null,
+    "origin_airport_icao": "KVNY",
+    "destination_airport_icao": "KLVK",
+    "departure_time": "2025-11-08T09:58:03",
+    "arrival_time": "2025-11-08T12:34:43",
+    "user_id": 10,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N28020",
+    "aircraft_model": "PA-28-181",
+    "manufacturer": null,
+    "origin_airport_icao": "KFFZ",
+    "destination_airport_icao": "KFFZ",
+    "departure_time": "2025-11-08T12:43:32",
+    "arrival_time": "2025-11-08T13:54:38",
+    "user_id": 11,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N1823E",
+    "aircraft_model": "172S",
+    "manufacturer": null,
+    "origin_airport_icao": "KCOS",
+    "destination_airport_icao": "KCOS",
+    "departure_time": "2025-11-08T12:37:47",
+    "arrival_time": "2025-11-08T14:19:27",
+    "user_id": 12,
+    "flight_number": 1
+  },
+  {
+    "tail_number": "N496AV",
+    "aircraft_model": "Cirrus SR20",
+    "manufacturer": null,
+    "origin_airport_icao": "KGYR",
+    "destination_airport_icao": "KGYR",
+    "departure_time": "2025-11-08T11:06:18",
+    "arrival_time": "2025-11-08T12:42:12",
+    "user_id": 13,
+    "flight_number": 1
+  }
+]
