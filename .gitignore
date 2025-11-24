@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Database
+*.db
+*.db-journal
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -45,6 +49,22 @@ yarn-error.log*
 *.sw?
 
 eng.traineddata
+/generated/prisma
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 # vercel
 .vercel
 

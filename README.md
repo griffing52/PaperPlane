@@ -2,6 +2,27 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Back-end
+
+```
+npm install:all
+```
+
+Init the database.
+
+```
+# sets the database location in prisma/dev.dbs
+cp .env.sample .env
+# creates the database
+npx prisma migrate dev --name initial_migration
+# generates prisma library to interact with database
+npx prisma generate
+# generate test data
+npm run seed
+```
+
+### Front-end
+
 First, run the development server:
 
 ```bash
