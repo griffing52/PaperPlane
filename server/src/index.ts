@@ -61,9 +61,9 @@ app.get("/api/v1/health", (_req: Request, res: Response) => {
 // AI Disclosure by Bolun Thompson:
 // I used Claude Code with Sonnet 4.5, to refactor the following tests to take a constant emailHash
 // rather than a userId, because that's what we're using to connect front-end/back-end.
-// I also used it to do some threading work to hook up the backend and frontend.
+// I also used it to generate a PATCH endpoint akin to the POST.
 // Thinking was enabled for the planning phase but disabled for the implementation phase.
-// I've manually written all of these endpoints, so I believe I understand my code well enough to
+// I've manually written the other endpoints, so I believe I understand my code well enough to
 // be able to review AI code to make sure its reasonable quality, and I'm curious about the results.
 
 // You're a skilled senior developer developing endpoints. You have four tasks:
@@ -88,13 +88,9 @@ app.get("/api/v1/health", (_req: Request, res: Response) => {
 // 2. Add a patch endpoint for flight_entry consistent with the others. Key it on the
 // id of the flight entry. Similarly, check the email hash before doing the operation.
 
-// 3. Hook up the front-end's page.tsx "manual entry" form to using the POST request here.
-// Write your code in a clean, elegant and factored way such that it is easy to change the design
-// of the form. Make sure the post request is in a separate function.
-
-// 4. Analogous to the front-ends manual entry post request, add PATCH and DELETE request functions.
-// Have them take IDs of the flight entries. They will be used in the future to implement
-// more UI features.
+// Results: The refactor works as expected, and the tests look good and pass.
+// However, I had to write the endpoint wrapper functions in the front-end myself
+// since the AI generated verbose code which tried to do too many changes at once.
 
 app.get(
   "/api/v1/flight_entry",
