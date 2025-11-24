@@ -28,16 +28,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+.pnpm-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Environment variables
-.env
+# env files (can opt-in for committing if needed)
+.env*
 
 # Database
 *.db
@@ -60,6 +54,16 @@ dist-ssr
 # env files (can opt-in for committing if needed)
 .env*
 
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 # vercel
 .vercel
 
