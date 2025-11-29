@@ -1,7 +1,5 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import multer from "multer";
-import { PrismaClient } from "@prisma/client";
 import {
   validate,
   flightEntryQuerySchema,
@@ -20,28 +18,9 @@ import {
 } from "./validation";
 import { ocrImage } from "./ocr";
 import { verifyFlight } from "./verify";
+import { PORT, emailHash, upload, prisma } from "./config";
 
 const app = express();
-const PORT = process.env.PORT || 3002;
-const prisma = new PrismaClient();
-
-// TODO: Replace with actual auth-based emailHash lookup once authentication is implemented
-const emailHash = "1c61d3af9e95de4b161dc5c7d5d7e0cbc6de90f884defcfe6d49a5e8bce62806";
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 100 * 1024 * 1024, // 100MB
-  },
-  fileFilter: (_req, file, cb) => {
-    // Accept only image files
-    if (file.mimetype.startsWith("image/")) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed"));
-    }
-  },
-});
 
 app.use(cors());
 app.use(express.json());

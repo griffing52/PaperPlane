@@ -8,9 +8,7 @@ import {
   createTestFlight,
   getOrCreateMichaelSmithUser,
 } from "./test-factories";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "./config";
 
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
 const TEST_LICENSE_NUMBER = "12345";
