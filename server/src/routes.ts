@@ -10,8 +10,13 @@ import {
   userPostSchema,
   ocrSchema,
   flightSchema,
-} from "./validation";
-import * as controllers from "./controllers";
+} from "./schema";
+import * as controllers from "./controllers/controllers";
+import * as flightControllers from "./controllers/FlightEntryController";
+
+// DESIGN DECISION: I could have put separate routs into a routes/ directory,
+// but I think that would make the code more complex
+// since each route is fairly simple.
 
 const router = Router();
 
@@ -21,7 +26,7 @@ router.get(
   "/api/v1/flight_entry",
   validate(flightEntryQuerySchema, "query"),
   requireUser,
-  controllers.listFlightEntries,
+  flightControllers.listFlightEntries,
 );
 
 router.get(
@@ -29,7 +34,7 @@ router.get(
   validate(flightEntryGetSchema, "params"),
   requireUser,
   verifyFlightEntryOwnership,
-  controllers.getFlightEntryById,
+  flightControllers.getFlightEntryById,
 );
 
 router.delete(
@@ -37,7 +42,7 @@ router.delete(
   validate(flightEntryGetSchema, "params"),
   requireUser,
   verifyFlightEntryOwnership,
-  controllers.deleteFlightEntry,
+  flightControllers.deleteFlightEntry,
 );
 
 router.patch(
@@ -46,14 +51,14 @@ router.patch(
   validate(flightEntryPatchSchema, "body"),
   requireUser,
   verifyFlightEntryOwnership,
-  controllers.updateFlightEntry,
+  flightControllers.updateFlightEntry,
 );
 
 router.post(
   "/api/v1/flight_entry/",
   validate(flightEntryPostSchema, "body"),
   requireUser,
-  controllers.createFlightEntry,
+  flightControllers.createFlightEntry,
 );
 
 router.post(
