@@ -22,7 +22,7 @@ import { ocrImage } from "./ocr";
 import { verifyFlight } from "./verify";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 const prisma = new PrismaClient();
 
 // TODO: Replace with actual auth-based emailHash lookup once authentication is implemented
