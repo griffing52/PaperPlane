@@ -19,7 +19,7 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm install && npm run install:server
+      run: npm install && npm run install:server && npx playwright install --with-deps
 
     - name: Setup environment
       run: cp .env.sample .env
@@ -34,7 +34,7 @@ jobs:
       run: npm run seed
 
     - name: Run tests
-      run: npm test:server
+      run: npm test:server && npm run test:cucumber && npm run test:e2e
 
     - name: Build
       run: npm run build:server
