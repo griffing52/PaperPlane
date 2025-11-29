@@ -34,7 +34,7 @@ jobs:
       run: npm run seed
 
     - name: Run tests
-      run: npm test:server && npm run test:cucumber && npm run test:e2e
+      run: npm run test:server && npm run test:cucumber && npm run test:e2e
 
     - name: Build
       run: npm run build:server
