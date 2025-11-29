@@ -19,7 +19,7 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm run install:server
+      run: npm install && npm run install:server
 
     - name: Setup environment
       run: cp .env.sample .env
