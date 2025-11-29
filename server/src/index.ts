@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import {
-  validate,
   flightEntryQuerySchema,
   flightEntryGetSchema,
   flightEntryPostSchema,
@@ -18,7 +17,9 @@ import {
 } from "./validation";
 import { ocrImage } from "./ocr";
 import { verifyFlight } from "./verify";
-import { PORT, emailHash, upload, prisma } from "./config";
+import { PORT, upload, prisma } from "./config";
+import { validate } from "./middleware/validation";
+import { requireUser, verifyFlightEntryOwnership } from "./middleware/auth";
 
 const app = express();
 
@@ -73,23 +74,14 @@ app.get("/api/v1/health", (_req: Request, res: Response) => {
 app.get(
   "/api/v1/flight_entry",
   validate(flightEntryQuerySchema, "query"),
+  requireUser,
   async (req: Request, res: Response) => {
     try {
       const { flightId } = req.query as unknown as FlightEntryQueryParams;
 
-      // Look up user by constant emailHash
-      const user = await prisma.user.findUnique({
-        where: { emailHash: emailHash },
-      });
-
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
       const flightEntries = await prisma.flightEntry.findMany({
         where: {
-          userId: user.id,
+          userId: req.user!.id,
           ...(flightId != null && { flightId }),
         },
       });
@@ -106,36 +98,11 @@ app.get(
 app.get(
   "/api/v1/flight_entry/:id",
   validate(flightEntryGetSchema, "params"),
+  requireUser,
+  verifyFlightEntryOwnership,
   async (req: Request, res: Response) => {
     try {
-      const { id } = req.params as unknown as FlightEntryGetParams;
-
-      // Look up user by constant emailHash
-      const user = await prisma.user.findUnique({
-        where: { emailHash: emailHash },
-      });
-
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
-      const flightEntry = await prisma.flightEntry.findUnique({
-        where: { id },
-        include: { user: true },
-      });
-
-      if (!flightEntry) {
-        res.status(404).json({ error: "Flight entry not found" });
-        return;
-      }
-
-      // Verify the flight entry belongs to the user with the correct hash
-      if (flightEntry.user.emailHash !== emailHash) {
-        res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
-        return;
-      }
-      const { user: _, ...flightEntryWithoutUser } = flightEntry;
+      const { user: _, ...flightEntryWithoutUser } = req.flightEntry!;
 
       res.json(flightEntryWithoutUser);
     } catch (error) {
@@ -150,36 +117,11 @@ app.get(
 app.delete(
   "/api/v1/flight_entry/:id",
   validate(flightEntryGetSchema, "params"),
+  requireUser,
+  verifyFlightEntryOwnership,
   async (req: Request, res: Response) => {
     try {
-      const { id } = req.params as unknown as FlightEntryGetParams;
-
-      // Look up user by their emailHash
-      const user = await prisma.user.findUnique({
-        where: { emailHash: emailHash },
-      });
-
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
-      // First fetch the entry to verify ownership
-      const flightEntry = await prisma.flightEntry.findUnique({
-        where: { id },
-        include: { user: true },
-      });
-
-      if (!flightEntry) {
-        res.status(404).json({ error: "Flight entry not found" });
-        return;
-      }
-
-      // Verify the flight entry belongs to the user with TEST_EMAIL_HASH
-      if (flightEntry.user.emailHash !== emailHash) {
-        res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
-        return;
-      }
+      const { id } = req.params;
 
       // Delete the entry after verification
       const deletedEntry = await prisma.flightEntry.delete({ where: { id } });
@@ -198,35 +140,12 @@ app.patch(
   "/api/v1/flight_entry/:id",
   validate(flightEntryGetSchema, "params"),
   validate(flightEntryPatchSchema, "body"),
+  requireUser,
+  verifyFlightEntryOwnership,
   async (req: Request, res: Response) => {
     try {
-      const { id } = req.params as unknown as FlightEntryGetParams;
+      const { id } = req.params;
       const updates = req.body as unknown as FlightEntryPatchParams;
-
-      // Look up user by constant emailHash
-      const user = await prisma.user.findUnique({
-        where: { emailHash: emailHash },
-      });
-
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
-      const flightEntry = await prisma.flightEntry.findUnique({
-        where: { id },
-        include: { user: true },
-      });
-
-      if (!flightEntry) {
-        res.status(404).json({ error: "Flight entry not found" });
-        return;
-      }
-
-      if (flightEntry.user.emailHash !== emailHash) {
-        res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
-        return;
-      }
 
       const { logbookUrl, ...restUpdates } = updates;
 
@@ -252,6 +171,7 @@ app.patch(
 app.post(
   "/api/v1/flight_entry/",
   validate(flightEntryPostSchema, "body"),
+  requireUser,
   async (req: Request, res: Response) => {
     try {
       const {
@@ -273,23 +193,13 @@ app.post(
         remarks,
       } = req.body as unknown as FlightEntryPostParams;
 
-      // Look up user by constant emailHash
-      const user = await prisma.user.findUnique({
-        where: { emailHash: emailHash },
-      });
-
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
       // Design Decision:
       // All the fields are optional except for date, src, dest and tail number
       // I think the requirements for what the frontend needs to show may change
       // so I'd rather have too many fields and a flexible API rather than too few.
       const flightEntry = await prisma.flightEntry.create({
         data: {
-          userId: user.id,
+          userId: req.user!.id,
           logbookURL: logbookUrl,
           date,
           tailNumber,
