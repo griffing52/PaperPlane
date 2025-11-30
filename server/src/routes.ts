@@ -14,9 +14,10 @@ import {
 import * as controllers from "./controllers/controllers";
 import * as flightControllers from "./controllers/FlightEntryController";
 
-// DESIGN DECISION: I could have put separate routs into a routes/ directory,
+// DESIGN DECISION:
+// I could have put separate routes into a routes/ directory,
 // but I think that would make the code more complex
-// since each route is fairly simple.
+// since each route is simple.
 
 const router = Router();
 
