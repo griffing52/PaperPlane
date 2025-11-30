@@ -15,9 +15,6 @@ export type FlightEntryGetParams = z.infer<typeof flightEntryGetSchema>;
 
 export const userPostSchema = z.object({
   name: z.string().min(1),
-  email: z.email(),
-  // This could be auto-generated if necessary
-  emailHash: z.string(),
   licenseNumber: z.string().min(1),
 });
 

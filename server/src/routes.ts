@@ -12,6 +12,7 @@ import {
   flightSchema,
 } from "./schema";
 import * as controllers from "./controllers/controllers";
+import * as userControllers from "./controllers/UserController";
 import * as flightControllers from "./controllers/FlightEntryController";
 
 // DESIGN DECISION:
@@ -65,7 +66,7 @@ router.post(
 router.post(
   "/api/v1/user/",
   validate(userPostSchema, "body"),
-  controllers.createUser,
+  userControllers.createUser,
 );
 
 router.post(

@@ -12,17 +12,17 @@ const hashString = async (email: string): Promise<string> => {
 }
 
 type AuthData = {
+  email: string,
   emailHash: string
 }
 
 async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
-  const userData = await firebaseAuth.verifyIdToken(idToken);
-  if (!userData.email) {
+  const { email } = await firebaseAuth.verifyIdToken(idToken);
+  if (!email) {
     return null;
   }
-  const emailHash = await hashString(userData.email);
-  // 1 item object because we may want more information in the future
-  return { emailHash };
+  const emailHash = await hashString(email);
+  return { email, emailHash };
 }
 
 // TODO: Move this to a final report. This isn't relavant anymore because
@@ -65,6 +65,19 @@ async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
 // NOTE: The above happened before I'd refactored everything into middlware. If I'd done that already,
 // it'd been easier to have done everything manually, since the auth would be DRY.
 
+export const authFromHeader = async (authHeader: string): Promise<AuthData | null> => {
+  // Bearer indicates that we're taking a JWT token
+  if (!authHeader?.startsWith("Bearer ")) {
+    return null;
+  }
+  // Regex could be used but there's no need; this is simple
+  const token = authHeader.split("Bearer ")[1];
+
+  const authData = await verifyFirebaseToken(token);
+  return authData;
+
+}
+
 // Lookup user by emailHash based on auth
 export const requireUser = async (
   req: Request,
@@ -72,16 +85,15 @@ export const requireUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const auth = req.headers.authorization;
-    // Bearer indicates that we're taking a JWT token
-    if (!auth?.startsWith("Bearer ")) {
-      res.status(401).json({ error: "No auth token provided" });
+    const authHeader = req.headers.authorization;
+    let auth;
+
+    if (!authHeader || !(auth = await authFromHeader(authHeader))) {
+      res.status(401).json({ error: "Invalid auth token" });
       return;
     }
-    // Regex could be used but there's no need; this is simple
-    const token = auth.split("Bearer ")[1];
 
-    const { emailHash } = await verifyFirebaseToken(token) || {};
+    const { emailHash } = auth;
 
     const user = emailHash ? await prisma.user.findUnique({
       where: { emailHash },
