@@ -37,6 +37,7 @@ describe("API Endpoints", () => {
         .catch(() => { });
     });
 
+    // TODO: Refactor the tests to use auth tokens.
     it("should create a user and store in DB", async () => {
       const email = `test-${Date.now()}@example.com`;
       const emailHash = "123";
