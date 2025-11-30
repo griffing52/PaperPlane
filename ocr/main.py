@@ -1,7 +1,8 @@
-#To run: 
-#pip install fastapi "uvicorn[standard]" pydantic boto3 python-multipart
-#Then from root, run 
-
+# To try out the endpoint, first install dependencies: 
+# pip install fastapi "uvicorn[standard]" pydantic boto3 python-multipart
+# Then, inside ocr directory, run:
+# uvicorn main:app --reload 
+# And navigate to http://127.0.0.1:8000/docs
 
 import os
 from typing import Dict, Any, List
