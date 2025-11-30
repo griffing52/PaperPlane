@@ -1,5 +1,14 @@
 # What I did if you're unsure
 
+## Merge branch 'main' into GriffinNessa-OCR
+
+Integrate nextjs switch. I cannot get it to run properly on my windows machine. I get this strange error:
+    Skipping creating a lockfile at C:\Users\griff\Documents\GitHub\PaperPlane\.next\dev\lock because we're using WASM bindings
+    Error: `turbo.createProject` is not supported by the wasm bindings.
+        at ignore-listed frames
+which I've been trying to fixn
+
+
 ## Configured and tested AWS Textract
 
 Followed the prerequisite instructions listed here: https://docs.aws.amazon.com/textract/latest/dg/examples-blocks.html#examples-prerequisites
