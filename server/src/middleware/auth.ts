@@ -1,5 +1,32 @@
 import { Request, Response, NextFunction } from "express";
-import { prisma, emailHash } from "../config";
+import { prisma, firebaseAuth } from "../config";
+
+const hashString = async (email: string): Promise<string> => {
+  const byteHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
+  // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#examples
+  const hashArray = Array.from(new Uint8Array(byteHash)); // convert buffer to byte array
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join(""); // convert bytes to hex string
+  return hashHex;
+}
+
+type AuthData = {
+  emailHash: string
+}
+
+async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
+  const userData = await firebaseAuth.verifyIdToken(idToken);
+  if (!userData.email) {
+    return null;
+  }
+  const emailHash = await hashString(userData.email);
+  // 1 item object because we may want more information in the future
+  return { emailHash };
+}
+
+// TODO: Move this to a final report. This isn't relavant anymore because
+// I've manually changed the arcitecture. However, this helped me change it!
 
 // AI Disclosure by Bolun Thompson:
 // I used Claude Code with Sonnet 4.5, to refactor the following endpoints to take a constant emailHash
@@ -38,7 +65,6 @@ import { prisma, emailHash } from "../config";
 // NOTE: The above happened before I'd refactored everything into middlware. If I'd done that already,
 // it'd been easier to have done everything manually, since the auth would be DRY.
 
-// TODO: Refactor to use firebase auth
 // Lookup user by emailHash based on auth
 export const requireUser = async (
   req: Request,
@@ -46,9 +72,20 @@ export const requireUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const user = await prisma.user.findUnique({
-      where: { emailHash: emailHash },
-    });
+    const auth = req.headers.authorization;
+    // Bearer indicates that we're taking a JWT token
+    if (!auth?.startsWith("Bearer ")) {
+      res.status(401).json({ error: "No auth token provided" });
+      return;
+    }
+    // Regex could be used but there's no need; this is simple
+    const token = auth.split("Bearer ")[1];
+
+    const { emailHash } = await verifyFirebaseToken(token) || {};
+
+    const user = emailHash ? await prisma.user.findUnique({
+      where: { emailHash },
+    }) : null;
 
     if (!user) {
       res.status(404).json({ error: "User not found" });
