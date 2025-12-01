@@ -4,7 +4,7 @@ import {
   FlightEntryQueryParams,
   FlightEntryPostParams,
   FlightEntryPatchParams,
-} from "./../validation";
+} from "./../schema";
 
 export const listFlightEntries = async (req: Request, res: Response) => {
   const { flightId } = req.query as unknown as FlightEntryQueryParams;
