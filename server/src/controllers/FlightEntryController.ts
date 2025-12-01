@@ -132,4 +132,3 @@ export const createFlightEntry = async (req: Request, res: Response) => {
     });
   }
 };
-

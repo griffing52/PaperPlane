@@ -2,19 +2,22 @@ import { Request, Response, NextFunction } from "express";
 import { prisma, firebaseAuth } from "../config";
 
 const hashString = async (email: string): Promise<string> => {
-  const byteHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
+  const byteHash = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(email),
+  );
   // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest#examples
   const hashArray = Array.from(new Uint8Array(byteHash)); // convert buffer to byte array
   const hashHex = hashArray
     .map((b) => b.toString(16).padStart(2, "0"))
     .join(""); // convert bytes to hex string
   return hashHex;
-}
+};
 
 type AuthData = {
-  email: string,
-  emailHash: string
-}
+  email: string;
+  emailHash: string;
+};
 
 async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
   const { email } = await firebaseAuth.verifyIdToken(idToken);
@@ -65,7 +68,9 @@ async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
 // NOTE: The above happened before I'd refactored everything into middlware. If I'd done that already,
 // it'd been easier to have done everything manually, since the auth would be DRY.
 
-export const authFromHeader = async (authHeader: string): Promise<AuthData | null> => {
+export const getFirebaseUserData = async (
+  authHeader: string,
+): Promise<AuthData | null> => {
   // Bearer indicates that we're taking a JWT token
   if (!authHeader?.startsWith("Bearer ")) {
     return null;
@@ -75,29 +80,28 @@ export const authFromHeader = async (authHeader: string): Promise<AuthData | nul
 
   const authData = await verifyFirebaseToken(token);
   return authData;
-
-}
+};
 
 // Lookup user by emailHash based on auth
 export const requireUser = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-    let auth;
+    const authData = authHeader && (await getFirebaseUserData(authHeader));
 
-    if (!authHeader || !(auth = await authFromHeader(authHeader))) {
+    if (!authData) {
       res.status(401).json({ error: "Invalid auth token" });
       return;
     }
 
-    const { emailHash } = auth;
+    const { emailHash } = authData;
 
-    const user = emailHash ? await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { emailHash },
-    }) : null;
+    });
 
     if (!user) {
       res.status(404).json({ error: "User not found" });
@@ -118,7 +122,7 @@ export const requireUser = async (
 export const verifyFlightEntryOwnership = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -139,7 +143,9 @@ export const verifyFlightEntryOwnership = async (
     }
 
     if (flightEntry.user.emailHash !== req.user.emailHash) {
-      res.status(403).json({ error: "Forbidden: Access denied to this flight entry" });
+      res
+        .status(403)
+        .json({ error: "Forbidden: Access denied to this flight entry" });
       return;
     }
 

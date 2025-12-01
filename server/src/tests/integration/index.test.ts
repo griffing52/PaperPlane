@@ -1,10 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import { app } from "../../index";
-import {
-  createTestUser,
-  createTestFlight,
-} from "../fixtures/factories";
+import { createTestUser, createTestFlight } from "../fixtures/factories";
 import { prisma } from "../../config";
 
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
@@ -34,7 +31,7 @@ describe("API Endpoints", () => {
     afterEach(async () => {
       await prisma.user
         .delete({ where: { id: createdUserId } })
-        .catch(() => { });
+        .catch(() => {});
     });
 
     // TODO: Refactor the tests to use auth tokens.

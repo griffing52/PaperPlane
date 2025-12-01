@@ -1,7 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { Command } from 'commander';
-import * as fs from 'fs';
-import * as path from 'path';
+import { PrismaClient } from "@prisma/client";
+import { Command } from "commander";
+import * as fs from "fs";
+import * as path from "path";
 
 const prisma = new PrismaClient();
 
@@ -59,8 +59,30 @@ class SeededRandom {
 const rng = new SeededRandom(42);
 
 // Realistic data pools
-const firstNames = ['James', 'Sarah', 'Michael', 'Emily', 'Robert', 'Jennifer', 'David', 'Lisa', 'John', 'Amanda'];
-const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'];
+const firstNames = [
+  "James",
+  "Sarah",
+  "Michael",
+  "Emily",
+  "Robert",
+  "Jennifer",
+  "David",
+  "Lisa",
+  "John",
+  "Amanda",
+];
+const lastNames = [
+  "Smith",
+  "Johnson",
+  "Williams",
+  "Brown",
+  "Jones",
+  "Garcia",
+  "Miller",
+  "Davis",
+  "Rodriguez",
+  "Martinez",
+];
 
 // Helper functions
 function randomElement<T>(array: T[]): T {
@@ -72,20 +94,24 @@ function randomInt(min: number, max: number): number {
 }
 
 function generateEmail(firstName: string, lastName: string): string {
-  const domains = ['gmail.com', 'yahoo.com', 'outlook.com', 'icloud.com'];
+  const domains = ["gmail.com", "yahoo.com", "outlook.com", "icloud.com"];
   return `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${randomElement(domains)}`;
 }
 
 function generateEmailHash(email: string): string {
-  const crypto = require('crypto');
-  return crypto.createHash('sha256').update(email).digest('hex');
+  const crypto = require("crypto");
+  return crypto.createHash("sha256").update(email).digest("hex");
 }
 
 function generateLicenseNumber(): string {
   return `PPL-${randomInt(100000, 999999)}`;
 }
 
-function randomDecimal(min: number, max: number, precision: number = 1): number {
+function randomDecimal(
+  min: number,
+  max: number,
+  precision: number = 1,
+): number {
   const value = rng.next() * (max - min) + min;
   return Math.round(value * Math.pow(10, precision)) / Math.pow(10, precision);
 }
@@ -121,12 +147,12 @@ function generateFlightTimes(departureTime: Date, arrivalTime: Date) {
 
   // Remarks
   const remarks = [
-    'Good weather, smooth flight',
-    'Practiced touch and goes',
-    'Cross country navigation',
-    'Instrument approach practice',
-    'Pattern work',
-    'Solo flight milestone',
+    "Good weather, smooth flight",
+    "Practiced touch and goes",
+    "Cross country navigation",
+    "Instrument approach practice",
+    "Pattern work",
+    "Solo flight milestone",
   ][randomInt(0, 5)];
 
   return {
@@ -147,26 +173,35 @@ function generateFlightTimes(departureTime: Date, arrivalTime: Date) {
 const program = new Command();
 
 program
-  .name('seed')
-  .description('Seeds the database with dummy data for development purposes.\nBy default, the script will refuse to run if data already exists in the database.')
-  .option('-f, --force', 'Force deletion of existing data before seeding')
-  .addHelpText('after', `
+  .name("seed")
+  .description(
+    "Seeds the database with dummy data for development purposes.\nBy default, the script will refuse to run if data already exists in the database.",
+  )
+  .option("-f, --force", "Force deletion of existing data before seeding")
+  .addHelpText(
+    "after",
+    `
 Examples:
   npm run seed           # Run seed (fails if data exists)
   npm run seed -- -f     # Force seed (deletes existing data)
-  `)
+  `,
+  )
   .parse(process.argv);
 
 const options = program.opts();
 
 // Main seed function
 async function seed(force: boolean) {
-  console.log('🌱 Starting database seed...');
-  console.log('🎲 Using seed value: 42 (change SeededRandom(42) to get different data)');
+  console.log("🌱 Starting database seed...");
+  console.log(
+    "🎲 Using seed value: 42 (change SeededRandom(42) to get different data)",
+  );
 
   // Load real flight data
-  const realFlightsPath = path.join(__dirname, '../../data/real_flights.json');
-  const realFlightsData: RealFlightData[] = JSON.parse(fs.readFileSync(realFlightsPath, 'utf-8'));
+  const realFlightsPath = path.join(__dirname, "../../data/real_flights.json");
+  const realFlightsData: RealFlightData[] = JSON.parse(
+    fs.readFileSync(realFlightsPath, "utf-8"),
+  );
   console.log(`📁 Loaded ${realFlightsData.length} real flights from JSON\n`);
 
   // Check if data exists
@@ -178,28 +213,30 @@ async function seed(force: boolean) {
     const hasData = userCount > 0 || flightCount > 0 || realFlightCount > 0;
 
     if (hasData && !force) {
-      console.error('❌ Error: Database already contains data!');
-      console.error('');
-      console.error('📊 Current data:');
+      console.error("❌ Error: Database already contains data!");
+      console.error("");
+      console.error("📊 Current data:");
       console.error(`   Users: ${userCount}`);
       console.error(`   Flight Entries: ${flightCount}`);
       console.error(`   Flights: ${realFlightCount}`);
-      console.error('');
-      console.error('To delete existing data and proceed with seeding, use the -f flag:');
-      console.error('  npm run seed -- -f');
+      console.error("");
+      console.error(
+        "To delete existing data and proceed with seeding, use the -f flag:",
+      );
+      console.error("  npm run seed -- -f");
       process.exit(1);
     }
 
     if (hasData) {
       // Clear existing data
-      console.log('🗑️  Clearing existing data...');
+      console.log("🗑️  Clearing existing data...");
       await prisma.flightEntry.deleteMany();
       await prisma.flight.deleteMany();
       await prisma.user.deleteMany();
     }
   }
 
-  console.log('✨ Creating users...\n');
+  console.log("✨ Creating users...\n");
 
   const users = [];
   for (let i = 0; i < 5; i++) {
@@ -224,14 +261,15 @@ async function seed(force: boolean) {
     console.log();
   }
 
-  console.log('✈️  Creating real flight data...\n');
+  console.log("✈️  Creating real flight data...\n");
 
   // Create Flight records from real data
   const createdFlights = [];
   for (const flightData of realFlightsData) {
     // Use placeholders for missing data
-    const manufacturer = flightData.manufacturer || 'Unknown';
-    const destinationAirport = flightData.destination_airport_icao || flightData.origin_airport_icao;
+    const manufacturer = flightData.manufacturer || "Unknown";
+    const destinationAirport =
+      flightData.destination_airport_icao || flightData.origin_airport_icao;
 
     const flight = await prisma.flight.create({
       data: {
@@ -250,7 +288,7 @@ async function seed(force: boolean) {
 
   console.log(`  ✅ Created ${createdFlights.length} Flight records\n`);
 
-  console.log('🔗 Creating flight entries (linking flights to users)...\n');
+  console.log("🔗 Creating flight entries (linking flights to users)...\n");
 
   // Create FlightEntry records, mapping JSON user_ids to our 5 users
   for (const { flight, originalPilotId } of createdFlights) {
@@ -259,7 +297,10 @@ async function seed(force: boolean) {
     const user = users[userIndex];
 
     // Generate plausible flight times
-    const flightTimes = generateFlightTimes(flight.departureTime, flight.arrivalTime);
+    const flightTimes = generateFlightTimes(
+      flight.departureTime,
+      flight.arrivalTime,
+    );
 
     const route = `${flight.originAirportIcao} ${flight.destinationAirportIcao}`;
 
@@ -293,8 +334,8 @@ async function seed(force: boolean) {
   const flightCount = await prisma.flight.count();
   const flightEntryCount = await prisma.flightEntry.count();
 
-  console.log('✅ Seed completed successfully!\n');
-  console.log('📊 Summary:');
+  console.log("✅ Seed completed successfully!\n");
+  console.log("📊 Summary:");
   console.log(`   Users: ${userCount}`);
   console.log(`   Flights: ${flightCount}`);
   console.log(`   Flight Entries: ${flightEntryCount}`);
@@ -303,7 +344,7 @@ async function seed(force: boolean) {
 // Run the seed
 seed(options.force)
   .catch((error) => {
-    console.error('❌ Error seeding database:', error);
+    console.error("❌ Error seeding database:", error);
     process.exit(1);
   })
   .finally(async () => {

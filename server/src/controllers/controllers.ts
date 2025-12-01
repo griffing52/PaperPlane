@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import { ocrImage } from "../ocr";
 import { verifyFlight } from "../verify";
-import {
-  FlightBodyParams,
-} from "../schema";
+import { FlightBodyParams } from "../schema";
 
 export const getHealth = (_req: Request, res: Response) => {
   try {

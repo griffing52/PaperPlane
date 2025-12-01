@@ -3,7 +3,8 @@ import { PrismaClient, FlightEntry, User, Flight } from "@prisma/client";
 const prisma = new PrismaClient();
 
 // Constant emailHash for testing (SHA-256 hex of michael.smith@outlook.com)
-const TEST_EMAIL_HASH = "1c61d3af9e95de4b161dc5c7d5d7e0cbc6de90f884defcfe6d49a5e8bce62806";
+const TEST_EMAIL_HASH =
+  "1c61d3af9e95de4b161dc5c7d5d7e0cbc6de90f884defcfe6d49a5e8bce62806";
 
 type FlightCleanupFunction = (() => Promise<void>) & { flight: Flight };
 

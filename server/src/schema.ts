@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-
 export const flightEntryQuerySchema = z.object({
   flightId: z.uuid().optional(),
 });

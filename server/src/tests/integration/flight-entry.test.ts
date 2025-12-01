@@ -11,12 +11,14 @@ import { prisma } from "../../config";
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
 
 // NOTE: All the tests that require authentication use the Michael Smith user
-// When we implement auth correctly, we should add some setup that stubs in 
+// When we implement auth correctly, we should add some setup that stubs in
 // Michael Smith's user object and emailHash.
 
 describe("API Endpoints", () => {
   describe("GET /api/v1/flight_entry/:id", () => {
-    let cleanup: Awaited<ReturnType<typeof createTestFlightEntryForMichaelSmith>>;
+    let cleanup: Awaited<
+      ReturnType<typeof createTestFlightEntryForMichaelSmith>
+    >;
 
     beforeEach(async () => {
       cleanup = await createTestFlightEntryForMichaelSmith();
@@ -70,7 +72,9 @@ describe("API Endpoints", () => {
   });
 
   describe("DELETE /api/v1/flight_entry/:id", () => {
-    let cleanup: Awaited<ReturnType<typeof createTestFlightEntryForMichaelSmith>>;
+    let cleanup: Awaited<
+      ReturnType<typeof createTestFlightEntryForMichaelSmith>
+    >;
 
     beforeEach(async () => {
       cleanup = await createTestFlightEntryForMichaelSmith();
@@ -136,7 +140,7 @@ describe("API Endpoints", () => {
       if (createdFlightEntryId) {
         await prisma.flightEntry
           .delete({ where: { id: createdFlightEntryId } })
-          .catch(() => { });
+          .catch(() => {});
       }
       await userCleanup();
     });
@@ -234,7 +238,9 @@ describe("API Endpoints", () => {
   });
 
   describe("PATCH /api/v1/flight_entry/:id", () => {
-    let cleanup: Awaited<ReturnType<typeof createTestFlightEntryForMichaelSmith>>;
+    let cleanup: Awaited<
+      ReturnType<typeof createTestFlightEntryForMichaelSmith>
+    >;
 
     beforeEach(async () => {
       cleanup = await createTestFlightEntryForMichaelSmith();
@@ -288,7 +294,9 @@ describe("API Endpoints", () => {
   });
 
   describe("GET /api/v1/flight_entry/", () => {
-    let cleanup: Awaited<ReturnType<typeof createTestFlightEntryForMichaelSmith>>;
+    let cleanup: Awaited<
+      ReturnType<typeof createTestFlightEntryForMichaelSmith>
+    >;
 
     beforeEach(async () => {
       cleanup = await createTestFlightEntryForMichaelSmith();
