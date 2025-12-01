@@ -1,18 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
-import { app } from "../../index";
+import { app } from "../../src/index";
 import {
   createTestFlightEntry,
   createTestFlightEntryForMichaelSmith,
   getOrCreateMichaelSmithUser,
 } from "../fixtures/factories";
-import { prisma } from "../../config";
+import { prisma } from "../../src/config";
 
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
 
-// NOTE: All the tests that require authentication use the Michael Smith user
-// When we implement auth correctly, we should add some setup that stubs in
-// Michael Smith's user object and emailHash.
 
 describe("API Endpoints", () => {
   describe("GET /api/v1/flight_entry/:id", () => {

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
-import { app } from "../../index";
+import { app } from "../../src/index";
 import { createTestUser, createTestFlight } from "../fixtures/factories";
-import { prisma } from "../../config";
+import { prisma } from "../../src/config";
 
 const FAKE_UUID = "10000000-1000-4000-8000-100000000000";
 const TEST_LICENSE_NUMBER = "12345";
@@ -45,7 +45,11 @@ describe("API Endpoints", () => {
         licenseNumber: TEST_LICENSE_NUMBER,
       };
 
-      const response = await request(app).post("/api/v1/user/").send(user);
+      const response = await request(app)
+        .post("/api/v1/user/")
+        // this checks for auth tokens, but we stub it out to always return Michael Smith's
+        .set("Authorization", "Bearer dummy")
+        .send(user);
 
       expect(response.status).toBe(201);
       expect(response.body).toMatchObject(user);
