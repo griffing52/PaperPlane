@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebase';
 import { createBackendUser } from '../../lib/backendUser';
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -50,20 +51,7 @@ export default function SignUpPage() {
       <div className="absolute inset-0 bg-black/60 -z-10" />
 
       {/* Logo */}
-      <header className="px-6 py-4">
-        <Link href="/" className="flex items-center">
-          <div className="relative h-10 w-40 md:h-12 md:w-48 lg:h-14 lg:w-56 cursor-pointer">
-            <Image
-              src="/paperplane-logo.svg"
-              alt="PaperPlane Logo"
-              fill
-              priority
-              className="object-contain"
-            />
-          </div>
-        </Link>
-      </header>
-
+      <BrandLogo href="/" />
       {/* Centered signup card */}
       <main className="flex items-center justify-center px-4 pb-16 min-h-[70vh]">
         <div className="w-full max-w-md rounded-md bg-black/60 border border-white/10 px-8 py-10 shadow-xl shadow-black/40 backdrop-blur-sm">

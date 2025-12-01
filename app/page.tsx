@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function Home() {
   return (
@@ -16,20 +17,7 @@ export default function Home() {
       <div className="absolute inset-0 bg-black/70 -z-10" />
 
       {/* Logo */}
-      <header className="px-6 py-4">
-        <div className="flex items-center">
-          <div className="relative h-10 w-40 md:h-12 md:w-48 lg:h-14 lg:w-56">
-            <Image
-              src="/paperplane-logo.svg"
-              alt="PaperPlane Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-        </div>
-      </header>
-
+      <BrandLogo href="/" />
       {/* Hero section */}
       <main className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
         <h1 className="text-4xl font-bold mb-6">

@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link"
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebase";
 import { useAuth } from "@/context/AuthContext";
-import Link from "next/link";
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,20 +54,8 @@ export default function LoginPage() {
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/30 -z-10" />
 
-      {/* Logo header */}
-      <header className="px-6 py-4">
-        <Link href="/" className="flex items-center">
-          <div className="relative h-10 w-40 md:h-12 md:w-48 lg:h-14 lg:w-56 cursor-pointer">
-            <Image
-              src="/paperplane-logo.svg"
-              alt="PaperPlane Logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-        </Link>
-      </header>
+      {/* Logo Component */}
+      <BrandLogo href="/" />
 
       {/* Main content */}
       <main className="flex items-center justify-center px-4 pb-16 min-h-[70vh]">
