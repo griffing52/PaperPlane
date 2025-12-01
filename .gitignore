@@ -75,3 +75,6 @@ ocr/__pycache__/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+serviceAccountKey.json
+dist/

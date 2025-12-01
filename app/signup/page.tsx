@@ -5,6 +5,26 @@ import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebase';
 
+const API_BASE_URL = 'https://paperplane.bolun.dev/api/v1';
+
+async function createBackendUser(idToken: string, name: string, licenseNumber: string) {
+  const response = await fetch(`${API_BASE_URL}/user`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({ name, licenseNumber }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to create backend user');
+  }
+
+  return response.json();
+}
+
 export default function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -23,7 +43,9 @@ export default function SignUpPage() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, passwordOne);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, passwordOne);
+      const idToken = await userCredential.user.getIdToken();
+      await createBackendUser(idToken, "TODO", "TODO");
       console.log('User created successfully');
       router.push('/login');
     } catch (err: any) {
