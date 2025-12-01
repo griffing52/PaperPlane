@@ -1,29 +1,12 @@
 'use client';
 
+import Image from "next/image";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebase';
+import { createBackendUser } from '../../lib/backendUser';
 
-const API_BASE_URL = 'https://paperplane.bolun.dev/api/v1';
-
-async function createBackendUser(idToken: string, name: string, licenseNumber: string) {
-  const response = await fetch(`${API_BASE_URL}/user`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${idToken}`,
-    },
-    body: JSON.stringify({ name, licenseNumber }),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to create backend user');
-  }
-
-  return response.json();
-}
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -55,53 +38,86 @@ export default function SignUpPage() {
   };
 
   return (
-    <main className="max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-semibold mb-6 text-center">Sign Up</h1>
+    <div className="relative min-h-screen text-white">
+      {/* Background image */}
+      <Image
+        src="/signup-bg.jpg"           
+        alt="Airplane background"
+        fill
+        priority
+        className="object-cover -z-20"
+      />
 
-      {/* Error message with data-testid */}
-      {error && (
-        <p data-testid="signup-error" className="text-red-500 text-center mb-4">
-          {error}
-        </p>
-      )}
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/70 -z-10" />
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <input
-          id="email"
-          data-testid="signup-email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border w-full p-2 rounded"
-        />
+      {/* Logo header */}
+      <header className="px-6 py-4">
+        <div className="flex items-center">
+          <div className="relative h-10 w-40 md:h-12 md:w-48 lg:h-14 lg:w-56">
+            <Image
+              src="/paperplane-logo.svg"
+              alt="PaperPlane Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+        </div>
+      </header>
 
-        <input
-          id="password"
-          data-testid="signup-password"
-          placeholder="Password"
-          value={passwordOne}
-          onChange={(e) => setPasswordOne(e.target.value)}
-          className="border w-full p-2 rounded"
-        />
+      {/* Centered signup card */}
+      <main className="flex items-center justify-center px-4 pb-16">
+        <div className="w-full max-w-md rounded-md bg-black/80 border border-white/10 px-8 py-10 shadow-xl shadow-black/40 backdrop-blur-sm">
+          <h1 className="text-2xl font-semibold mb-6 text-center">Sign Up</h1>
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          data-testid="signup-confirm"
-          value={passwordTwo}
-          onChange={(e) => setPasswordTwo(e.target.value)}
-          className="border w-full p-2 rounded"
-        />
+          {error && (
+            <p data-testid="signup-error" className="text-red-500 text-center mb-4">
+              {error}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          data-testid="signup-button"
-          className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-          disabled={!email || !passwordOne || !passwordTwo}
-        >
-          Create Account
-        </button>
-      </form>
-    </main>
+          <form onSubmit={onSubmit} className="space-y-4">
+            <input
+              id="email"
+              data-testid="signup-email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border border-neutral-700 w-full p-2 rounded bg-neutral-900/80 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <input
+              id="password"
+              data-testid="signup-password"
+              type="password"
+              placeholder="Password"
+              value={passwordOne}
+              onChange={(e) => setPasswordOne(e.target.value)}
+              className="border border-neutral-700 w-full p-2 rounded bg-neutral-900/80 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              data-testid="signup-confirm"
+              value={passwordTwo}
+              onChange={(e) => setPasswordTwo(e.target.value)}
+              className="border border-neutral-700 w-full p-2 rounded bg-neutral-900/80 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <button
+              type="submit"
+              data-testid="signup-button"
+              className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50 hover:bg-blue-500 text-sm font-semibold"
+              disabled={!email || !passwordOne || !passwordTwo}
+            >
+              Create Account
+            </button>
+          </form>
+        </div>
+      </main>
+    </div>
   );
 }
