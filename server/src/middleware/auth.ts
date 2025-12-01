@@ -82,7 +82,7 @@ export const getFirebaseUserData = async (
   return authData;
 };
 
-// Lookup user by emailHash based on auth
+// Lookup the user in the database based on the Firebase Authorization Header
 export const requireUser = async (
   req: Request,
   res: Response,
@@ -90,7 +90,11 @@ export const requireUser = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-    const authData = authHeader && (await getFirebaseUserData(authHeader));
+    if (!authHeader) {
+      res.status(401).json({ error: "Missing authorization header" });
+      return;
+    }
+    const authData = await getFirebaseUserData(authHeader);
 
     if (!authData) {
       res.status(401).json({ error: "Invalid auth token" });
