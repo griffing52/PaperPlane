@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://paperplane.bolun.dev/api/v1';
+import { API_BASE_URL } from "./config.ts"
+
 
 export async function createBackendUser(idToken: string, name: string, licenseNumber: string) {
   const response = await fetch(`${API_BASE_URL}/user`, {

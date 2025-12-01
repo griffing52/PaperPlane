@@ -3,6 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "@/components/LogoutButton";
 import { useMemo, useState, useEffect, FormEvent } from "react";
+import { API_BASE_URL } from "./../../lib/config.ts"
 
 type LogEntry = {
   id?: string;
@@ -54,7 +55,7 @@ const parseLogEntry = (data: any): LogEntry => {
 
 // NOTE: michael.smith@outlook.com is a valid email address for testing
 const fetchLogs = async (idToken: string): Promise<Array<LogEntry>> => {
-  const response = await fetch("https://paperplane.bolun.dev/api/v1/flight_entry", {
+  const response = await fetch(`https://${API_BASE_URL}/api/v1/flight_entry`, {
     method: "GET",
     headers: genHeaders(idToken),
   });
@@ -71,8 +72,8 @@ const saveFlightEntry = async (
   id?: string,
 ) => {
   const url = id
-    ? `https://paperplane.bolun.dev/api/v1/flight_entry/${id}`
-    : "https://paperplane.bolun.dev/api/v1/flight_entry";
+    ? `https://${API_BASE_URL}/api/v1/flight_entry/${id}`
+    : `https://${API_BASE_URL}/api/v1/flight_entry`;
 
   const response = await fetch(url, {
     method,
@@ -110,7 +111,7 @@ const updateFlightEntry = (entry: LogEntry, idToken: string) =>
   saveFlightEntry("PATCH", entry, idToken, entry.id);
 
 const deleteFlightEntry = async (id: string, idToken: string) => {
-  const response = await fetch(`https://paperplane.bolun.dev/api/v1/flight_entry/${id}`, {
+  const response = await fetch(`https://${API_BASE_URL}/api/v1/flight_entry/${id}`, {
     method: "DELETE",
     headers: genHeaders(idToken),
   });
