@@ -4,6 +4,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+First, install version 18+ of node.js.
+
 ### Back-end
 
 ```
@@ -21,6 +23,13 @@ npx prisma migrate dev --name initial_migration
 npx prisma generate
 # generate test data
 npm run seed
+```
+
+Setup secrets. First, copy the firebase service side private key to the server/ directory.
+
+Run the backend.
+``bash
+npm run dev:server
 ```
 
 ### Front-end
