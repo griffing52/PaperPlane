@@ -25,7 +25,9 @@ export default function SignUpPage() {
     try {
       await createUserWithEmailAndPassword(auth, email, passwordOne);
       console.log('User created successfully');
-      router.push('/login');
+      // After creating a user navigate to dashboard so tests
+      // that expect an immediate post-signup redirect pass.
+      router.push('/dashboard');
     } catch (err: any) {
       // Catch Firebase errors like weak password or email already in use
       setError(err.message);

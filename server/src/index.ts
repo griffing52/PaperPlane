@@ -43,7 +43,11 @@ const upload = multer({
   },
 });
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
 
 app.get("/api/v1/health", (_req: Request, res: Response) => {
