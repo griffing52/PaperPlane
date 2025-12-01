@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebase";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,8 +55,8 @@ export default function LoginPage() {
 
       {/* Logo header */}
       <header className="px-6 py-4">
-        <div className="flex items-center">
-          <div className="relative h-10 w-40 md:h-12 md:w-48 lg:h-14 lg:w-56">
+        <Link href="/" className="flex items-center">
+          <div className="relative h-10 w-40 md:h-12 md:w-48 lg:h-14 lg:w-56 cursor-pointer">
             <Image
               src="/paperplane-logo.svg"
               alt="PaperPlane Logo"
@@ -64,12 +65,12 @@ export default function LoginPage() {
               priority
             />
           </div>
-        </div>
+        </Link>
       </header>
 
       {/* Main content */}
       <main className="flex items-center justify-center px-4 pb-16 min-h-[70vh]">
-        <div className="w-full max-w-md rounded-md bg-black/80 border border-white/10 px-8 py-10 shadow-xl shadow-black/40 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-md bg-black/60 border border-white/10 px-8 py-10 shadow-xl shadow-black/40 backdrop-blur-sm">
           <h1 className="text-2xl font-semibold mb-6 text-center">Log in</h1>
 
           {loading ? (
