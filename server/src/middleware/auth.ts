@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { prisma, firebaseAuth } from "../config";
+import { prisma, firebaseAuth, logger } from "../config";
 
 const hashString = async (email: string): Promise<string> => {
   const byteHash = await crypto.subtle.digest(
@@ -68,7 +68,7 @@ async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
 // NOTE: The above happened before I'd refactored everything into middlware. If I'd done that already,
 // it'd been easier to have done everything manually, since the auth would be DRY.
 
-export const getFirebaseUserData = async (
+export const getAuthData = async (
   authHeader: string,
 ): Promise<AuthData | null> => {
   // Bearer indicates that we're taking a JWT token
@@ -88,38 +88,31 @@ export const requireUser = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      res.status(401).json({ error: "Missing authorization header" });
-      return;
-    }
-    const authData = await getFirebaseUserData(authHeader);
-
-    if (!authData) {
-      res.status(401).json({ error: "Invalid auth token" });
-      return;
-    }
-
-    const { emailHash } = authData;
-
-    const user = await prisma.user.findUnique({
-      where: { emailHash },
-    });
-
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
-
-    req.user = user;
-    next();
-  } catch (error) {
-    res.status(500).json({
-      error: "Internal server error",
-      details: error instanceof Error ? error.message : "Unknown error",
-    });
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    res.status(401).json({ error: "Missing authorization header" });
+    return;
   }
+  const authData = await getAuthData(authHeader);
+
+  if (!authData) {
+    res.status(401).json({ error: "Invalid auth token" });
+    return;
+  }
+
+  const { emailHash } = authData;
+
+  const user = await prisma.user.findUnique({
+    where: { emailHash },
+  });
+
+  if (!user) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  req.user = user;
+  next();
 };
 
 // Verify that requested flight entry is associated with the user
@@ -128,37 +121,30 @@ export const verifyFlightEntryOwnership = async (
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
-  try {
-    const { id } = req.params;
+  const { id } = req.params;
 
-    if (!req.user) {
-      res.status(401).json({ error: "Unauthorized: User not authenticated" });
-      return;
-    }
-
-    const flightEntry = await prisma.flightEntry.findUnique({
-      where: { id },
-      include: { user: true },
-    });
-
-    if (!flightEntry) {
-      res.status(404).json({ error: "Flight entry not found" });
-      return;
-    }
-
-    if (flightEntry.user.emailHash !== req.user.emailHash) {
-      res
-        .status(403)
-        .json({ error: "Forbidden: Access denied to this flight entry" });
-      return;
-    }
-
-    req.flightEntry = flightEntry;
-    next();
-  } catch (error) {
-    res.status(500).json({
-      error: "Internal server error",
-      details: error instanceof Error ? error.message : "Unknown error",
-    });
+  if (!req.user) {
+    res.status(401).json({ error: "Unauthorized: User not authenticated" });
+    return;
   }
+
+  const flightEntry = await prisma.flightEntry.findUnique({
+    where: { id },
+    include: { user: true },
+  });
+
+  if (!flightEntry) {
+    res.status(404).json({ error: "Flight entry not found" });
+    return;
+  }
+
+  if (flightEntry.user.emailHash !== req.user.emailHash) {
+    res
+      .status(403)
+      .json({ error: "Forbidden: Access denied to this flight entry" });
+    return;
+  }
+
+  req.flightEntry = flightEntry;
+  next();
 };

@@ -2,6 +2,7 @@ import multer from "multer";
 import { PrismaClient } from "@prisma/client";
 import firebase from "firebase-admin";
 import serviceAccount from "./../../serviceAccountKey.json";
+import pino from "pino";
 
 export const PORT = process.env.PORT || 3002;
 
@@ -29,3 +30,14 @@ if (!firebase.apps.length) {
 export const firebaseAuth = firebase.auth();
 
 export const prisma = new PrismaClient();
+
+// https://medium.com/@amalsaji218/setting-up-pino-logging-in-node-js-simple-and-fast-e158b366b8b4
+export const logger = pino({
+  level: 'info', 
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+    },
+  },
+});
