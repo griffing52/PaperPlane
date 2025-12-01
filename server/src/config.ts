@@ -1,7 +1,7 @@
 import multer from "multer";
 import { PrismaClient } from "@prisma/client";
 import firebase from "firebase-admin";
-import serviceAccount from "../sericeAccountKey.json";
+import serviceAccount from "../serviceAccountKey.json";
 import pino from "pino";
 
 export const PORT = process.env.PORT || 3002;
