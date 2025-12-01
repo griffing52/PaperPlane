@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -38,65 +39,109 @@ export default function LoginPage() {
   if (loading) return <div className="p-6">Loading…</div>;
 
   return (
-    <main className="max-w-sm mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-4">Log in</h1>
+    <div className="relative min-h-screen text-white">
+      {/* Background image */}
+      <Image
+        src="/login-bg.jpg"
+        alt="Airplane night background"
+        fill
+        priority
+        className="object-cover -z-20"
+      />
 
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div>
-          <label className="block text-sm mb-1">Email</label>
-          <input
-            id="email"
-            data-testid="login-email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            placeholder="you@example.com"
-          />
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/30 -z-10" />
+
+      {/* Logo header */}
+      <header className="px-6 py-4">
+        <div className="flex items-center">
+          <div className="relative h-10 w-40 md:h-12 md:w-48 lg:h-14 lg:w-56">
+            <Image
+              src="/paperplane-logo.svg"
+              alt="PaperPlane Logo"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
         </div>
+      </header>
 
-        <div>
-          <label className="block text-sm mb-1">Password</label>
-          <input
-            id="password"
-            data-testid="login-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            placeholder="••••••••"
-          />
+      {/* Main content */}
+      <main className="flex items-center justify-center px-4 pb-16 min-h-[70vh]">
+        <div className="w-full max-w-md rounded-md bg-black/80 border border-white/10 px-8 py-10 shadow-xl shadow-black/40 backdrop-blur-sm">
+          <h1 className="text-2xl font-semibold mb-6 text-center">Log in</h1>
+
+          {loading ? (
+            <div className="text-center text-sm text-gray-300">Loading…</div>
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm mb-1" htmlFor="email">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    data-testid="login-email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border border-neutral-700 rounded px-3 py-2 bg-neutral-900/80 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="you@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm mb-1" htmlFor="password">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    data-testid="login-password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full border border-neutral-700 rounded px-3 py-2 bg-neutral-900/80 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="••••••••"
+                  />
+                </div>
+
+                {error && (
+                  <p
+                    data-testid="login-error"
+                    className="text-sm text-red-500 text-center"
+                  >
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  data-testid="login-button"
+                  disabled={submitting}
+                  className="w-full rounded bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 text-sm font-semibold disabled:opacity-50"
+                >
+                  {submitting ? "Signing in…" : "Sign in"}
+                </button>
+              </form>
+
+              <p className="mt-4 text-sm text-center text-gray-300">
+                Don’t have an account?{" "}
+                <a
+                  href="/signup"
+                  data-testid="login-signup-link"
+                  className="text-blue-400 hover:underline"
+                >
+                  Sign up
+                </a>
+              </p>
+            </>
+          )}
         </div>
-
-        {error && (
-          <p
-            data-testid="login-error"
-            className="text-sm text-red-600 text-center"
-          >
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          data-testid="login-button"
-          disabled={submitting}
-          className="w-full rounded px-3 py-2 border"
-        >
-          {submitting ? "Signing in…" : "Sign in"}
-        </button>
-      </form>
-
-      <p className="mt-4 text-sm text-center">
-        Don’t have an account?{" "}
-        <a
-          href="/signup"
-          data-testid="login-signup-link"
-          className="underline"
-        >
-          Sign up
-        </a>
-      </p>
-    </main>
+      </main>
+    </div>
   );
 }
