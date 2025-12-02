@@ -7,11 +7,11 @@
 import os
 from typing import Dict, Any, List
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from processors import AWSOCRProcessor, GeminiOCRProcessor, OCRResult
+from processors import AWSOCRProcessor, GeminiOCRProcessor, OCRResult, HybridOCRProcessor
 
 # Configuration
 # TODO: Use environment variables
-OCR_PROVIDER = os.getenv("OCR_PROVIDER", "AWS") # Options: AWS, GEMINI
+OCR_PROVIDER = os.getenv("OCR_PROVIDER", "AWS") # Options: AWS, GEMINI, HYBRID
 
 app = FastAPI(
     title="Logbook OCR Service",
@@ -21,6 +21,9 @@ app = FastAPI(
 def get_processor():
     if OCR_PROVIDER == "GEMINI":
         return GeminiOCRProcessor()
+
+    if OCR_PROVIDER == "HYBRID":
+        return HybridOCRProcessor()
     
     return AWSOCRProcessor()
 

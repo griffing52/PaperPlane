@@ -1,5 +1,20 @@
 # What I did if you're unsure
 
+## OCR Hybrid processing and AWS integration
+
+Enhance OCR functionality with Hybrid processing and Gemini integration and updated environment variables and modularized code structured. Need to create test suite now to make sure it's good!
+
+Prompted Gemini 3 Pro with the following to take current tested code and insert and refactor it into AWS image processing wrapper with the following prompt:
+
+You are a professional systems and software engineer. Using and reformatting the textract processing code provided, can you implement the pure AWS processor that takes the table output, which should have the following header (or similar):
+Date	Aircraft Type	Tail Number	Source Airport	Destination Airport	Total Time (hrs)	PIC Hours (hrs)	Instrument Hours (hrs)	Night Hours (hrs)	Landings (Day)	Landings (Night)	Remarks
+
+It should return an error if it doens't understand the data (error handling by the frontend for display to user), but it shouldn't crash the program. Please fill in the aws_processor, while maintaining processor design practices.
+
+## Add gemini image understanding (untested but independent!)
+
+Used gemini [docs](https://ai.google.dev/gemini-api/docs/image-understanding) to fill gemini OCR image processor functionality.
+
 ## Modularize OCR with temporary mockup
 
 I was thinking about the implementation hiding principle and figured it wouldn't be a bad thing to both modularize the image processor as well as
