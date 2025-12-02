@@ -33,6 +33,9 @@ Integrate nextjs switch. I cannot get it to run properly on my windows machine. 
         at ignore-listed frames
 which I've been trying to fixn
 
+## Give NumberField settable min value and setup
+
+I added component options for clamping numbers that don't make sense like negative hours flown and decimal day and night landings.
 
 ## Configured and tested AWS Textract
 
