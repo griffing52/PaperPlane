@@ -102,6 +102,7 @@ export const requireUser = async (
 
   const { emailHash } = authData;
 
+  // for privacy we only store email hashes in the database
   const user = await prisma.user.findUnique({
     where: { emailHash },
   });
