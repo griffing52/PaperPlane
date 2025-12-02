@@ -1,3 +1,4 @@
+import { createUser } from "@/server/src/controllers/UserController";
 import { PrismaClient, FlightEntry, User, Flight } from "@prisma/client";
 
 const prisma = new PrismaClient();

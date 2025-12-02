@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "Paper Plane",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "dev:server": "cd server && npm run dev",
-    "build:server": "cd server && npm run build",
-    "test:server": "cd server && npm test",
-    "install:server": "cd server && npm install",
+    "dev:server": "npm --prefix server run dev",
+    "build:server": "npm --prefix server run build",
+    "test:server": "npm --prefix server test",
+    "install:all": "npm install && npm --prefix server install",
+    "install:server": "npm --prefix server install",
     "seed": "npm --prefix server run seed --",
     "test:cucumber": "cucumber-js --require-module ts-node/register/transpile-only --require \"./features/step_definitions/**/*.ts\"",
     "test:e2e": "cucumber-js --require-module ts-node/register --require \"./features/**/*.ts\"",

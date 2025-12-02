@@ -10,5 +10,7 @@ export default defineConfig({
     environment: "node",
     testTimeout: 10000,
     hookTimeout: 10000,
+    setupFiles: ["./test/setup.ts"],
+    fileParallelism: false, // parallel tests leads to DB conflicts because we use the same mock user
   },
 });

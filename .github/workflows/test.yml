@@ -33,6 +33,8 @@ jobs:
         NEXT_PUBLIC_FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}
         ARTILLERY_CLOUD_API_KEY=${{ secrets.ARTILLERY_CLOUD_API_KEY }}
         EOF
+        # base64 to avoid encoding issues with a JSON
+        echo '${{ secrets.SERVICE_ACCOUNT_KEY }}' | base64 -d > server/sericeAccountKey.json
 
     - name: Setup database
       run: npx prisma db push
