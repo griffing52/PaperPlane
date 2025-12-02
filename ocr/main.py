@@ -32,13 +32,14 @@ class FlightRecord(BaseModel):
 
 class OCRResultResponse(BaseModel):
     message: str
+    rawjson: Dict[str, Any]
     records: List[FlightRecord]
 
 # --- Helper Function for Data Extraction (Mocked) ---
 
 def parse_textract_json(raw_json: Dict[str, Any]) -> List[FlightRecord]:
     """
-    Parse Textract JSON to extract a list of flight records.
+    Returns a list of flight records extracted from Textract JSON.
 
     TODO: Implement. Iterate through the TABLE blocks
     and map the cell contents to the FlightRecord fields.
@@ -97,8 +98,9 @@ async def process_logbook(
         # e.g., prisma_client.flightrecord.create_many(data=flight_records)
 
         return OCRResultResponse(
-            message=f"Successfully processed {len(flight_records)} flight records.",
-            records=flight_records
+            message=f"Successfully processed {len(flight_records)} flight records",
+            records=flight_records,
+            rawjson=textract_response
         )
 
     except Exception as e:
