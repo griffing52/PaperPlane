@@ -3,6 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "@/components/LogoutButton";
 import { useMemo, useState, useEffect, FormEvent, useRef, ChangeEvent } from "react";
+import { API_BASE_URL } from "./../../lib/config.ts"
 
 const uploadLogbookFile = async (file: File) => {
   const formData = new FormData();
@@ -39,6 +40,13 @@ type LogEntry = {
   remarks: string | null;
 };
 
+const genHeaders = (idToken: string) => {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${idToken}`
+  }
+}
+
 const parseLogEntry = (data: any): LogEntry => {
   // we use this instead of Json.parse for more flexiblity
   return {
@@ -61,13 +69,11 @@ const parseLogEntry = (data: any): LogEntry => {
   };
 };
 
-// NOTE: Backend now uses constant emailHash for michael.smith@outlook.com for testing
-const fetchLogs = async () => {
-  const response = await fetch("https://paperplane.bolun.dev/api/v1/flight_entry", {
+// NOTE: michael.smith@outlook.com is a valid email address for testing
+const fetchLogs = async (idToken: string): Promise<Array<LogEntry>> => {
+  const response = await fetch(`https://${API_BASE_URL}/api/v1/flight_entry`, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: genHeaders(idToken),
   });
   const data = await response.json();
   return data.map(parseLogEntry);
@@ -78,17 +84,16 @@ const fetchLogs = async () => {
 const saveFlightEntry = async (
   method: "POST" | "PATCH",
   entry: Partial<Omit<LogEntry, "id">>,
-  id?: string
+  idToken: string,
+  id?: string,
 ) => {
   const url = id
-    ? `https://paperplane.bolun.dev/api/v1/flight_entry/${id}`
-    : "https://paperplane.bolun.dev/api/v1/flight_entry";
+    ? `https://${API_BASE_URL}/api/v1/flight_entry/${id}`
+    : `https://${API_BASE_URL}/api/v1/flight_entry`;
 
   const response = await fetch(url, {
     method,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: genHeaders(idToken),
     body: JSON.stringify({
       date: entry.date,
       tailNumber: entry.tailNumber,
@@ -116,17 +121,15 @@ const saveFlightEntry = async (
   return response.json();
 };
 
-const createFlightEntry = (entry: Omit<LogEntry, "id">) => saveFlightEntry("POST", entry);
+const createFlightEntry = (entry: Omit<LogEntry, "id">, idToken: string) => saveFlightEntry("POST", entry, idToken);
 
-const updateFlightEntry = (entry: LogEntry) =>
-  saveFlightEntry("PATCH", entry, entry.id);
+const updateFlightEntry = (entry: LogEntry, idToken: string) =>
+  saveFlightEntry("PATCH", entry, idToken, entry.id);
 
-const deleteFlightEntry = async (id: string) => {
-  const response = await fetch(`https://paperplane.bolun.dev/api/v1/flight_entry/${id}`, {
+const deleteFlightEntry = async (id: string, idToken: string) => {
+  const response = await fetch(`https://${API_BASE_URL}/api/v1/flight_entry/${id}`, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: genHeaders(idToken),
   });
 
   if (!response.ok) {
@@ -139,7 +142,7 @@ const deleteFlightEntry = async (id: string) => {
 
 
 export default function DashboardPage() {
-  const { user, emailHash, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
 
@@ -187,9 +190,14 @@ const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
 };
 
   useEffect(() => {
-    if (!emailHash) return;
-    fetchLogs().then(setLogs);
-  }, [emailHash]);
+    const load = async () => {
+      const idToken = await user?.getIdToken()
+      if (idToken) {
+        fetchLogs(idToken).then(setLogs);
+      }
+    }
+    load()
+  }, [user]);
 
   const stats = useMemo(() => {
     const totalHours = logs.reduce((sum, log) => sum + log.totalFlightTime, 0);
