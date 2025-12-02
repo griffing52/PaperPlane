@@ -10,6 +10,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from pydantic import BaseModel
 import boto3
 
+# TODO switch to environment variable management as needed, use python-dotenv or similar in dev
+# AWS_REGION = os.getenv("AWS_REGION", "us-west-1")
 AWS_REGION = "us-west-1" 
 TEXTRACT_CLIENT = boto3.client('textract', region_name=AWS_REGION)
 # --------------------------------------------------------------------------
