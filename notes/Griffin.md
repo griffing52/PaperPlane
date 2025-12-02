@@ -1,5 +1,15 @@
 # What I did if you're unsure
 
+## Modularize OCR with temporary mockup
+
+I was thinking about the implementation hiding principle and figured it wouldn't be a bad thing to both modularize the image processor as well as
+allow for other implementations in the future (or even as I continue developing this in case we run into issues with Textract).
+
+## Initialize script helpers for TA
+
+Getting ready for when our TA is going to have to try to run this! Hopefully these shell scripts (and ps1 script potentially if on windows
+if I end up adding that part too) will make it easier to get everything up and running, installing all dependencies and other configuration steps!
+
 ## Merge branch 'main' into GriffinNessa-OCR
 
 Integrate nextjs switch. I cannot get it to run properly on my windows machine. I get this strange error:
