@@ -1,9 +1,13 @@
 'use client';
 
+import Image from "next/image";
+import Link from "next/link";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebase';
+import { createBackendUser } from '../../lib/backendUser';
+import { BrandLogo } from "@/components/BrandLogo";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -16,70 +20,95 @@ export default function SignUpPage() {
     e.preventDefault();
     setError(null);
 
-    // Validate passwords match
     if (passwordOne !== passwordTwo) {
       setError('Passwords do not match');
       return;
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, passwordOne);
-      console.log('User created successfully');
+      const userCredential = await createUserWithEmailAndPassword(auth, email, passwordOne);
+      const idToken = await userCredential.user.getIdToken();
+      await createBackendUser(idToken, "TODO", "TODO");
       router.push('/login');
     } catch (err: any) {
-      // Catch Firebase errors like weak password or email already in use
       setError(err.message);
     }
   };
 
   return (
-    <main className="max-w-md mx-auto mt-10">
-      <h1 className="text-2xl font-semibold mb-6 text-center">Sign Up</h1>
+    <div className="relative min-h-screen text-white">
 
-      {/* Error message with data-testid */}
-      {error && (
-        <p data-testid="signup-error" className="text-red-500 text-center mb-4">
-          {error}
-        </p>
-      )}
+      {/* Background */}
+      <Image
+        src="/signup-bg.jpg"
+        alt="Airplane background"
+        fill
+        priority
+        className="object-cover -z-20"
+      />
 
-      <form onSubmit={onSubmit} className="space-y-4">
-        <input
-          id="email"
-          data-testid="signup-email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="border w-full p-2 rounded"
-        />
+      {/* Lighter overlay */}
+      <div className="absolute inset-0 bg-black/60 -z-10" />
 
-        <input
-          id="password"
-          data-testid="signup-password"
-          placeholder="Password"
-          value={passwordOne}
-          onChange={(e) => setPasswordOne(e.target.value)}
-          className="border w-full p-2 rounded"
-        />
+      {/* Logo */}
+      <BrandLogo href="/" />
+      {/* Centered signup card */}
+      <main className="flex items-center justify-center px-4 pb-16 min-h-[70vh]">
+        <div className="w-full max-w-md rounded-md bg-black/60 border border-white/10 px-8 py-10 shadow-xl shadow-black/40 backdrop-blur-sm">
+          <h1 className="text-2xl font-semibold mb-6 text-center">Sign Up</h1>
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          data-testid="signup-confirm"
-          value={passwordTwo}
-          onChange={(e) => setPasswordTwo(e.target.value)}
-          className="border w-full p-2 rounded"
-        />
+          {error && (
+            <p data-testid="signup-error" className="text-red-500 text-center mb-4">
+              {error}
+            </p>
+          )}
 
-        <button
-          type="submit"
-          data-testid="signup-button"
-          className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
-          disabled={!email || !passwordOne || !passwordTwo}
-        >
-          Create Account
-        </button>
-      </form>
-    </main>
+          <form onSubmit={onSubmit} className="space-y-4">
+
+            <input
+              id="email"
+              data-testid="signup-email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="border border-neutral-700 w-full p-2 rounded bg-neutral-900/80 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <input
+              id="password"
+              data-testid="signup-password"
+              type="password"
+              placeholder="Password"
+              value={passwordOne}
+              onChange={(e) => setPasswordOne(e.target.value)}
+              className="border border-neutral-700 w-full p-2 rounded bg-neutral-900/80 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <input
+              type="password"
+              placeholder="Confirm Password"
+              data-testid="signup-confirm"
+              value={passwordTwo}
+              onChange={(e) => setPasswordTwo(e.target.value)}
+              className="border border-neutral-700 w-full p-2 rounded bg-neutral-900/80 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            <button
+              type="submit"
+              data-testid="signup-button"
+              disabled={!email || !passwordOne || !passwordTwo}
+              className="w-full bg-blue-600 text-white py-2 rounded text-sm font-semibold 
+                         hover:bg-blue-500 disabled:opacity-50"
+            >
+              Create Account
+            </button>
+          </form>
+        </div>
+      </main>
+    </div>
   );
 }
