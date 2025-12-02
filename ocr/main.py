@@ -7,72 +7,33 @@
 import os
 from typing import Dict, Any, List
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from pydantic import BaseModel
-import boto3
+from processors import AWSOCRProcessor, GeminiOCRProcessor, OCRResult
 
-# TODO switch to environment variable management as needed, use python-dotenv or similar in dev
-# AWS_REGION = os.getenv("AWS_REGION", "us-west-1")
-AWS_REGION = "us-west-1" 
-TEXTRACT_CLIENT = boto3.client('textract', region_name=AWS_REGION)
-# --------------------------------------------------------------------------
+# Configuration
+# TODO: Use environment variables
+OCR_PROVIDER = os.getenv("OCR_PROVIDER", "AWS") # Options: AWS, GEMINI
 
 app = FastAPI(
-    title="Logbook OCR Service (No S3)",
-    description="Uses Textract's synchronous analyze_document for direct byte processing."
+    title="Logbook OCR Service",
+    description="Modular OCR service supporting AWS Textract and Gemini."
 )
 
-# --- Pydantic Models for Response (Simplified for this example) ---
-
-#TODO: Update model with actual logbook fields
-class FlightRecord(BaseModel):
-    date: str
-    source_airport: str
-    destination_airport: str
-    hours_flight: float
-    landings_day: int
-    landings_night: int
-
-class OCRResultResponse(BaseModel):
-    message: str
-    rawjson: Dict[str, Any]
-    records: List[FlightRecord]
-
-# --- Helper Function for Data Extraction (Mocked) ---
-
-def parse_textract_json(raw_json: Dict[str, Any]) -> List[FlightRecord]:
-    """
-    Returns a list of flight records extracted from Textract JSON.
-
-    TODO: Implement. Iterate through the TABLE blocks
-    and map the cell contents to the FlightRecord fields.
-    """
-    # NOTE: This is MOCKED DATA. Your actual implementation will be complex.
-    print("--- RAW TEXTRACT JSON RECEIVED (Placeholder for parsing) ---")
+def get_processor():
+    if OCR_PROVIDER == "GEMINI":
+        return GeminiOCRProcessor()
     
-    # For demonstration, we'll return a simple mock record
-    return [
-        FlightRecord(
-            date="2025-01-15",
-            source_airport="KSMO",
-            destination_airport="KSAN",
-            hours_flight=1.5,
-            landings_day=2,
-            landings_night=0
-        )
-    ]
+    return AWSOCRProcessor()
 
-# --- FastAPI Endpoint for Synchronous OCR Processing ---
 @app.post(
     "/ocr/process",
-    response_model=OCRResultResponse,
+    response_model=OCRResult,
     status_code=200
 )
 async def process_logbook(
     file: UploadFile = File(..., description="Image of the logbook page (PNG or JPEG, Max 5MB)")
 ):
     """
-    Uploads a single-page image and processes it immediately using Textract's
-    synchronous analyze_document API.
+    Uploads a single-page image and processes it using the configured OCR provider.
     """
     # 1. Read file bytes
     file_bytes = await file.read()
@@ -80,32 +41,16 @@ async def process_logbook(
     # 2. Validate file size and type
     if file.content_type not in ["image/png", "image/jpeg"]:
         raise HTTPException(status_code=400, detail="File must be a PNG or JPEG image.")
+    
+    # Size limit might depend on provider, but keeping 5MB as a safe default for now
     if len(file_bytes) > 5 * 1024 * 1024:
-        # The synchronous API has a 5MB limit
-        raise HTTPException(status_code=413, detail="File size exceeds the 5MB limit for synchronous Textract analysis.")
+        raise HTTPException(status_code=413, detail="File size exceeds the 5MB limit.")
 
     try:
-        # 3. Call Textract Synchronous API
-        textract_response = TEXTRACT_CLIENT.analyze_document(
-            Document={'Bytes': file_bytes},
-            FeatureTypes=['TABLES'] # Requesting table detection
-        )
-
-        # 4. Parse/Normalize Data (Placeholder function)
-        flight_records = parse_textract_json(textract_response)
-
-        # 5. Store Data (Prisma step placeholder)
-        # Note: Database storage using Prisma client goes here, 
-        # leveraging the 'flight_records' list.
-        # e.g., prisma_client.flightrecord.create_many(data=flight_records)
-
-        return OCRResultResponse(
-            message=f"Successfully processed {len(flight_records)} flight records",
-            records=flight_records,
-            rawjson=textract_response
-        )
+        processor = get_processor()
+        result = await processor.process_image(file_bytes)
+        return result
 
     except Exception as e:
-        # Log the detailed exception e to your internal logs
-        print(f"Textract or Processing Error: {e}")
-        raise HTTPException(status_code=500, detail="Textract processing failed. Check logs for details.")
+        print(f"Processing Error: {e}")
+        raise HTTPException(status_code=500, detail=f"OCR processing failed: {str(e)}")
