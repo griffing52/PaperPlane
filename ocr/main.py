@@ -48,7 +48,7 @@ async def process_logbook(
 
     try:
         processor = get_processor()
-        result = await processor.process_image(file_bytes)
+        result = await processor.process_image(file_bytes, mime_type=file.content_type)
         return result
 
     except Exception as e:

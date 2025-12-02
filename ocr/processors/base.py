@@ -24,7 +24,7 @@ class OCRResult(BaseModel):
 
 class OCRProcessor(ABC):
     @abstractmethod
-    async def process_image(self, file_bytes: bytes) -> OCRResult:
+    async def process_image(self, file_bytes: bytes, mime_type: str = "image/jpeg") -> OCRResult:
         """
         Process the image bytes and return the extracted flight records.
         """

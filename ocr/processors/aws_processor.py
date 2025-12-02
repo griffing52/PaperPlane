@@ -6,7 +6,7 @@ class AWSOCRProcessor(OCRProcessor):
     def __init__(self, region_name: str = "us-west-1"):
         self.client = boto3.client('textract', region_name=region_name)
 
-    async def process_image(self, file_bytes: bytes) -> OCRResult:
+    async def process_image(self, file_bytes: bytes, mime_type: str = "image/jpeg") -> OCRResult:
         # Call Textract Synchronous API
         textract_response = self.client.analyze_document(
             Document={'Bytes': file_bytes},
