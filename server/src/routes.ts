@@ -75,11 +75,6 @@ router.post(
   controllers.verifyFlightHandler,
 );
 
-router.post(
-  "/api/v1/ocr/",
-  upload.single("image"),
-  validate(ocrSchema, "body"),
-  controllers.processOcrImage,
-);
+
 
 export default router;

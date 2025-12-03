@@ -19,14 +19,13 @@ export const createUser = async (req: Request, res: Response) => {
 
   const { email, emailHash } = auth;
 
-  const { name, licenseNumber } = req.body as unknown as UserPostBodyParams;
+  const { name } = req.body as unknown as UserPostBodyParams;
 
   const user = await prisma.user.create({
     data: {
       name,
       email,
-      emailHash,
-      licenseNumber,
+      emailHash
     },
   });
   res.status(201).json(user);
