@@ -1,5 +1,17 @@
 # What I did if you're unsure
 
+## AWS processor works + tests for all added!
+
+Polished pipeline and created good mock data for the test api functionality! Also manual tested it, looks good! Maybe remove textract raw output from https return in future?
+
+Command notes for me to explain later:
+pip install -e .
+uvicorn main:app --reload
+
+## Temporary test suite for OCR zoo
+
+Added intial mockup for test suite, didn't confirm mock data and functionality yet but outlined testing foundation and pipeline
+
 ## OCR Hybrid processing and AWS integration
 
 Enhance OCR functionality with Hybrid processing and Gemini integration and updated environment variables and modularized code structured. Need to create test suite now to make sure it's good!
