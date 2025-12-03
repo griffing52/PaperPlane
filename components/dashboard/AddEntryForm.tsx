@@ -5,24 +5,25 @@ import NumberField from "./NumberField";
 type AddEntryFormProps = {
   onClose: () => void;
   onSave: (entry: Omit<LogEntry, "id">) => Promise<void>;
+  editingEntry?: LogEntry | null;
 };
 
-export default function AddEntryForm({ onClose, onSave }: AddEntryFormProps) {
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [tailNumber, setTailNumber] = useState("");
-  const [srcIcao, setSrcIcao] = useState("");
-  const [destIcao, setDestIcao] = useState("");
-  const [route, setRoute] = useState("");
-  const [totalFlightTime, setTotalFlightTime] = useState("");
-  const [landingsDay, setLandingsDay] = useState("0");
-  const [landingsNight, setLandingsNight] = useState("0");
-  const [instrumentTime, setInstrumentTime] = useState("0");
-  const [picTime, setPicTime] = useState("0");
-  const [dualReceived, setDualReceived] = useState("0");
-  const [isNight, setIsNight] = useState(false);
-  const [isSolo, setIsSolo] = useState(false);
-  const [isXC, setIsXC] = useState(false);
-  const [remarks, setRemarks] = useState("");
+export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntryFormProps) {
+  const [date, setDate] = useState(editingEntry ? editingEntry.date : new Date().toISOString().split("T")[0]);
+  const [tailNumber, setTailNumber] = useState(editingEntry?.tailNumber || "");
+  const [srcIcao, setSrcIcao] = useState(editingEntry?.srcIcao || "");
+  const [destIcao, setDestIcao] = useState(editingEntry?.destIcao || "");
+  const [route, setRoute] = useState(editingEntry?.route || "");
+  const [totalFlightTime, setTotalFlightTime] = useState(editingEntry?.totalFlightTime.toString() || "");
+  const [landingsDay, setLandingsDay] = useState(editingEntry?.dayLandings.toString() || "0");
+  const [landingsNight, setLandingsNight] = useState(editingEntry?.nightLandings.toString() || "0");
+  const [instrumentTime, setInstrumentTime] = useState(editingEntry?.instrumentTime.toString() || "0");
+  const [picTime, setPicTime] = useState(editingEntry?.picTime.toString() || "0");
+  const [dualReceived, setDualReceived] = useState(editingEntry?.dualReceivedTime.toString() || "0");
+  const [isNight, setIsNight] = useState(editingEntry?.night || false);
+  const [isSolo, setIsSolo] = useState(editingEntry?.solo || false);
+  const [isXC, setIsXC] = useState(editingEntry?.crossCountry || false);
+  const [remarks, setRemarks] = useState(editingEntry?.remarks || "");
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = async () => {
@@ -78,7 +79,9 @@ export default function AddEntryForm({ onClose, onSave }: AddEntryFormProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-800 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">Add Flight Entry</h2>
+          <h2 className="text-xl font-semibold text-white">
+            {editingEntry ? "Edit Flight Entry" : "Add Flight Entry"}
+          </h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 text-slate-400 hover:bg-slate-700 hover:text-white"
@@ -225,7 +228,7 @@ export default function AddEntryForm({ onClose, onSave }: AddEntryFormProps) {
               disabled={isSaving}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50"
             >
-              {isSaving ? "Saving..." : "Save Entry"}
+              {isSaving ? "Saving..." : editingEntry ? "Update Entry" : "Save Entry"}
             </button>
           </div>
         </div>

@@ -7,6 +7,7 @@ type LogbookListProps = {
   selectedIds?: Set<string>;
   onSelectionChange?: (id: string) => void;
   onSelectAll?: (selected: boolean) => void;
+  onEdit?: (entry: LogEntry) => void;
 };
 
 export default function LogbookList({ 
@@ -14,7 +15,8 @@ export default function LogbookList({
   isLoading, 
   selectedIds = new Set(),
   onSelectionChange,
-  onSelectAll
+  onSelectAll,
+  onEdit
 }: LogbookListProps) {
   if (isLoading) {
     return (
@@ -62,6 +64,7 @@ export default function LogbookList({
               <th className="px-4 py-3 font-medium text-right">PIC</th>
               <th className="px-4 py-3 font-medium text-right">Landings</th>
               <th className="px-4 py-3 font-medium">Remarks</th>
+              <th className="px-4 py-3 font-medium w-8"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
@@ -104,6 +107,19 @@ export default function LogbookList({
                 </td>
                 <td className="max-w-xs truncate px-4 py-3 text-slate-500 group-hover:text-slate-400">
                   {entry.remarks}
+                </td>
+                <td className="px-4 py-3 w-8">
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(entry)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-slate-200"
+                      title="Edit entry"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

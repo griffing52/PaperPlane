@@ -11,6 +11,7 @@ import {
   createFlightEntry,
   uploadLogbookFile,
   deleteFlightEntry,
+  updateFlightEntry,
 } from "@/lib/api/logbook";
 import StatusBar from "@/components/dashboard/StatusBar";
 import LogbookList from "@/components/dashboard/LogbookList";
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddEntry, setShowAddEntry] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -178,6 +180,26 @@ export default function Dashboard() {
     }
   };
 
+  const handleEditEntry = (entry: LogEntry) => {
+    setEditingEntry(entry);
+  };
+
+  const handleSaveEditedEntry = async (entryData: Omit<LogEntry, "id">) => {
+    if (!user || !editingEntry) return;
+    try {
+      const token = await user.getIdToken();
+      await updateFlightEntry(
+        { ...entryData, id: editingEntry.id } as LogEntry,
+        token
+      );
+      await loadLogs();
+      setEditingEntry(null);
+    } catch (error) {
+      console.error("Failed to update entry", error);
+      throw error;
+    }
+  };
+
   if (loading || !user) {
     return null; // Or a loading spinner
   }
@@ -263,6 +285,7 @@ export default function Dashboard() {
               selectedIds={selectedIds}
               onSelectionChange={handleToggleSelection}
               onSelectAll={handleSelectAll}
+              onEdit={handleEditEntry}
             />
           </section>
 
@@ -292,10 +315,14 @@ export default function Dashboard() {
       </main>
 
       {/* Add Entry Modal */}
-      {showAddEntry && (
+      {(showAddEntry || editingEntry) && (
         <AddEntryForm
-          onClose={() => setShowAddEntry(false)}
-          onSave={handleSaveEntry}
+          onClose={() => {
+            setShowAddEntry(false);
+            setEditingEntry(null);
+          }}
+          onSave={editingEntry ? handleSaveEditedEntry : handleSaveEntry}
+          editingEntry={editingEntry}
         />
       )}
     </div>
