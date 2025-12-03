@@ -5,7 +5,7 @@ Feature: Routing & Access Protection
 Scenario: User is redirected when trying to access dashboard without logging in
   Given I am logged out
   When I try to access the page "/dashboard"
-  Then I should see a request to sign in
+  Then I should be redirected to the login page
 
 @auth
 Scenario: Logged-in user can access dashboard

@@ -15,8 +15,8 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
   const [destIcao, setDestIcao] = useState(editingEntry?.destIcao || "");
   const [route, setRoute] = useState(editingEntry?.route || "");
   const [totalFlightTime, setTotalFlightTime] = useState(editingEntry?.totalFlightTime.toString() || "");
-  const [landingsDay, setLandingsDay] = useState(editingEntry?.dayLandings.toString() || "0");
-  const [landingsNight, setLandingsNight] = useState(editingEntry?.nightLandings.toString() || "0");
+  const [dayLandings, setDayLandings] = useState(editingEntry?.dayLandings.toString() || "0");
+  const [nightLandings, setNightLandings] = useState(editingEntry?.nightLandings.toString() || "0");
   const [instrumentTime, setInstrumentTime] = useState(editingEntry?.instrumentTime.toString() || "0");
   const [picTime, setPicTime] = useState(editingEntry?.picTime.toString() || "0");
   const [dualReceived, setDualReceived] = useState(editingEntry?.dualReceivedTime.toString() || "0");
@@ -36,9 +36,8 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
         destIcao,
         route,
         totalFlightTime: parseFloat(totalFlightTime) || 0,
-        landingsDay: parseInt(landingsDay) || 0,
-        nightLandings: parseInt(landingsNight) || 0,
-        dayLandings: parseInt(landingsDay) || 0, // Fix: assigned twice in original thought, correcting here
+        nightLandings: parseInt(nightLandings) || 0,
+        dayLandings: parseInt(dayLandings) || 0, // Fix: assigned twice in original thought, correcting here
         instrumentTime: parseFloat(instrumentTime) || 0,
         picTime: parseFloat(picTime) || 0,
         dualReceivedTime: parseFloat(dualReceived) || 0,
@@ -58,8 +57,8 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
         picTime: parseFloat(picTime) || 0,
         dualReceivedTime: parseFloat(dualReceived) || 0,
         instrumentTime: parseFloat(instrumentTime) || 0,
-        dayLandings: parseInt(landingsDay) || 0,
-        nightLandings: parseInt(landingsNight) || 0,
+        dayLandings: parseInt(dayLandings) || 0,
+        nightLandings: parseInt(nightLandings) || 0,
         night: isNight,
         solo: isSolo,
         crossCountry: isXC,
@@ -122,7 +121,10 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
               <input
                 type="text"
                 value={srcIcao}
-                onChange={(e) => setSrcIcao(e.target.value)}
+                onChange={(e) => {
+                  setSrcIcao(e.target.value)
+                  return setRoute(`${srcIcao} ${e.target.value}`);
+                }}
                 className="w-full rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs uppercase"
                 placeholder="KAPA"
               />
@@ -132,7 +134,10 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
               <input
                 type="text"
                 value={destIcao}
-                onChange={(e) => setDestIcao(e.target.value)}
+                onChange={(e) => {
+                  setDestIcao(e.target.value)
+                  return setRoute(`${srcIcao} ${e.target.value}`);
+                }}
                 className="w-full rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs uppercase"
                 placeholder="KCOS"
               />
@@ -163,14 +168,14 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
           <div className="grid grid-cols-2 gap-4 rounded-xl bg-slate-900/50 p-4">
             <NumberField
               label="Day Landings"
-              value={landingsDay}
-              onChange={setLandingsDay}
+              value={dayLandings}
+              onChange={setDayLandings}
               step="1"
             />
             <NumberField
               label="Night Landings"
-              value={landingsNight}
-              onChange={setLandingsNight}
+              value={nightLandings}
+              onChange={setNightLandings}
               step="1"
             />
             

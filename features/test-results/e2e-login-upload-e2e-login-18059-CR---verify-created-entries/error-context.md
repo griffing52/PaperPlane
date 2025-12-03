@@ -1,0 +1,189 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [active]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - navigation [ref=e7]:
+            - button "previous" [disabled] [ref=e8]:
+              - img "previous" [ref=e9]
+            - generic [ref=e11]:
+              - generic [ref=e12]: 1/
+              - text: "1"
+            - button "next" [disabled] [ref=e13]:
+              - img "next" [ref=e14]
+          - img
+        - generic [ref=e16]:
+          - link "Next.js 16.0.1 (stale) Turbopack" [ref=e17] [cursor=pointer]:
+            - /url: https://nextjs.org/docs/messages/version-staleness
+            - img [ref=e18]
+            - generic "There is a newer version (16.0.6) available, upgrade recommended!" [ref=e20]: Next.js 16.0.1 (stale)
+            - generic [ref=e21]: Turbopack
+          - img
+      - dialog "Console TypeError" [ref=e23]:
+        - generic [ref=e26]:
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - generic [ref=e30]: Console TypeError
+              - generic [ref=e31]:
+                - button "Copy Error Info" [ref=e32] [cursor=pointer]:
+                  - img [ref=e33]
+                - button "No related documentation found" [disabled] [ref=e35]:
+                  - img [ref=e36]
+                - link "Learn more about enabling Node.js inspector for server code with Chrome DevTools" [ref=e38] [cursor=pointer]:
+                  - /url: https://nextjs.org/docs/app/building-your-application/configuring/debugging#server-side-code
+                  - img [ref=e39]
+            - generic [ref=e48]: Failed to fetch
+          - generic [ref=e50]:
+            - paragraph [ref=e52]:
+              - text: Call Stack
+              - generic [ref=e53]: "10"
+            - generic [ref=e54]:
+              - generic [ref=e55]:
+                - text: uploadLogbookFile
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e56] [cursor=pointer]:
+                  - img [ref=e57]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/_de85bb14._.js (188:28)
+            - generic [ref=e59]:
+              - generic [ref=e60]:
+                - text: handleFileUpload
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e61] [cursor=pointer]:
+                  - img [ref=e62]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/_de85bb14._.js (1513:182)
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - text: executeDispatch
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e66] [cursor=pointer]:
+                  - img [ref=e67]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (10239:13)
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - text: runWithFiberInDEV
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e71] [cursor=pointer]:
+                  - img [ref=e72]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (959:74)
+            - generic [ref=e74]:
+              - generic [ref=e75]:
+                - text: processDispatchQueue
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e76] [cursor=pointer]:
+                  - img [ref=e77]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (10265:41)
+            - generic [ref=e79]:
+              - generic [ref=e80]:
+                - text: <unknown>
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e81] [cursor=pointer]:
+                  - img [ref=e82]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (10540:13)
+            - generic [ref=e84]:
+              - generic [ref=e85]:
+                - text: batchedUpdates$1
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e86] [cursor=pointer]:
+                  - img [ref=e87]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (2247:44)
+            - generic [ref=e89]:
+              - generic [ref=e90]:
+                - text: dispatchEventForPluginEventSystem
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e91] [cursor=pointer]:
+                  - img [ref=e92]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (10341:9)
+            - generic [ref=e94]:
+              - generic [ref=e95]:
+                - text: dispatchEvent
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e96] [cursor=pointer]:
+                  - img [ref=e97]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (12855:37)
+            - generic [ref=e99]:
+              - generic [ref=e100]:
+                - text: dispatchDiscreteEvent
+                - button "Sourcemapping failed. Click to log cause of error." [ref=e101] [cursor=pointer]:
+                  - img [ref=e102]
+              - text: file:///C:/Users/Mira%20Haldar/PaperPlane/.next/dev/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js (12837:64)
+        - generic [ref=e104]: "1"
+        - generic [ref=e105]: "2"
+    - generic [ref=e110] [cursor=pointer]:
+      - button "Open Next.js Dev Tools" [ref=e111]:
+        - img [ref=e112]
+      - generic [ref=e115]:
+        - button "Open issues overlay" [ref=e116]:
+          - generic [ref=e117]:
+            - generic [ref=e118]: "0"
+            - generic [ref=e119]: "1"
+          - generic [ref=e120]: Issue
+        - button "Collapse issues badge" [ref=e121]:
+          - img [ref=e122]
+  - alert [ref=e124]: Pilot Dashboard
+  - generic [ref=e125]:
+    - navigation [ref=e126]:
+      - generic [ref=e127]:
+        - generic [ref=e128]:
+          - link "PaperPlane Logo" [ref=e130] [cursor=pointer]:
+            - /url: /
+            - img "PaperPlane Logo" [ref=e132]
+          - generic [ref=e133]:
+            - button "Logbook" [ref=e134]
+            - button "Reports" [ref=e135]
+            - button "Aircraft" [ref=e136]
+        - generic [ref=e137]:
+          - generic [ref=e138]:
+            - generic [ref=e139]: test user
+            - generic [ref=e140]: admin@example.com
+          - button "Logout" [ref=e141]
+    - main [ref=e142]:
+      - generic [ref=e143]:
+        - heading "Pilot Dashboard" [level=1] [ref=e144]
+        - paragraph [ref=e145]: Flight time, proficiency, and logbook in one place.
+      - generic [ref=e146]:
+        - generic [ref=e147]:
+          - generic [ref=e148]:
+            - heading "Logbook" [level=2] [ref=e149]
+            - generic [ref=e150]:
+              - generic [ref=e151] [cursor=pointer]: Upload logbook file
+              - button "Add entry" [ref=e152]
+          - generic [ref=e154]:
+            - paragraph [ref=e155]: No flights recorded yet
+            - paragraph [ref=e156]: Add your first entry to get started
+        - generic [ref=e157]:
+          - heading "Pilot status" [level=2] [ref=e158]
+          - generic [ref=e159]:
+            - generic [ref=e161]:
+              - generic [ref=e162]:
+                - paragraph [ref=e163]: Total time
+                - paragraph [ref=e164]: 0.0 h
+              - generic [ref=e165]:
+                - paragraph [ref=e166]: PIC time
+                - paragraph [ref=e167]: 0.0 h
+              - generic [ref=e168]:
+                - paragraph [ref=e169]: Instrument
+                - paragraph [ref=e170]: 0.0 h
+              - generic [ref=e171]:
+                - paragraph [ref=e172]: Night
+                - paragraph [ref=e173]: 0.0 h
+              - generic [ref=e174]:
+                - paragraph [ref=e175]: Total landings
+                - paragraph [ref=e176]: "0"
+              - generic [ref=e177]:
+                - paragraph [ref=e178]: Flights logged
+                - paragraph [ref=e179]: "0"
+            - generic [ref=e180]:
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - paragraph [ref=e183]: Yearly hours
+                  - paragraph [ref=e184]: 0.0h / 100h
+                - paragraph [ref=e186]: Common target for active GA pilots.
+              - generic [ref=e187]:
+                - generic [ref=e188]:
+                  - paragraph [ref=e189]: Instrument training
+                  - paragraph [ref=e190]: 0.0h / 40h
+                - paragraph [ref=e192]: Toward a typical 40h IFR training benchmark.
+              - generic [ref=e193]:
+                - generic [ref=e194]:
+                  - paragraph [ref=e195]: Night experience
+                  - paragraph [ref=e196]: 0.0h / 20h
+                - paragraph [ref=e198]: Helps maintain comfort and currency at night.
+          - generic [ref=e199]:
+            - paragraph [ref=e200]: Quick currency notes (informational only)
+            - paragraph [ref=e201]: "• Day passenger currency: 3 takeoffs/landings in the last 90 days. • Night passenger currency: 3 full-stop landings at night in last 90 days. • IFR: 6 approaches, holding, and tracking in the last 6 months."
+            - paragraph [ref=e202]: This dashboard doesn't yet auto-compute legal currency, but your log entries here are set up to support that later.
+```

@@ -75,7 +75,7 @@ export default function Dashboard() {
                   srcIcao: record.srcIcao,
                   destIcao: record.destIcao,
                   route: record.srcIcao && record.destIcao 
-                    ? `${record.srcIcao} -> ${record.destIcao}`
+                    ? `${record.srcIcao} ${record.destIcao}`
                     : null,
                   totalFlightTime: record.totalFlightTime || 0,
                   picTime: record.picTime || 0,
@@ -238,7 +238,7 @@ export default function Dashboard() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-white">
+          <h1 data-testid = "dashboard-header" className="text-3xl font-semibold tracking-tight text-white">
             Pilot Dashboard
           </h1>
           <p className="text-sm text-slate-400 mt-1">

@@ -39,7 +39,7 @@ export default function LogbookList({
     );
   }
 
-  const allSelected = entries.length > 0 && entries.every(e => selectedIds.has(e.id));
+  const allSelected = entries.length > 0 && entries.every(e => selectedIds.has(String(e.id)));
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
@@ -70,17 +70,17 @@ export default function LogbookList({
           <tbody className="divide-y divide-slate-800">
             {entries.map((entry) => (
               <tr
-                key={entry.id}
+                key={String(entry.id)}
                 className={`group hover:bg-slate-800/50 transition-colors ${
-                  selectedIds.has(entry.id) ? "bg-slate-800/50" : ""
+                  selectedIds.has(String(entry.id)) ? "bg-slate-800/50" : ""
                 }`}
               >
                 <td className="px-4 py-3 w-8">
                   {onSelectionChange && (
                     <input
                       type="checkbox"
-                      checked={selectedIds.has(entry.id)}
-                      onChange={() => onSelectionChange(entry.id)}
+                      checked={selectedIds.has(String(entry.id))}
+                      onChange={() => onSelectionChange(String(entry.id))}
                       className="rounded border-slate-600 cursor-pointer"
                     />
                   )}
