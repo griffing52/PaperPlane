@@ -6,7 +6,11 @@ import { Request, Response, NextFunction } from "express";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
 app.use(router);
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {

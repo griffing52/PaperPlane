@@ -2,8 +2,24 @@
 
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "@/components/LogoutButton";
-import { useMemo, useState, useEffect, FormEvent } from "react";
+import { useMemo, useState, useEffect, FormEvent, useRef, ChangeEvent } from "react";
 import { API_BASE_URL } from "./../../lib/config.ts"
+
+const uploadLogbookFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("https://paperplane.bolun.dev/api/v1/upload_log", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+
+  return response.json();
+};
 
 type LogEntry = {
   id?: string;
@@ -145,6 +161,34 @@ export default function DashboardPage() {
     remarks: "",
   });
 
+  // Hidden input reference
+const fileInputRef = useRef<HTMLInputElement>(null);
+const [isUploading, setIsUploading] = useState(false);
+
+// Handler for file input change
+const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    alert("Please upload an image file (JPEG, PNG, etc).");
+    return;
+  }
+
+  try {
+    setIsUploading(true);
+    await uploadLogbookFile(file);
+    alert("File uploaded successfully!");
+    // Optionally refresh logs here
+  } catch (err) {
+    console.error(err);
+    alert("Failed to upload file.");
+  } finally {
+    setIsUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+};
+
   useEffect(() => {
     const load = async () => {
       const idToken = await user?.getIdToken()
@@ -191,7 +235,7 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-100">
-        <div>Please sign in to access your logbook.</div>
+        <div data-testid = "sign-in-request">Please sign in to access your logbook.</div>
       </main>
     );
   }
@@ -225,7 +269,7 @@ export default function DashboardPage() {
         {/* Top bar */}
         <header className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight"> data-testid = "dashboard-header"
+            <h1 data-testid = "dashboard-header" className="text-3xl font-semibold tracking-tight"> 
               Pilot Dashboard
             </h1>
             <p className="text-sm text-slate-400 mt-1">
@@ -257,9 +301,24 @@ export default function DashboardPage() {
             <div className="flex justify-between items-center">
               <h2 className="text-lg font-semibold">Logbook</h2>
               <div className="flex gap-2">
-                <button className="rounded-lg border border-slate-600/60 bg-slate-900 px-3 py-1.5 text-xs sm:text-sm hover:border-sky-500 hover:bg-slate-900/80 transition">
-                  Upload logbook file
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept="image/*"
+                />
+
+                {/* Styled button that opens the file picker */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  className="rounded-lg border border-slate-600/60 bg-slate-900 px-3 py-1.5 text-xs sm:text-sm hover:border-sky-500 hover:bg-slate-900/80 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUploading ? "Uploading…" : "Upload logbook file"}
                 </button>
+
                 <button
                   onClick={() => setIsAddOpen(true)}
                   className="rounded-lg bg-sky-500 px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-950 hover:bg-sky-400 transition"
@@ -268,7 +327,6 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-
             {/* Log list */}
             <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60 backdrop-blur">
               <div className="grid grid-cols-6 gap-2 border-b border-slate-800 px-4 py-2 text-xs text-slate-400">
