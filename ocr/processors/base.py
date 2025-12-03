@@ -19,7 +19,6 @@ class FlightRecord(BaseModel):
 
 class OCRResult(BaseModel):
     message: str
-    raw_data: Dict[str, Any]
     records: List[FlightRecord]
 
 class OCRProcessor(ABC):

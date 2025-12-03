@@ -76,7 +76,6 @@ class GeminiOCRProcessor(OCRProcessor):
             
             return OCRResult(
                 message=f"Successfully processed {len(records)} records with Gemini",
-                raw_data={"full_text": response.text},
                 records=records
             )
 

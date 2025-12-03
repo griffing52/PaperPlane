@@ -16,20 +16,17 @@ class AWSOCRProcessor(OCRProcessor):
             if not records:
                  return OCRResult(
                     message="No valid flight records found in the image.",
-                    raw_data=textract_response,
                     records=[]
                 )
 
             return OCRResult(
                 message=f"Successfully processed {len(records)} flight records",
-                raw_data=textract_response,
                 records=records
             )
         except Exception as e:
             print(f"AWS Textract Processing Error: {e}")
             return OCRResult(
                 message=f"Error processing image: {str(e)}",
-                raw_data={},
                 records=[]
             )
 
