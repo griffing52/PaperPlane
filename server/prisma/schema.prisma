@@ -48,7 +48,6 @@ model FlightEntry {
   id                 String       @id @default(uuid())
   flightId           String?      @map("flight_id")
   userId             String       @map("user_id")
-  uploadId           String?      @map("upload_id")
   logbookURL         String?      @map("logbook_url")
 
   // Flight details. These should correspond to the Flight table
