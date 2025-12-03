@@ -1,14 +1,18 @@
 # To try out the endpoint, first install dependencies: 
-# pip install fastapi "uvicorn[standard]" pydantic boto3 python-multipart
+# pip install fastapi "uvicorn[standard]" pydantic boto3 python-multipart python-dotenv
 # Then, inside ocr directory, run:
 # uvicorn main:app --reload 
 # And navigate to http://127.0.0.1:8000/docs
 
 import os
 from typing import Dict, Any, List
+from dotenv import load_dotenv
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from processors import AWSOCRProcessor, GeminiOCRProcessor, OCRResult, HybridOCRProcessor
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configuration
 # TODO: Use environment variables
