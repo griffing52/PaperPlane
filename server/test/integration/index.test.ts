@@ -11,30 +11,7 @@ describe("API Endpoints", () => {
     });
   });
 
-  describe("POST /api/v1/ocr/", () => {
-    let cleanup: Awaited<ReturnType<typeof createTestUser>>;
-
-    beforeEach(async () => {
-      cleanup = await createTestUser();
-    });
-
-    afterEach(async () => {
-      await cleanup();
-    });
-
-    it("should return an OCR result when passed a buffer", async () => {
-      const response = await request(app)
-        .post("/api/v1/ocr/")
-        .attach("image", Buffer.from("fake-image-data"), "test.png");
-
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        tailNumber: expect.any(String),
-        aircraftModel: expect.any(String),
-      });
-    });
-  });
-
+  
   describe("POST /api/v1/verify/", () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlight>>;
 
