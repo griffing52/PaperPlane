@@ -34,7 +34,7 @@ jobs:
         ARTILLERY_CLOUD_API_KEY=${{ secrets.ARTILLERY_CLOUD_API_KEY }}
         EOF
         # base64 to avoid encoding issues with a JSON
-        echo '${{ secrets.SERVICE_ACCOUNT_KEY }}' | base64 -d > server/sericeAccountKey.json
+        echo '${{ secrets.SERVICE_ACCOUNT_KEY }}' | base64 -d > server/serviceAccountKey.json
 
     - name: Setup database
       run: npx prisma db push
