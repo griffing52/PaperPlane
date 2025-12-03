@@ -24,6 +24,13 @@ const router = Router();
 
 router.get("/api/v1/health", controllers.getHealth);
 
+router.post(
+  "/api/v1/flight_entry",
+  validate(flightEntryPostSchema, "body"),
+  requireUser,
+  flightControllers.createFlightEntry,
+);
+
 router.get(
   "/api/v1/flight_entry",
   validate(flightEntryQuerySchema, "query"),
@@ -54,13 +61,6 @@ router.patch(
   requireUser,
   verifyFlightEntryOwnership,
   flightControllers.updateFlightEntry,
-);
-
-router.post(
-  "/api/v1/flight_entry/",
-  validate(flightEntryPostSchema, "body"),
-  requireUser,
-  flightControllers.createFlightEntry,
 );
 
 router.post(
