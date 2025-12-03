@@ -7,6 +7,7 @@
 import os
 from typing import Dict, Any, List
 from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from processors import AWSOCRProcessor, GeminiOCRProcessor, OCRResult, HybridOCRProcessor
 
 # Configuration
@@ -16,6 +17,18 @@ OCR_PROVIDER = os.getenv("OCR_PROVIDER", "AWS") # Options: AWS, GEMINI, HYBRID
 app = FastAPI(
     title="Logbook OCR Service",
     description="Modular OCR service supporting AWS Textract and Gemini."
+)
+
+origins = [
+    "*"  # In production, restrict this to your frontend domain
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 def get_processor():

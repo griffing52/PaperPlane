@@ -3,20 +3,22 @@
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "@/components/LogoutButton";
 import { useMemo, useState, useEffect, FormEvent, useRef, ChangeEvent } from "react";
-import { API_BASE_URL } from "./../../lib/config.ts"
+import { API_BASE_URL, OCR_API_BASE_URL } from "./../../lib/config.ts"
 
 const uploadLogbookFile = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch("https://paperplane.bolun.dev/api/v1/upload_log", {
+  const response = await fetch(`http://${OCR_API_BASE_URL}/ocr/process`, {
     method: "POST",
     body: formData,
   });
 
   if (!response.ok) {
-    throw new Error("Upload failed");
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Upload failed with an unknown error.');
   }
+
 
   return response.json();
 };
@@ -71,7 +73,7 @@ const parseLogEntry = (data: any): LogEntry => {
 
 // NOTE: michael.smith@outlook.com is a valid email address for testing
 const fetchLogs = async (idToken: string): Promise<Array<LogEntry>> => {
-  const response = await fetch(`https://${API_BASE_URL}/api/v1/flight_entry`, {
+  const response = await fetch(`http://${API_BASE_URL}/api/v1/flight_entry`, {
     method: "GET",
     headers: genHeaders(idToken),
   });
@@ -88,8 +90,8 @@ const saveFlightEntry = async (
   id?: string,
 ) => {
   const url = id
-    ? `https://${API_BASE_URL}/api/v1/flight_entry/${id}`
-    : `https://${API_BASE_URL}/api/v1/flight_entry`;
+    ? `http://${API_BASE_URL}/api/v1/flight_entry/${id}`
+    : `http://${API_BASE_URL}/api/v1/flight_entry`;
 
   const response = await fetch(url, {
     method,
@@ -127,7 +129,7 @@ const updateFlightEntry = (entry: LogEntry, idToken: string) =>
   saveFlightEntry("PATCH", entry, idToken, entry.id);
 
 const deleteFlightEntry = async (id: string, idToken: string) => {
-  const response = await fetch(`https://${API_BASE_URL}/api/v1/flight_entry/${id}`, {
+  const response = await fetch(`http://${API_BASE_URL}/api/v1/flight_entry/${id}`, {
     method: "DELETE",
     headers: genHeaders(idToken),
   });
@@ -177,8 +179,10 @@ const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
 
   try {
     setIsUploading(true);
-    await uploadLogbookFile(file);
-    alert("File uploaded successfully!");
+    const logbook_list = await uploadLogbookFile(file);
+    for (const flightRecord of logbook_list["records"]) {
+      // TODO Actually put this in the database
+    }
     // Optionally refresh logs here
   } catch (err) {
     console.error(err);
