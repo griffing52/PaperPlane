@@ -10,6 +10,7 @@ import {
   fetchLogs,
   createFlightEntry,
   uploadLogbookFile,
+  deleteFlightEntry,
 } from "@/lib/api/logbook";
 import StatusBar from "@/components/dashboard/StatusBar";
 import LogbookList from "@/components/dashboard/LogbookList";
@@ -22,6 +23,7 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Auth check
   useEffect(() => {
@@ -67,21 +69,21 @@ export default function Dashboard() {
               // Map OCR record to LogEntry format
               const entry = {
                   date: record.date,
-                  tailNumber: record.tail_number,
-                  srcIcao: record.source_airport,
-                  destIcao: record.destination_airport,
-                  route: record.source_airport && record.destination_airport 
-                    ? `${record.source_airport} -> ${record.destination_airport}`
+                  tailNumber: record.tailNumber,
+                  srcIcao: record.srcIcao,
+                  destIcao: record.destIcao,
+                  route: record.srcIcao && record.destIcao 
+                    ? `${record.srcIcao} -> ${record.destIcao}`
                     : null,
-                  totalFlightTime: record.total_time || 0,
-                  picTime: record.pic_hours || 0,
-                  dualReceivedTime: 0,
-                  instrumentTime: record.instrument_hours || 0,
-                  crossCountry: false,
-                  night: (record.night_hours || 0) > 0,
-                  solo: false,
-                  dayLandings: record.landings_day || 0,
-                  nightLandings: record.landings_night || 0,
+                  totalFlightTime: record.totalFlightTime || 0,
+                  picTime: record.picTime || 0,
+                  dualReceivedTime: record.dualReceivedTime || 0,
+                  instrumentTime: record.instrumentTime || 0,
+                  crossCountry: record.crossCountry || false,
+                  night: record.night || false,
+                  solo: record.solo || false,
+                  dayLandings: record.dayLandings || 0,
+                  nightLandings: record.nightLandings || 0,
                   remarks: record.remarks || null
               };
               
@@ -99,6 +101,8 @@ export default function Dashboard() {
       alert("Failed to process logbook image. Ensure the backend server is running.");
     } finally {
       setIsUploading(false);
+      // Reset the file input so the same file can be uploaded again
+      e.target.value = "";
     }
   };
 
@@ -120,6 +124,57 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Failed to save entry", error);
       throw error; 
+    }
+  };
+
+  const handleToggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const handleSelectAll = (selected: boolean) => {
+    if (selected) {
+      setSelectedIds(new Set(entries.map(e => e.id)));
+    } else {
+      setSelectedIds(new Set());
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    
+    const confirmed = window.confirm(
+      `Delete ${selectedIds.size} flight ${selectedIds.size === 1 ? "entry" : "entries"}?`
+    );
+    
+    if (!confirmed) return;
+
+    if (!user) return;
+    
+    try {
+      const token = await user.getIdToken();
+      
+      // Delete each selected entry
+      for (const id of selectedIds) {
+        try {
+          await deleteFlightEntry(id, token);
+        } catch (error) {
+          console.error(`Failed to delete entry ${id}`, error);
+        }
+      }
+      
+      // Refresh logs and clear selection
+      await loadLogs();
+      setSelectedIds(new Set());
+      alert(`Successfully deleted ${selectedIds.size} entries!`);
+    } catch (error) {
+      console.error("Failed to delete entries", error);
+      alert("Failed to delete some entries.");
     }
   };
 
@@ -185,6 +240,14 @@ export default function Dashboard() {
                     disabled={isUploading}
                   />
                 </label>
+                {selectedIds.size > 0 && (
+                  <button
+                    onClick={handleDeleteSelected}
+                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition-colors shadow-lg shadow-red-900/20"
+                  >
+                    Delete ({selectedIds.size})
+                  </button>
+                )}
                 <button
                   onClick={() => setShowAddEntry(true)}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20"
@@ -194,7 +257,13 @@ export default function Dashboard() {
               </div>
             </div>
             
-            <LogbookList entries={entries} isLoading={isLoading} />
+            <LogbookList 
+              entries={entries} 
+              isLoading={isLoading}
+              selectedIds={selectedIds}
+              onSelectionChange={handleToggleSelection}
+              onSelectAll={handleSelectAll}
+            />
           </section>
 
           {/* Pilot Status Section */}

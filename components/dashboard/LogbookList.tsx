@@ -4,9 +4,18 @@ import { LogEntry } from "@/types/logbook";
 type LogbookListProps = {
   entries: LogEntry[];
   isLoading: boolean;
+  selectedIds?: Set<string>;
+  onSelectionChange?: (id: string) => void;
+  onSelectAll?: (selected: boolean) => void;
 };
 
-export default function LogbookList({ entries, isLoading }: LogbookListProps) {
+export default function LogbookList({ 
+  entries, 
+  isLoading, 
+  selectedIds = new Set(),
+  onSelectionChange,
+  onSelectAll
+}: LogbookListProps) {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center rounded-xl border border-slate-800 bg-slate-900/50">
@@ -28,12 +37,24 @@ export default function LogbookList({ entries, isLoading }: LogbookListProps) {
     );
   }
 
+  const allSelected = entries.length > 0 && entries.every(e => selectedIds.has(e.id));
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead className="bg-slate-800/50 text-xs uppercase text-slate-400">
             <tr>
+              <th className="px-4 py-3 font-medium w-8">
+                {onSelectAll && (
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={(e) => onSelectAll(e.target.checked)}
+                    className="rounded border-slate-600 cursor-pointer"
+                  />
+                )}
+              </th>
               <th className="px-4 py-3 font-medium">Date</th>
               <th className="px-4 py-3 font-medium">Aircraft</th>
               <th className="px-4 py-3 font-medium">Route</th>
@@ -47,8 +68,20 @@ export default function LogbookList({ entries, isLoading }: LogbookListProps) {
             {entries.map((entry) => (
               <tr
                 key={entry.id}
-                className="group hover:bg-slate-800/50 transition-colors"
+                className={`group hover:bg-slate-800/50 transition-colors ${
+                  selectedIds.has(entry.id) ? "bg-slate-800/50" : ""
+                }`}
               >
+                <td className="px-4 py-3 w-8">
+                  {onSelectionChange && (
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(entry.id)}
+                      onChange={() => onSelectionChange(entry.id)}
+                      className="rounded border-slate-600 cursor-pointer"
+                    />
+                  )}
+                </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-300">
                   {new Date(entry.date).toLocaleDateString()}
                 </td>
