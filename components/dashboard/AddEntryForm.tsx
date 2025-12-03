@@ -90,7 +90,7 @@ export default function AddEntryForm({ onClose, onSave }: AddEntryFormProps) {
         <div className="grid gap-4">
           {/* Basic Info */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="col-span-2 sm:col-span-1">
+            <div className="col-span-2 sm:col-span-2">
               <label className="block text-xs text-slate-400 mb-1">Date</label>
               <input
                 type="date"
@@ -99,7 +99,7 @@ export default function AddEntryForm({ onClose, onSave }: AddEntryFormProps) {
                 className="w-full rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs"
               />
             </div>
-            <div className="col-span-2 sm:col-span-1">
+            <div className="col-span-2 sm:col-span-2">
               <label className="block text-xs text-slate-400 mb-1">
                 Tail Number
               </label>
@@ -109,16 +109,6 @@ export default function AddEntryForm({ onClose, onSave }: AddEntryFormProps) {
                 onChange={(e) => setTailNumber(e.target.value)}
                 className="w-full rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs uppercase"
                 placeholder="N12345"
-              />
-            </div>
-            <div className="col-span-2">
-              <label className="block text-xs text-slate-400 mb-1">Route</label>
-              <input
-                type="text"
-                value={route}
-                onChange={(e) => setRoute(e.target.value)}
-                className="w-full rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs uppercase"
-                placeholder="KABC-KXYZ"
               />
             </div>
           </div>
