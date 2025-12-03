@@ -103,9 +103,6 @@ function generateEmailHash(email: string): string {
   return crypto.createHash("sha256").update(email).digest("hex");
 }
 
-function generateLicenseNumber(): string {
-  return `PPL-${randomInt(100000, 999999)}`;
-}
 
 function randomDecimal(
   min: number,
@@ -252,8 +249,7 @@ async function seed(force: boolean) {
       data: {
         email,
         emailHash: generateEmailHash(email),
-        name: fullName,
-        licenseNumber: generateLicenseNumber(),
+        name: fullName
       },
     });
 
