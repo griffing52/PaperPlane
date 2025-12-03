@@ -17,6 +17,8 @@ Init the database.
 ```
 # sets the database location in prisma/dev.dbs
 cp .env.sample .env
+# TASK: edit .env to add the firebase API keys
+# TASK: Copy the firebase service side private key as 'serviceAccountKey.json' to server/
 # creates the database
 npx prisma migrate dev --name initial_migration
 # generates prisma library to interact with database
@@ -24,8 +26,6 @@ npx prisma generate
 # generate test data
 npm run seed
 ```
-
-Setup secrets. First, copy the firebase service side private key to the server/ directory.
 
 Run the backend.
 ``bash

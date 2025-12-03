@@ -1,5 +1,9 @@
 # What I did if you're unsure
 
+## Give NumberField settable min value and setup
+
+I added component options for clamping numbers that don't make sense like negative hours flown and decimal day and night landings.
+
 ## Configured and tested AWS Textract
 
 Followed the prerequisite instructions listed here: https://docs.aws.amazon.com/textract/latest/dg/examples-blocks.html#examples-prerequisites
