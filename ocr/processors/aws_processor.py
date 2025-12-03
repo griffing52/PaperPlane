@@ -2,7 +2,7 @@ import boto3
 import re
 import os
 from typing import List, Dict, Any, Optional, Tuple
-from .base import OCRProcessor, OCRResult, FlightRecord
+from .base import OCRProcessor, OCRResult, FlightEntry
 
 class AWSOCRProcessor(OCRProcessor):
     def __init__(self, region_name: str = "us-west-1"):
@@ -127,7 +127,7 @@ class AWSOCRProcessor(OCRProcessor):
 
     # --- Internal Parsing Logic for Pure AWS Mode ---
 
-    def _parse_textract_json(self, raw_json: Dict[str, Any]) -> List[FlightRecord]:
+    def _parse_textract_json(self, raw_json: Dict[str, Any]) -> List[FlightEntry]:
         """
         Returns a list of flight records extracted from Textract JSON.
         Uses the get_rows_columns_map helper to standardize extraction.
@@ -184,16 +184,15 @@ class AWSOCRProcessor(OCRProcessor):
     
         patterns = {
             'date': re.compile(r'date', re.IGNORECASE),
-            'aircraft_type': re.compile(r'aircraft\s*type|make|model|type', re.IGNORECASE),
-            'tail_number': re.compile(r'tail|ident|registration|reg', re.IGNORECASE),
-            'source_airport': re.compile(r'from|source|dep|route.*from', re.IGNORECASE),
-            'destination_airport': re.compile(r'to|dest|arr|route.*to', re.IGNORECASE),
-            'total_time': re.compile(r'total|duration|time.*flight', re.IGNORECASE),
-            'pic_hours': re.compile(r'pic|pilot\s*in\s*command', re.IGNORECASE),
-            'instrument_hours': re.compile(r'inst|instrument', re.IGNORECASE),
-            'night_hours': re.compile(r'night', re.IGNORECASE),
-            'landings_day': re.compile(r'day\s*ldg|landings.*day|day', re.IGNORECASE),
-            'landings_night': re.compile(r'night\s*ldg|landings.*night', re.IGNORECASE),
+            'tailNumber': re.compile(r'tail|ident|registration|reg', re.IGNORECASE),
+            'srcIcao': re.compile(r'from|source|dep|route.*from|origin', re.IGNORECASE),
+            'destIcao': re.compile(r'to|dest|arr|route.*to|destination', re.IGNORECASE),
+            'totalFlightTime': re.compile(r'total|duration|time.*flight', re.IGNORECASE),
+            'picTime': re.compile(r'pic|pilot\s*in\s*command', re.IGNORECASE),
+            'instrumentTime': re.compile(r'inst|instrument', re.IGNORECASE),
+            'dualReceivedTime': re.compile(r'dual|received', re.IGNORECASE),
+            'dayLandings': re.compile(r'day\s*ldg|landings.*day|day', re.IGNORECASE),
+            'nightLandings': re.compile(r'night\s*ldg|landings.*night', re.IGNORECASE),
             'remarks': re.compile(r'remark|comment|note', re.IGNORECASE),
         }
 
@@ -205,7 +204,18 @@ class AWSOCRProcessor(OCRProcessor):
         
         return mapping
 
-    def _create_flight_record(self, row_data: Dict[int, str], header_map: Dict[str, int]) -> Optional[FlightRecord]:
+    def _parse_remarks_for_flags(self, remarks: str) -> tuple[bool, bool, bool]:
+        """
+        Extract boolean flags from remarks/notes section.
+        Returns: (crossCountry, night, solo)
+        """
+        remarks_lower = remarks.lower()
+        cross_country = bool(re.search(r'cross.?country|xc|cross|country', remarks_lower))
+        night = bool(re.search(r'\bnight\b|nvg', remarks_lower))
+        solo = bool(re.search(r'\bsolo\b', remarks_lower))
+        return cross_country, night, solo
+
+    def _create_flight_record(self, row_data: Dict[int, str], header_map: Dict[str, int]) -> Optional[FlightEntry]:
         try:
             def get_val(field):
                 col_idx = header_map.get(field)
@@ -235,19 +245,24 @@ class AWSOCRProcessor(OCRProcessor):
             if not date_str:
                 return None
 
-            return FlightRecord(
+            remarks_str = get_val('remarks')
+            cross_country, night, solo = self._parse_remarks_for_flags(remarks_str)
+
+            return FlightEntry(
                 date=date_str,
-                aircraft_type=get_val('aircraft_type'),
-                tail_number=get_val('tail_number'),
-                source_airport=get_val('source_airport'),
-                destination_airport=get_val('destination_airport'),
-                total_time=parse_float(get_val('total_time')),
-                pic_hours=parse_float(get_val('pic_hours')),
-                instrument_hours=parse_float(get_val('instrument_hours')),
-                night_hours=parse_float(get_val('night_hours')),
-                landings_day=parse_int(get_val('landings_day')),
-                landings_night=parse_int(get_val('landings_night')),
-                remarks=get_val('remarks')
+                tailNumber=get_val('tailNumber'),
+                srcIcao=get_val('srcIcao'),
+                destIcao=get_val('destIcao'),
+                totalFlightTime=parse_float(get_val('totalFlightTime')),
+                picTime=parse_float(get_val('picTime')),
+                dualReceivedTime=parse_float(get_val('dualReceivedTime')),
+                instrumentTime=parse_float(get_val('instrumentTime')),
+                crossCountry=cross_country,
+                night=night,
+                solo=solo,
+                dayLandings=parse_int(get_val('dayLandings')),
+                nightLandings=parse_int(get_val('nightLandings')),
+                remarks=remarks_str
             )
         except Exception as e:
             print(f"Error creating record: {e}")

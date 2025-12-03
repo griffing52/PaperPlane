@@ -3,23 +3,25 @@ from typing import List, Dict, Any
 from pydantic import BaseModel
 
 # Shared models
-class FlightRecord(BaseModel):
+class FlightEntry(BaseModel):
     date: str
-    aircraft_type: str
-    tail_number: str
-    source_airport: str
-    destination_airport: str
-    total_time: float
-    pic_hours: float
-    instrument_hours: float
-    night_hours: float
-    landings_day: int
-    landings_night: int
+    tailNumber: str
+    srcIcao: str
+    destIcao: str
+    totalFlightTime: float
+    picTime: float
+    dualReceivedTime: float
+    instrumentTime: float
+    crossCountry: bool
+    night: bool
+    solo: bool
+    dayLandings: int
+    nightLandings: int
     remarks: str
 
 class OCRResult(BaseModel):
     message: str
-    records: List[FlightRecord]
+    records: List[FlightEntry]
 
 class OCRProcessor(ABC):
     @abstractmethod

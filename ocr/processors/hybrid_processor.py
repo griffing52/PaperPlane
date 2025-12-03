@@ -1,7 +1,7 @@
 import os
 import json
 from typing import Dict, Any, List
-from .base import OCRProcessor, OCRResult, FlightRecord
+from .base import OCRProcessor, OCRResult, FlightEntry
 from .aws_processor import AWSOCRProcessor
 
 try:
@@ -52,19 +52,22 @@ class HybridOCRProcessor(AWSOCRProcessor):
 
         Return ONLY a JSON array of objects with the following keys:
         - date (string, YYYY-MM-DD)
-        - aircraft_type (string)
-        - tail_number (string)
-        - source_airport (string)
-        - destination_airport (string)
-        - total_time (float)
-        - pic_hours (float)
-        - instrument_hours (float)
-        - night_hours (float)
-        - landings_day (int)
-        - landings_night (int)
+        - tailNumber (string)
+        - srcIcao (string, 4-letter airport code)
+        - destIcao (string, 4-letter airport code)
+        - totalFlightTime (float)
+        - picTime (float)
+        - dualReceivedTime (float)
+        - instrumentTime (float)
+        - crossCountry (boolean, parse from remarks if present)
+        - night (boolean, parse from remarks if present)
+        - solo (boolean, parse from remarks if present)
+        - dayLandings (int)
+        - nightLandings (int)
         - remarks (string)
 
-        If a field is empty or unreadable, use null or 0 for numbers and empty string for strings.
+        For boolean flags: search the remarks/notes for keywords like 'cross-country', 'xc', 'night', 'nvg', or 'solo'.
+        If a field is empty or unreadable, use null or 0 for numbers, false for booleans, and empty string for strings.
         Ensure the JSON is valid.
         """
 
@@ -88,7 +91,7 @@ class HybridOCRProcessor(AWSOCRProcessor):
             records = []
             if isinstance(data, list):
                 for item in data:
-                    records.append(FlightRecord(**item))
+                    records.append(FlightEntry(**item))
             
             return OCRResult(
                 message=f"Successfully processed {len(records)} records with Hybrid (Textract -> Gemini)",
