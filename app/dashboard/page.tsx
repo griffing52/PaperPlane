@@ -11,6 +11,7 @@ import {
   createFlightEntry,
   uploadLogbookFile,
   deleteFlightEntry,
+  verifyFlightEntry,
   updateFlightEntry,
 } from "@/lib/api/logbook";
 import StatusBar from "@/components/dashboard/StatusBar";
@@ -26,6 +27,8 @@ export default function Dashboard() {
   const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [verificationResults, setVerificationResults] = useState<Record<string, boolean>>({});
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -75,7 +78,7 @@ export default function Dashboard() {
                   srcIcao: record.srcIcao,
                   destIcao: record.destIcao,
                   route: record.srcIcao && record.destIcao 
-                    ? `${record.srcIcao} ${record.destIcao}`
+                    ? `${record.srcIcao} \u2192 ${record.destIcao}`
                     : null,
                   totalFlightTime: record.totalFlightTime || 0,
                   picTime: record.picTime || 0,
@@ -147,6 +150,42 @@ export default function Dashboard() {
     }
   };
 
+  const handleVerify = async () => {
+    if (!user) return;
+    setIsVerifying(true);
+    const results: Record<string, boolean> = {};
+    
+    try {
+      const token = await user.getIdToken();
+      // Verify all entries or selected entries?
+      // If selectedIds has items, verify those. Else verify all.
+      const entriesToVerify = selectedIds.size > 0 
+        ? entries.filter(e => e.id && selectedIds.has(e.id))
+        : entries;
+
+      let verifiedCount = 0;
+      for (const entry of entriesToVerify) {
+        if (!entry.id) continue;
+        try {
+          const result = await verifyFlightEntry(entry, token);
+          const isVerified = !!result;
+          results[entry.id] = isVerified;
+          if (isVerified) verifiedCount++;
+        } catch (error) {
+          console.error(`Failed to verify entry ${entry.id}`, error);
+          results[entry.id] = false;
+        }
+      }
+      setVerificationResults(prev => ({ ...prev, ...results }));
+      alert(`Verification complete. Verified ${verifiedCount} out of ${entriesToVerify.length} checked flights.`);
+    } catch (error) {
+      console.error("Verification failed", error);
+      alert("Verification process failed.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const handleDeleteSelected = async () => {
     if (selectedIds.size === 0) return;
     
@@ -215,12 +254,12 @@ export default function Dashboard() {
               <button className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white">
                 Logbook
               </button>
-              <button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
+              {/*<button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
                 Reports
               </button>
               <button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
                 Aircraft
-              </button>
+              </button>*/}
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -271,6 +310,13 @@ export default function Dashboard() {
                   </button>
                 )}
                 <button
+                  onClick={handleVerify}
+                  disabled={isVerifying}
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/20 disabled:opacity-50"
+                >
+                  {isVerifying ? "Verifying..." : "Verify"}
+                </button>
+                <button
                   onClick={() => setShowAddEntry(true)}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20"
                 >
@@ -285,6 +331,7 @@ export default function Dashboard() {
               selectedIds={selectedIds}
               onSelectionChange={handleToggleSelection}
               onSelectAll={handleSelectAll}
+              verificationResults={verificationResults}
               onEdit={handleEditEntry}
             />
           </section>

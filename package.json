@@ -13,8 +13,10 @@
     "install:all": "npm install && npm --prefix server install",
     "install:server": "npm --prefix server install",
     "seed": "npm --prefix server run seed --",
-    "test:cucumber": "cucumber-js --require-module ts-node/register/transpile-only --require \"./features/step_definitions/**/*.ts\"",
-    "test:e2e": "cucumber-js --require-module ts-node/register --require \"./features/**/*.ts\"",
+    "test:cucumber:run": "cucumber-js --require-module ts-node/register/transpile-only --require \"./features/step_definitions/**/*.ts\"",
+    "test:cucumber": "start-server-and-test dev http://localhost:3000 dev:server http://localhost:3002/api/v1/health test:cucumber:run",
+    "test:e2e:run": "cucumber-js --require-module ts-node/register --require \"./features/**/*.ts\"",
+    "test:e2e": "start-server-and-test dev http://localhost:3000 dev:server http://localhost:3002/api/v1/health test:e2e:run",
     "artillery": "ts-node artillery.ts"
   },
   "dependencies": {
@@ -48,6 +50,7 @@
     "globals": "^16.4.0",
     "playwright": "^1.56.1",
     "prisma": "^6.1.0",
+    "start-server-and-test": "^2.1.3",
     "supertest": "^7.1.4",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
