@@ -11,6 +11,8 @@ import {
   createFlightEntry,
   uploadLogbookFile,
   deleteFlightEntry,
+  verifyFlightEntry,
+  updateFlightEntry,
 } from "@/lib/api/logbook";
 import StatusBar from "@/components/dashboard/StatusBar";
 import LogbookList from "@/components/dashboard/LogbookList";
@@ -22,8 +24,11 @@ export default function Dashboard() {
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddEntry, setShowAddEntry] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [verificationResults, setVerificationResults] = useState<Record<string, boolean>>({});
+  const [isVerifying, setIsVerifying] = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -145,6 +150,42 @@ export default function Dashboard() {
     }
   };
 
+  const handleVerify = async () => {
+    if (!user) return;
+    setIsVerifying(true);
+    const results: Record<string, boolean> = {};
+    
+    try {
+      const token = await user.getIdToken();
+      // Verify all entries or selected entries?
+      // If selectedIds has items, verify those. Else verify all.
+      const entriesToVerify = selectedIds.size > 0 
+        ? entries.filter(e => e.id && selectedIds.has(e.id))
+        : entries;
+
+      let verifiedCount = 0;
+      for (const entry of entriesToVerify) {
+        if (!entry.id) continue;
+        try {
+          const result = await verifyFlightEntry(entry, token);
+          const isVerified = !!result;
+          results[entry.id] = isVerified;
+          if (isVerified) verifiedCount++;
+        } catch (error) {
+          console.error(`Failed to verify entry ${entry.id}`, error);
+          results[entry.id] = false;
+        }
+      }
+      setVerificationResults(prev => ({ ...prev, ...results }));
+      alert(`Verification complete. Verified ${verifiedCount} out of ${entriesToVerify.length} checked flights.`);
+    } catch (error) {
+      console.error("Verification failed", error);
+      alert("Verification process failed.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const handleDeleteSelected = async () => {
     if (selectedIds.size === 0) return;
     
@@ -175,6 +216,26 @@ export default function Dashboard() {
     } catch (error) {
       console.error("Failed to delete entries", error);
       alert("Failed to delete some entries.");
+    }
+  };
+
+  const handleEditEntry = (entry: LogEntry) => {
+    setEditingEntry(entry);
+  };
+
+  const handleSaveEditedEntry = async (entryData: Omit<LogEntry, "id">) => {
+    if (!user || !editingEntry) return;
+    try {
+      const token = await user.getIdToken();
+      await updateFlightEntry(
+        { ...entryData, id: editingEntry.id } as LogEntry,
+        token
+      );
+      await loadLogs();
+      setEditingEntry(null);
+    } catch (error) {
+      console.error("Failed to update entry", error);
+      throw error;
     }
   };
 
@@ -216,7 +277,7 @@ export default function Dashboard() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-white">
+          <h1 data-testid = "dashboard-header" className="text-3xl font-semibold tracking-tight text-white">
             Pilot Dashboard
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -249,6 +310,13 @@ export default function Dashboard() {
                   </button>
                 )}
                 <button
+                  onClick={handleVerify}
+                  disabled={isVerifying}
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/20 disabled:opacity-50"
+                >
+                  {isVerifying ? "Verifying..." : "Verify"}
+                </button>
+                <button
                   onClick={() => setShowAddEntry(true)}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20"
                 >
@@ -263,6 +331,8 @@ export default function Dashboard() {
               selectedIds={selectedIds}
               onSelectionChange={handleToggleSelection}
               onSelectAll={handleSelectAll}
+              verificationResults={verificationResults}
+              onEdit={handleEditEntry}
             />
           </section>
 
@@ -292,10 +362,14 @@ export default function Dashboard() {
       </main>
 
       {/* Add Entry Modal */}
-      {showAddEntry && (
+      {(showAddEntry || editingEntry) && (
         <AddEntryForm
-          onClose={() => setShowAddEntry(false)}
-          onSave={handleSaveEntry}
+          onClose={() => {
+            setShowAddEntry(false);
+            setEditingEntry(null);
+          }}
+          onSave={editingEntry ? handleSaveEditedEntry : handleSaveEntry}
+          editingEntry={editingEntry}
         />
       )}
     </div>

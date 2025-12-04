@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './tests/playwright',
   timeout: 30000,
   use: {
-    headless: false, 
+    headless: process.env.CI === 'true',
     baseURL: "http://localhost:3000",
     trace: 'on-first-retry',
   },

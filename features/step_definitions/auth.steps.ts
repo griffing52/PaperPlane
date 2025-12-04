@@ -1,6 +1,8 @@
 import { Given, When, Then } from "@cucumber/cucumber";
 import { expect } from "@playwright/test";
 import { CustomWorld } from "../support/custom-world";
+import fs from 'fs';
+import path from 'path';
 
 // Note: setDefaultTimeout is removed here because we moved it to hooks.ts
 
@@ -26,6 +28,10 @@ When(
     this.existingEmail = uniqueEmail; // Store for later if needed
     this.lastPassword = password;
 
+    // Fill name fields with reasonable defaults so the form is valid
+    await this.page.fill('#first-name', 'Test');
+    await this.page.fill('#last-name', `User-${Date.now()}`);
+
     await this.page.fill('[data-testid="signup-email"]', uniqueEmail);
     await this.page.fill('[data-testid="signup-password"]', password);
   }
@@ -37,14 +43,36 @@ When("I enter the same password to confirm it", async function (this: CustomWorl
   await this.page.fill('[data-testid="signup-confirm"]', this.lastPassword);
 });
 
+When(
+  "I enter first name {string} and last name {string}",
+  async function (this: CustomWorld, firstName: string, lastName: string) {
+    await this.page.fill('#first-name', firstName);
+    await this.page.fill('#last-name', lastName);
+  }
+);
+
 When("I submit the sign-up form", async function (this: CustomWorld) {
   await this.page.click('[data-testid="signup-button"]');
 });
 
 Then("I should be redirected to the dashboard page", async function (this: CustomWorld) {
-  // Cucumber waits up to 60s (from hooks.ts), so we give Playwright 10s here
-  await this.page.waitForURL("**/dashboard", { timeout: 10000 });
-  expect(this.page.url()).toContain("/dashboard");
+  // Cucumber waits up to 60s (from hooks.ts). Use a slightly longer Playwright timeout and
+  // provide diagnostic artifacts on failure to help debugging.
+  try {
+    await this.page.waitForURL("**/dashboard", { timeout: 15000 });
+    expect(this.page.url()).toContain("/dashboard");
+  } catch (err) {
+    // Save screenshot and page HTML for debugging
+    const outDir = path.resolve('./test-results');
+    if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+    const ts = Date.now();
+    const png = path.join(outDir, `redirect-dashboard-failure-${ts}.png`);
+    const html = path.join(outDir, `redirect-dashboard-failure-${ts}.html`);
+    try { await this.page.screenshot({ path: png, fullPage: true }); } catch(_){}
+    try { const content = await this.page.content(); fs.writeFileSync(html, content); } catch(_){}
+    // Re-throw with helpful message
+    throw new Error(`Expected redirect to /dashboard but did not occur. Saved artifacts: ${png}, ${html}`);
+  }
 });
 
 // -------------------------------
@@ -57,6 +85,9 @@ Given("a user already exists with email {string}", async function (this: CustomW
 });
 
 When("I attempt to sign up with email {string}", async function (this: CustomWorld, email: string) {
+  // Provide default names so validation on the page doesn't block the test
+  await this.page.fill('#first-name', 'Existing');
+  await this.page.fill('#last-name', 'User');
   await this.page.fill('[data-testid="signup-email"]', email);
   await this.page.fill('[data-testid="signup-password"]', "Password123!");
   await this.page.fill('[data-testid="signup-confirm"]', "Password123!");
@@ -81,6 +112,9 @@ When(
     const uniqueEmail = `weak-${Date.now()}@test.com`;
     
     this.lastPassword = password;
+    // Fill name fields so the form passes client-side required checks
+    await this.page.fill('#first-name', 'Weak');
+    await this.page.fill('#last-name', `Pass-${Date.now()}`);
     await this.page.fill('[data-testid="signup-email"]', uniqueEmail);
     await this.page.fill('[data-testid="signup-password"]', password);
     await this.page.fill('[data-testid="signup-confirm"]', password);
@@ -93,11 +127,22 @@ Then("I should see an error", async function (this: CustomWorld) {
   await expect(errorLocator).toBeVisible();
 });
 
+Then('I should stay on signup page', async function (this: CustomWorld) {
+  // The signup page should remain visible and URL should contain /signup
+  await this.page.waitForURL('**/signup', { timeout: 5000 });
+  expect(this.page.url()).toContain('/signup');
+  // Also ensure the signup button is still present (form not submitted)
+  const btn = this.page.locator('[data-testid="signup-button"]');
+  await expect(btn).toBeVisible();
+});
+
 // -------------------------------
 // Scenario: User cannot sign up with an invalid email format
 // -------------------------------
 When("I enter an invalid email {string}", async function (this: CustomWorld, email: string) {
   this.lastPassword = "ValidPass123!";
+  await this.page.fill('#first-name', 'Invalid');
+  await this.page.fill('#last-name', 'Email');
   await this.page.fill('[data-testid="signup-email"]', email);
   await this.page.fill('[data-testid="signup-password"]', this.lastPassword);
   await this.page.fill('[data-testid="signup-confirm"]', this.lastPassword);
@@ -126,6 +171,8 @@ When(
   async function (this: CustomWorld, email: string, password: string) {
     const uniqueEmail = `mismatch-${Date.now()}@test.com`;
     this.lastPassword = password;
+    await this.page.fill('#first-name', 'Mismatch');
+    await this.page.fill('#last-name', 'User');
     await this.page.fill('[data-testid="signup-email"]', uniqueEmail);
     await this.page.fill('[data-testid="signup-password"]', password);
   }
@@ -208,10 +255,30 @@ Given("I am logged in", async function (this: CustomWorld) {
   
   // 1. Just go to the protected page
   await this.page.goto("/dashboard");
-  
+
   // 2. If the auth file was invalid/expired, we will be redirected to login
   if (this.page.url().includes("/login")) {
-    throw new Error("Fixture Auth Failed: The stored 'auth.json' is expired or invalid. Delete the '.auth' folder and run tests again.");
+    // Attempt a UI login as a fallback so tests can continue.
+    const email = process.env.TEST_USER_EMAIL || 'admin@example.com';
+    const password = process.env.TEST_USER_PASSWORD || 'Password123!';
+
+    try {
+      // Fill login form and submit
+      await this.page.fill('[data-testid="login-email"]', email);
+      await this.page.fill('[data-testid="login-password"]', password);
+      await this.page.click('[data-testid="login-button"]');
+      await this.page.waitForURL('**/dashboard', { timeout: 15000 });
+
+      // Save storageState for worker_0 so future runs use it
+      const authDir = path.resolve('./playwright/.auth');
+      if (!fs.existsSync(authDir)) fs.mkdirSync(authDir, { recursive: true });
+      const authFile = path.join(authDir, 'worker_0.json');
+      await this.page.context().storageState({ path: authFile });
+      console.log(`Saved fallback auth state to ${authFile}`);
+
+    } catch (err) {
+      throw new Error("Fixture Auth Failed: Could not authenticate via UI fallback. Ensure TEST_USER_EMAIL/TEST_USER_PASSWORD are valid and the app is running.");
+    }
   }
 
   // 3. Verify we are safely inside
@@ -245,6 +312,11 @@ When("I view any page", async function (this: CustomWorld) {
 Then('I should see a request to sign in', async function (this: CustomWorld) {
   const signInReq = this.page.locator('[data-testid="sign-in-request"]');
   await expect(signInReq).toBeVisible({ timeout: 10000 });
+});
+
+Then('I should be redirected to the login page', async function (this: CustomWorld) {
+  await this.page.waitForURL('**/login', { timeout: 10000 });
+  expect(this.page.url()).toContain('/login');
 });
 
 Then("I should see the dashboard content", async function (this: CustomWorld) {

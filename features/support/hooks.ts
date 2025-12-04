@@ -11,7 +11,7 @@ const BASE_URL = 'http://localhost:3000'; // Change to your app URL
 const TEST_USER = { email: 'admin@example.com', password: 'Password123!' }; // Change to valid creds
 
 BeforeAll(async function () {
-  browser = await chromium.launch({ headless: false }); // Set true for CI
+  browser = await chromium.launch({ headless: process.env.CI === 'true' });
 });
 
 Before(async function (this: CustomWorld, scenario) {
@@ -60,30 +60,32 @@ AfterAll(async function () {
 // HELPER: The "Robot" that creates the file
 // =========================================
 async function createAuthFile(filePath: string) {
-  // 1. Open a temporary page
-  const page = await browser.newPage({ baseURL: BASE_URL });
+  // 1. Create a temporary context (so baseURL works) and open a page
+  const context = await browser.newContext({ baseURL: BASE_URL });
+  const page = await context.newPage();
 
   try {
     console.log(`   Navigating to login...`);
     await page.goto('/login');
-    
+
     console.log(`   Filling credentials...`);
-    await page.fill('input[name="login-email"]', TEST_USER.email); 
-    await page.fill('input[name="login-password"]', TEST_USER.password);
-    await page.click('button[type="login-submit"]');
+    // Use the data-testid attributes and IDs from the actual login page
+    await page.fill('input[data-testid="login-email"]', TEST_USER.email);
+    await page.fill('input[data-testid="login-password"]', TEST_USER.password);
+    await page.click('button[data-testid="login-button"]');
 
-    // 3. Wait for success
-    // Crucial: Wait until we are redirected to the dashboard (cookies are set)
-    await page.waitForURL('**/dashboard'); 
+    // Wait for the dashboard redirect (ensures cookies/storage are set)
+    await page.waitForURL('**/dashboard', { timeout: 10_000 });
 
-    // 4. Save the file
-    await page.context().storageState({ path: filePath });
+    // Save the authenticated storage state to disk
+    await context.storageState({ path: filePath });
     console.log(`Auth state saved to: ${filePath}`);
 
   } catch (error) {
-    console.error("FAILED to create auth file. Is the login page working?");
+    console.error("FAILED to create auth file. Is the login page working?", error);
     throw error;
   } finally {
     await page.close();
+    await context.close();
   }
 }
