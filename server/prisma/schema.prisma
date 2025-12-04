@@ -11,34 +11,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Enums
-// TODO: Figure which of these we need to use.
-enum UploadStatus {
-  PENDING
-  PROCESSING
-  DONE
-  FAILED
-}
-
-enum JobStatus {
-  QUEUED
-  RUNNING
-  DONE
-  ERRORED
-  FAILED
-}
-
-enum FlightSource {
-  OCR
-  MANUAL
-}
-
-enum VerificationStatus {
-  VERIFIED
-  PARTIAL
-  UNVERIFIED
-}
-
 
 // Models
 model User {
@@ -76,7 +48,6 @@ model FlightEntry {
   id                 String       @id @default(uuid())
   flightId           String?      @map("flight_id")
   userId             String       @map("user_id")
-  uploadId           String?      @map("upload_id")
   logbookURL         String?      @map("logbook_url")
 
   // Flight details. These should correspond to the Flight table

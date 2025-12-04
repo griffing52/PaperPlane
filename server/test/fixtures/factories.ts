@@ -42,7 +42,6 @@ export async function createTestUser(): Promise<UserCleanupFunction> {
       email,
       emailHash: `hash_${email}`,
       name: "Jebadiah",
-      licenseNumber: `${d}`,
     },
   });
 
@@ -68,7 +67,6 @@ export async function getOrCreateMichaelSmithUser(): Promise<UserCleanupFunction
         email: "michael.smith@outlook.com",
         emailHash: TEST_EMAIL_HASH,
         name: "Michael Smith",
-        licenseNumber: "TEST123",
       },
     });
   }
