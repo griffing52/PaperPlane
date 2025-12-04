@@ -73,7 +73,7 @@ export default function Dashboard() {
                   srcIcao: record.srcIcao,
                   destIcao: record.destIcao,
                   route: record.srcIcao && record.destIcao 
-                    ? `${record.srcIcao} -> ${record.destIcao}`
+                    ? `${record.srcIcao} \u2192 ${record.destIcao}`
                     : null,
                   totalFlightTime: record.totalFlightTime || 0,
                   picTime: record.picTime || 0,
@@ -193,12 +193,12 @@ export default function Dashboard() {
               <button className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white">
                 Logbook
               </button>
-              <button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
+              {/*<button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
                 Reports
               </button>
               <button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
                 Aircraft
-              </button>
+              </button>*/}
             </div>
           </div>
           <div className="flex items-center gap-4">
