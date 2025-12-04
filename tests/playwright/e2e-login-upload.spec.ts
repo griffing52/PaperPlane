@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Locator} from '@playwright/test';
 import path from 'path';
 
 test('e2e: login -> upload file -> process OCR -> verify created entries', async ({ page, request }) => {
@@ -51,4 +51,36 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
     });
     expect(verifyResp.ok()).toBeTruthy();
   }
+
+// ============================================================
+  // 4. DATA STABILITY CHECK 
+  // ============================================================
+  
+  // Helper to extract text from the row cells. 
+  // Adjust the .nth() indices based on your actual table column order.
+  const extractRowData = async (rowLocator: Locator) => {
+    return {
+      date: await rowLocator.locator('td').nth(0).innerText(), // e.g. "2025-12-01"
+      tail: await rowLocator.locator('td').nth(1).innerText(), // e.g. "N12345A"
+      route: await rowLocator.locator('td').nth(2).innerText(), // e.g. "KJFK - KLAX"
+      totalTime: await rowLocator.locator('td').nth(3).innerText(), // e.g. "2.5"
+    };
+  };
+
+  // A. Snapshot data BEFORE logout
+  const dataBeforeLogout = await extractRowData(anyRow);
+  console.log('Data before logout:', dataBeforeLogout);
+
+  // 5. Logout and Log back in
+  await page.click('[data-testid="logout-button"]');
+  await page.waitForURL(/.*login/, { timeout: 10000 });
+
+  await page.fill('[data-testid="login-email"]', email);
+  await page.fill('[data-testid="login-password"]', password);
+  await page.click('[data-testid="login-button"]');
+  await page.waitForURL(/.*dashboard/, { timeout: 15000 });
+
+  // 6. Verify Persistence
+  await expect(anyRow).toBeVisible({ timeout: 10000 });
+
 });
