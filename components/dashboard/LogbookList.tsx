@@ -107,7 +107,7 @@ export default function LogbookList({
                   </div>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-300">
-                  {entry.route}
+                  {`${entry.srcIcao} \u2192 ${entry.destIcao}`}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-blue-400">
                   {entry.totalFlightTime.toFixed(1)}
