@@ -75,6 +75,4 @@ router.post(
   controllers.verifyFlightHandler,
 );
 
-
-
 export default router;

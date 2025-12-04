@@ -25,7 +25,7 @@ export const createUser = async (req: Request, res: Response) => {
     data: {
       name,
       email,
-      emailHash
+      emailHash,
     },
   });
   res.status(201).json(user);

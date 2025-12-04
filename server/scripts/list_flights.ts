@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -7,16 +7,18 @@ const prisma = new PrismaClient();
 async function main() {
   const flights = await prisma.flight.findMany({
     orderBy: {
-      departureTime: 'desc',
+      departureTime: "desc",
     },
     take: 20,
   });
 
   console.log("--- Archived Flights (Top 20) ---");
-  flights.forEach(f => {
+  flights.forEach((f) => {
     console.log(`Flight ID: ${f.id}`);
     console.log(`  Tail: ${f.tailNumber}`);
-    console.log(`  Route: ${f.originAirportIcao} -> ${f.destinationAirportIcao}`);
+    console.log(
+      `  Route: ${f.originAirportIcao} -> ${f.destinationAirportIcao}`,
+    );
     console.log(`  Departure: ${f.departureTime.toISOString()}`);
     console.log(`  Arrival:   ${f.arrivalTime.toISOString()}`);
     console.log("-----------------------------------");

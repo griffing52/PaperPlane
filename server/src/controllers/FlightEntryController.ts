@@ -15,7 +15,7 @@ export const listFlightEntries = async (req: Request, res: Response) => {
       ...(flightId != null && { flightId }),
     },
     orderBy: {
-      date: 'desc',
+      date: "desc",
     },
   });
   res.status(201).json(flightEntries);

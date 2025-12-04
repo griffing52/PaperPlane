@@ -23,15 +23,15 @@ type AuthData = {
 async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
   const decodedToken = await firebaseAuth.verifyIdToken(idToken);
   const { email, name } = decodedToken;
-  
+
   if (!email) {
     return null;
   }
   const emailHash = await hashString(email);
-  return { 
-    email, 
+  return {
+    email,
     emailHash,
-    name: name || email.split("@")[0] // Default name if missing
+    name: name || email.split("@")[0], // Default name if missing
   };
 }
 

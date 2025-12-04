@@ -47,7 +47,6 @@ WARNING: The free open-sky API is finicky and prone to rate-limiting.
 # and to only consider flights from small aircrafts.
 # Make sure to rate limit.
 
-
 import os
 import json
 import time
@@ -300,12 +299,14 @@ class OpenSkyClient:
 
         if bounds:
             lat_min, lat_max, lon_min, lon_max = bounds
-            params.update({
-                "lamin": lat_min,
-                "lamax": lat_max,
-                "lomin": lon_min,
-                "lomax": lon_max,
-            })
+            params.update(
+                {
+                    "lamin": lat_min,
+                    "lamax": lat_max,
+                    "lomin": lon_min,
+                    "lomax": lon_max,
+                }
+            )
 
         if icao24_filter:
             params["icao24"] = ",".join(icao24_filter)
@@ -719,11 +720,13 @@ def main():
     except RateLimitExceeded as e:
         logger.error(f"Rate limit exceeded: {e}")
         print(f"\nError: {e}")
-        print("Please wait before making more requests or upgrade your API credentials.")
+        print(
+            "Please wait before making more requests or upgrade your API credentials."
+        )
         return 1
     except requests.exceptions.HTTPError as e:
         logger.error(f"HTTP error from API: {e}")
-        if hasattr(e, 'response') and e.response is not None:
+        if hasattr(e, "response") and e.response is not None:
             print(f"\nAPI Error: HTTP {e.response.status_code}")
             print(f"The API may be temporarily unavailable. Please try again later.")
         else:
@@ -759,4 +762,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

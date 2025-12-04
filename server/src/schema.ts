@@ -13,7 +13,7 @@ export const flightEntryGetSchema = z.object({
 export type FlightEntryGetParams = z.infer<typeof flightEntryGetSchema>;
 
 export const userPostSchema = z.object({
-  name: z.string().min(1)
+  name: z.string().min(1),
 });
 
 export type UserPostBodyParams = z.infer<typeof userPostSchema>;
