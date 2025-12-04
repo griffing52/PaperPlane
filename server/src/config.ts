@@ -24,7 +24,7 @@ export const upload = multer({
 // if to prevent re-initialization
 if (!firebase.apps.length) {
   firebase.initializeApp({
-    credential: firebase.credential.cert(serviceAccount),
+    credential: firebase.credential.cert(serviceAccount as firebase.ServiceAccount),
   });
 }
 export const firebaseAuth = firebase.auth();

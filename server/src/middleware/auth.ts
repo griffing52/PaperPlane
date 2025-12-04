@@ -126,7 +126,7 @@ export const requireUser = async (
       });
       logger.info(`Created new user for ${email}`);
     } catch (error) {
-      logger.error(`Failed to create user ${email}:`, error);
+      logger.error(error, `Failed to create user ${email}:`);
       res.status(500).json({ error: "Failed to create user account" });
       return;
     }
