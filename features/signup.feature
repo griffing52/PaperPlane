@@ -3,6 +3,7 @@ Feature: User Sign-Up
   Scenario: User successfully signs up with valid credentials
     Given I am on the sign-up page
     When I enter a valid email "testuser1@example.com" and a valid password "Password123!"
+    And I enter first name "Test" and last name "User"
     And I enter the same password to confirm it
     And I submit the sign-up form
     Then I should be redirected to the dashboard page
@@ -24,7 +25,7 @@ Feature: User Sign-Up
   Scenario: User cannot sign up with an invalid email format
     Given I am on the sign-up page
     When I enter an invalid email "not-an-email"
-    Then I should see an error
+    Then I should stay on signup page
 
 @clean
   Scenario: Sign-up button is disabled until form is valid

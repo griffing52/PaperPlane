@@ -34,7 +34,8 @@ export const uploadLogbookFile = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`http://${OCR_API_BASE_URL}/ocr/process`, {
+  const ocrBase = String(OCR_API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${ocrBase}/ocr/process`, {
     method: "POST",
     body: formData,
   });
@@ -49,7 +50,8 @@ export const uploadLogbookFile = async (file: File) => {
 
 // NOTE: michael.smith@outlook.com is a valid email address for testing
 export const fetchLogs = async (idToken: string): Promise<Array<LogEntry>> => {
-  const response = await fetch(`http://${API_BASE_URL}/api/v1/flight_entry`, {
+  const apiBase = String(API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${apiBase}/api/v1/flight_entry`, {
     method: "GET",
     headers: genHeaders(idToken),
   });
@@ -66,8 +68,8 @@ const saveFlightEntry = async (
   id?: string,
 ) => {
   const url = id
-    ? `http://${API_BASE_URL}/api/v1/flight_entry/${id}`
-    : `http://${API_BASE_URL}/api/v1/flight_entry`;
+    ? `${String(API_BASE_URL).replace(/\/$/, "")}/api/v1/flight_entry/${id}`
+    : `${String(API_BASE_URL).replace(/\/$/, "")}/api/v1/flight_entry`;
 
   const response = await fetch(url, {
     method,
@@ -105,7 +107,8 @@ export const updateFlightEntry = (entry: LogEntry, idToken: string) =>
   saveFlightEntry("PATCH", entry, idToken, entry.id);
 
 export const deleteFlightEntry = async (id: string, idToken: string) => {
-  const response = await fetch(`http://${API_BASE_URL}/api/v1/flight_entry/${id}`, {
+  const apiBase = String(API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${apiBase}/api/v1/flight_entry/${id}`, {
     method: "DELETE",
     headers: genHeaders(idToken),
   });
@@ -113,6 +116,36 @@ export const deleteFlightEntry = async (id: string, idToken: string) => {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || "Failed to delete flight entry");
+  }
+
+  return response.json();
+};
+
+export const verifyFlightEntry = async (entry: LogEntry, idToken: string) => {
+  // Create a midday date for the flight to avoid timezone issues
+  const departureTime = new Date(entry.date);
+  departureTime.setUTCHours(12, 0, 0, 0);
+
+  // Calculate arrival time based on duration (hours -> ms)
+  const durationMs = entry.totalFlightTime * 60 * 60 * 1000;
+  const arrivalTime = new Date(departureTime.getTime() + durationMs);
+
+  const apiBase = String(API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${apiBase}/api/v1/verify/`, {
+    method: "POST",
+    headers: genHeaders(idToken),
+    body: JSON.stringify({
+      tailNumber: entry.tailNumber,
+      originAirportIcao: entry.srcIcao,
+      destinationAirportIcao: entry.destIcao,
+      departureTime: departureTime.toISOString(),
+      arrivalTime: arrivalTime.toISOString(),
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to verify flight entry");
   }
 
   return response.json();

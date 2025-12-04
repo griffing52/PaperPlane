@@ -7,6 +7,8 @@ type LogbookListProps = {
   selectedIds?: Set<string>;
   onSelectionChange?: (id: string) => void;
   onSelectAll?: (selected: boolean) => void;
+  verificationResults?: Record<string, boolean>;
+  onEdit?: (entry: LogEntry) => void;
 };
 
 export default function LogbookList({ 
@@ -14,7 +16,9 @@ export default function LogbookList({
   isLoading, 
   selectedIds = new Set(),
   onSelectionChange,
-  onSelectAll
+  onSelectAll,
+  verificationResults,
+  onEdit
 }: LogbookListProps) {
   if (isLoading) {
     return (
@@ -37,7 +41,7 @@ export default function LogbookList({
     );
   }
 
-  const allSelected = entries.length > 0 && entries.every(e => selectedIds.has(e.id));
+  const allSelected = entries.length > 0 && entries.every(e => selectedIds.has(String(e.id)));
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50">
@@ -62,34 +66,51 @@ export default function LogbookList({
               <th className="px-4 py-3 font-medium text-right">PIC</th>
               <th className="px-4 py-3 font-medium text-right">Landings</th>
               <th className="px-4 py-3 font-medium">Remarks</th>
+              <th className="px-4 py-3 font-medium w-8"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
             {entries.map((entry) => (
               <tr
-                key={entry.id}
+                key={String(entry.id)}
                 className={`group hover:bg-slate-800/50 transition-colors ${
-                  selectedIds.has(entry.id) ? "bg-slate-800/50" : ""
+                  selectedIds.has(String(entry.id)) ? "bg-slate-800/50" : ""
                 }`}
               >
                 <td className="px-4 py-3 w-8">
                   {onSelectionChange && (
                     <input
                       type="checkbox"
-                      checked={selectedIds.has(entry.id)}
-                      onChange={() => onSelectionChange(entry.id)}
+                      checked={selectedIds.has(String(entry.id))}
+                      onChange={() => onSelectionChange(String(entry.id))}
                       className="rounded border-slate-600 cursor-pointer"
                     />
                   )}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-300">
-                  {new Date(entry.date).toLocaleDateString()}
+                  {new Date(entry.date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 font-medium text-white">
-                  {entry.tailNumber}
+                  <div className="flex items-center gap-2">
+                    {entry.tailNumber}
+                    {verificationResults && entry.id && verificationResults[entry.id] === true && (
+                      <span title="Verified flight">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-green-500">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                    )}
+                    {verificationResults && entry.id && verificationResults[entry.id] === false && (
+                      <span title="Verification failed">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-red-500">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-300">
-                  {entry.route}
+                  {`${entry.srcIcao} \u2192 ${entry.destIcao}`}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-right font-medium text-blue-400">
                   {entry.totalFlightTime.toFixed(1)}
@@ -104,6 +125,19 @@ export default function LogbookList({
                 </td>
                 <td className="max-w-xs truncate px-4 py-3 text-slate-500 group-hover:text-slate-400">
                   {entry.remarks}
+                </td>
+                <td className="px-4 py-3 w-8">
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(entry)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-slate-200"
+                      title="Edit entry"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

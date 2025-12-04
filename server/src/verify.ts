@@ -22,30 +22,46 @@ export async function verifyFlight(
       .map((field) => [field, flight[field]]),
   );
 
-  const timeFields: (keyof Flight)[] = ["departureTime", "arrivalTime"];
-  const toleranceMs = timeToleranceMinutes * 60 * 1000;
+  // Check if the flight happened on the same day
+  if (flight.departureTime) {
+    const startOfDay = new Date(flight.departureTime);
+    startOfDay.setUTCHours(0, 0, 0, 0);
 
-  for (const field of timeFields) {
-    const timeValue = flight[field];
+    const endOfDay = new Date(flight.departureTime);
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
-    if (timeValue == null) continue;
-
-    // for the type checker
-    if (timeValue instanceof Date) {
-      where[field] = {
-        gte: new Date(timeValue.getTime() - toleranceMs),
-        lte: new Date(timeValue.getTime() + toleranceMs),
-      };
-    } else {
-      throw new Error(`Expected ${field} to be Date but got ${timeValue}`);
-    }
+    where.departureTime = {
+      gte: startOfDay,
+      lte: endOfDay,
+    };
   }
 
-  // if where is empty, then this will always return something
-  // this is intended behavior
-  const match = await prisma.flight.findFirst({
+  const candidates = await prisma.flight.findMany({
     where,
   });
 
-  return match;
+  // Check if the duration is within the tolerance
+  if (flight.departureTime && flight.arrivalTime) {
+    const targetDuration =
+      flight.arrivalTime.getTime() - flight.departureTime.getTime();
+    const toleranceMs = timeToleranceMinutes * 60 * 1000;
+
+    for (const candidate of candidates) {
+      const candidateDuration =
+        candidate.arrivalTime.getTime() - candidate.departureTime.getTime();
+      
+      const diff = Math.abs(candidateDuration - targetDuration);
+      console.log(`Candidate ${candidate.id} duration: ${candidateDuration}ms, Diff: ${diff}ms`);
+
+      if (diff <= toleranceMs) {
+        console.log(`Match found: ${candidate.id}`);
+        return candidate;
+      }
+    }
+  } else {
+    console.log("Missing departureTime or arrivalTime in input flight");
+  }
+
+  console.log("No match found");
+  return null;
 }
