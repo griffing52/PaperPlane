@@ -1,68 +1,128 @@
 ![Test Badge](https://github.com/griffing52/workflows/test.yml/badge.svg)
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PaperPlane
 
-## Getting Started
+PaperPlane is a modern aviation logbook application designed to help pilots track their flights, currency, and proficiency. It features a Next.js frontend, an Express/Node.js backend, and a Python-based OCR service for digitizing physical logbook entries.
 
-First, install version 18+ of node.js.
+## Features
 
-### Back-end
+*   **Digital Logbook**: View, add, edit, and delete flight entries.
+*   **OCR Integration**: Upload photos of your paper logbook to automatically extract flight data.
+*   **Flight Verification**: Verify your logged flights against a database of archived flight records to ensure accuracy.
+*   **Pilot Status**: Track your flight times!
 
-```
-npm install:all
-```
+## Prerequisites
 
-Init the database. Run the following commands from the root of the project.
+Before you begin, ensure you have the following installed:
 
-```
-# sets the database location in prisma/dev.dbs
-cp .env.sample .env
-# TASK: edit .env to add the firebase API keys
-# TASK: Copy the firebase service side private key as 'serviceAccountKey.json' to server/
-# creates the database
-npx prisma migrate dev --name initial_migration
-# generates prisma library to interact with database
-npx prisma generate
-# generate test data
-npm run seed
-```
+*   **Node.js** (v18 or higher)
+*   **Python** (v3.8 or higher)
+*   **npm** (usually comes with Node.js)
 
-Run the backend.
+## Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/griffing52/PaperPlane.git
+    cd PaperPlane
+    ```
+
+2.  **Install Node.js dependencies (Frontend & Backend):**
+    ```bash
+    npm run install:all
+    ```
+
+3.  **Install Python dependencies (OCR Service):**
+    ```bash
+    npm run install:ocr
+    # OR manually:
+    # cd ocr
+    # pip install -r requirements.txt
+    ```
+
+## Configuration
+
+1.  **Environment Variables:**
+    Copy the sample environment file to `.env`:
+    ```bash
+    cp .env.sample .env
+    ```
+    Edit `.env` to add your configuration (e.g., Firebase API keys, OCR provider settings).
+
+2.  **Firebase Setup:**
+    *   Obtain your Firebase service account private key.
+    *   Save it as `serviceAccountKey.json` in the `server/` directory.
+
+## Database Setup
+
+This project uses SQLite. You need to initialize the database and seed it with data.
+
+1.  **Run Migrations:**
+    ```bash
+    npx prisma migrate dev --name initial_migration
+    ```
+
+2.  **Generate Prisma Client:**
+    ```bash
+    npx prisma generate
+    ```
+
+3.  **Seed the Database:**
+    This populates the database with sample users and archived flight data for verification.
+    ```bash
+    npm run seed
+    ```
+
+## Running the Application
+
+You can run all services (Frontend, Backend, OCR) concurrently with a single command:
+
 ```bash
-npm run dev:server
+npm run dev:all
 ```
 
-### Front-end
+Alternatively, you can run them individually in separate terminals:
 
-First, run the development server:
+*   **Frontend** (http://localhost:3000):
+    ```bash
+    npm run dev:frontend
+    ```
+
+*   **Backend** (http://localhost:3002):
+    ```bash
+    npm run dev:server
+    ```
+
+*   **OCR Service** (http://localhost:8000):
+    ```bash
+    npm run dev:ocr
+    ```
+
+## Testing
+
+To run all tests (Frontend, Backend, OCR):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run test:all
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Or run them individually:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+*   **Backend Tests:** `npm run test:server`
+*   **Frontend Tests:** `npm run test:frontend` (if configured)
+*   **OCR Tests:** `npm run test:ocr`
+*   **E2E Tests:** `npm run test:e2e`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Verification Feature
 
-## Learn More
+The dashboard includes a **Verify** button. This feature checks your logbook entries against the archived flight data in the database.
 
-To learn more about Next.js, take a look at the following resources:
+*   **Green Checkmark**: The flight matches an archived record (same date, duration, and route).
+*   **Red X**: No matching flight was found in the archives.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+To see the archived flights available for verification, you can use Prisma Studio:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+cd server
+npx prisma studio
+```

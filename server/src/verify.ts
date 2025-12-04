@@ -50,18 +50,13 @@ export async function verifyFlight(
       const candidateDuration =
         candidate.arrivalTime.getTime() - candidate.departureTime.getTime();
       
-      const diff = Math.abs(candidateDuration - targetDuration);
-      console.log(`Candidate ${candidate.id} duration: ${candidateDuration}ms, Diff: ${diff}ms`);
-
-      if (diff <= toleranceMs) {
-        console.log(`Match found: ${candidate.id}`);
+      if (Math.abs(candidateDuration - targetDuration) <= toleranceMs) {
         return candidate;
       }
     }
-  } else {
-    console.log("Missing departureTime or arrivalTime in input flight");
+  } else if (candidates.length > 0) {
+    return candidates[0];
   }
 
-  console.log("No match found");
   return null;
 }

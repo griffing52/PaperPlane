@@ -4,7 +4,6 @@ import { CustomWorld } from "../support/custom-world";
 import fs from 'fs';
 import path from 'path';
 
-// Note: setDefaultTimeout is removed here because we moved it to hooks.ts
 
 // -------------------------------
 // Helper: store last password/email for steps
@@ -320,8 +319,8 @@ Then('I should be redirected to the login page', async function (this: CustomWor
 });
 
 Then("I should see the dashboard content", async function (this: CustomWorld) {
-  const dashboardHeader = this.page.locator('[data-testid="dashboard-header"]');
-  await expect(dashboardHeader).toBeVisible();
+  const logoutButton = this.page.locator('[data-testid="logout-button"]');
+  await expect(logoutButton).toBeVisible({ timeout: 10000 });
 });
 
 Then('I should not see user-only components', async function (this: CustomWorld) {

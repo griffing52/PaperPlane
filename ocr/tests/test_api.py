@@ -16,16 +16,18 @@ client = TestClient(app)
 # Mock Data
 MOCK_FLIGHT_RECORD = {
     "date": "1/10/2025",
-    "aircraft_type": "Cessna 172S",
-    "tail_number": "N54321",
-    "source_airport": "KSMO",
-    "destination_airport": "KSBA",
-    "total_time": 1.5,
-    "pic_hours": 0.8,
-    "instrument_hours": 0.4,
-    "night_hours": 0.0,
-    "landings_day": 3,
-    "landings_night": 0,
+    "tailNumber": "N54321",
+    "srcIcao": "KSMO",
+    "destIcao": "KSBA",
+    "totalFlightTime": 1.5,
+    "picTime": 0.8,
+    "dualReceivedTime": 0.0,
+    "instrumentTime": 0.4,
+    "crossCountry": False,
+    "night": False,
+    "solo": False,
+    "dayLandings": 3,
+    "nightLandings": 0,
     "remarks": "Local VFR flight, steep turns"
 }
 
@@ -144,7 +146,7 @@ def test_aws_processor_pipeline(mock_aws_client, mock_image):
             assert "records" in data
             assert len(data["records"]) > 0
             assert data["records"][0]["date"] == "1/10/2025"
-            assert data["records"][0]["total_time"] == 1.5
+            assert data["records"][0]["totalFlightTime"] == 1.5
             
             # Verify the mock was actually called
             mock_aws_client.analyze_document.assert_called_once()
@@ -167,7 +169,7 @@ def test_gemini_processor_pipeline(mock_gemini_client, mock_image):
             assert response.status_code == 200
             data = response.json()
             assert len(data["records"]) == 1
-            assert data["records"][0]["tail_number"] == "N54321"
+            assert data["records"][0]["tailNumber"] == "N54321"
 
 def test_hybrid_processor_pipeline(mock_aws_client, mock_gemini_client, mock_image):
     """

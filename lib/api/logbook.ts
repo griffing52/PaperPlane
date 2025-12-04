@@ -56,6 +56,15 @@ export const fetchLogs = async (idToken: string): Promise<Array<LogEntry>> => {
     headers: genHeaders(idToken),
   });
   const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Failed to fetch logs");
+  }
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid response format: expected an array of logs");
+  }
+
   return data.map(parseLogEntry);
 };
 
