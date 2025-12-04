@@ -12,7 +12,7 @@ First, install version 18+ of node.js.
 npm install:all
 ```
 
-Init the database.
+Init the database. Run the following commands from the root of the project.
 
 ```
 # sets the database location in prisma/dev.dbs
@@ -28,7 +28,7 @@ npm run seed
 ```
 
 Run the backend.
-``bash
+```bash
 npm run dev:server
 ```
 
