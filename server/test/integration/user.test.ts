@@ -4,8 +4,6 @@ import { app } from "../../src/index";
 import { prisma } from "../../src/config";
 import * as auth from "../../src/middleware/auth";
 
-const TEST_LICENSE_NUMBER = "12345";
-
 // AI Disclosure by Bolun Thompson:
 // I used Claude Code Sonnet 4.5 to generate this test, since it's largely repititive. Prompt as follows:
 // Add an anlogous user test. Make it short and to the point. Add a minimal test that its been stored in the DB.
@@ -27,8 +25,7 @@ describe("POST /api/v1/user/", () => {
     });
 
     const user = {
-      name: "Test User",
-      licenseNumber: TEST_LICENSE_NUMBER,
+      name: "Test User"
     };
 
     const response = await request(app)
@@ -55,7 +52,7 @@ describe("POST /api/v1/user/", () => {
   it("should 400 when body is invalid", async () => {
     const response = await request(app)
       .post("/api/v1/user/")
-      .send({ name: "Test" });
+      .send();
 
     expect(response.status).toBe(400);
   });
