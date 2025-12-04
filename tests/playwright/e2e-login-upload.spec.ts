@@ -18,7 +18,7 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
 
   // Upload an example image from repository test_images
   // test_images are located under the `ocr` folder in the repo
-  const filePath = path.resolve(__dirname, '..', '..', 'ocr', 'test_images', 'custom_example.png');
+  const filePath = path.resolve(__dirname, '..', '..', 'ocr', 'images', 'custom_example.png');
 
   // Set the file directly on the hidden input element. This is more reliable than the filechooser flow.
   await page.setInputFiles('input[type="file"]', filePath);

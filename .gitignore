@@ -68,6 +68,8 @@ eng.traineddata
 # vercel
 .vercel
 
+test-results/
+
 # python
 ocr/__pycache__/
 *.pyc
