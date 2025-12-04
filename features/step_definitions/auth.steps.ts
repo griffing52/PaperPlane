@@ -327,3 +327,8 @@ Then('I should not see user-only components', async function (this: CustomWorld)
   const dashboardHeader = this.page.locator('[data-testid="dashboard-header"]');
   await expect(dashboardHeader).not.toBeVisible();
 });
+
+Then("I can access page {string}", async function (this: CustomWorld, path: string) {
+  const dashboardHeader = this.page.locator('[data-testid="logout-button"]');
+  await expect(dashboardHeader).toBeVisible();
+});

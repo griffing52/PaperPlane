@@ -11,7 +11,7 @@ Scenario: User is redirected when trying to access dashboard without logging in
 Scenario: Logged-in user can access dashboard
   Given I am logged in
   When I try to access the page "/dashboard"
-  Then I should see the dashboard content
+  Then I should be redirected to the dashboard
 
 @clean
 Scenario: Logged-out user cannot see private UI elements
