@@ -78,7 +78,7 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-800 p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-white">
+          <h2 data-testid = "dashboard-header" className="text-xl font-semibold text-white">
             {editingEntry ? "Edit Flight Entry" : "Add Flight Entry"}
           </h2>
           <button
