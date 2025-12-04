@@ -25,10 +25,10 @@ export async function verifyFlight(
   // Check if the flight happened on the same day
   if (flight.departureTime) {
     const startOfDay = new Date(flight.departureTime);
-    startOfDay.setHours(0, 0, 0, 0);
+    startOfDay.setUTCHours(0, 0, 0, 0);
 
     const endOfDay = new Date(flight.departureTime);
-    endOfDay.setHours(23, 59, 59, 999);
+    endOfDay.setUTCHours(23, 59, 59, 999);
 
     where.departureTime = {
       gte: startOfDay,
@@ -49,11 +49,19 @@ export async function verifyFlight(
     for (const candidate of candidates) {
       const candidateDuration =
         candidate.arrivalTime.getTime() - candidate.departureTime.getTime();
-      if (Math.abs(candidateDuration - targetDuration) <= toleranceMs) {
+      
+      const diff = Math.abs(candidateDuration - targetDuration);
+      console.log(`Candidate ${candidate.id} duration: ${candidateDuration}ms, Diff: ${diff}ms`);
+
+      if (diff <= toleranceMs) {
+        console.log(`Match found: ${candidate.id}`);
         return candidate;
       }
     }
+  } else {
+    console.log("Missing departureTime or arrivalTime in input flight");
   }
 
+  console.log("No match found");
   return null;
 }

@@ -88,7 +88,7 @@ export default function LogbookList({
                   )}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-slate-300">
-                  {new Date(entry.date).toLocaleDateString()}
+                  {new Date(entry.date).toLocaleDateString(undefined, { timeZone: 'UTC' })}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 font-medium text-white">
                   <div className="flex items-center gap-2">

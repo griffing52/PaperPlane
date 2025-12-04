@@ -124,13 +124,14 @@ export const deleteFlightEntry = async (id: string, idToken: string) => {
 export const verifyFlightEntry = async (entry: LogEntry, idToken: string) => {
   // Create a midday date for the flight to avoid timezone issues
   const departureTime = new Date(entry.date);
-  departureTime.setHours(12, 0, 0, 0);
+  departureTime.setUTCHours(12, 0, 0, 0);
 
   // Calculate arrival time based on duration (hours -> ms)
   const durationMs = entry.totalFlightTime * 60 * 60 * 1000;
   const arrivalTime = new Date(departureTime.getTime() + durationMs);
 
-  const response = await fetch(`http://${API_BASE_URL}/api/v1/verify/`, {
+  const apiBase = String(API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${apiBase}/api/v1/verify/`, {
     method: "POST",
     headers: genHeaders(idToken),
     body: JSON.stringify({
