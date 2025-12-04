@@ -12,6 +12,7 @@ import {
   uploadLogbookFile,
   deleteFlightEntry,
   verifyFlightEntry,
+  updateFlightEntry,
 } from "@/lib/api/logbook";
 import StatusBar from "@/components/dashboard/StatusBar";
 import LogbookList from "@/components/dashboard/LogbookList";
@@ -23,6 +24,7 @@ export default function Dashboard() {
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddEntry, setShowAddEntry] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [verificationResults, setVerificationResults] = useState<Record<string, boolean>>({});
@@ -217,6 +219,26 @@ export default function Dashboard() {
     }
   };
 
+  const handleEditEntry = (entry: LogEntry) => {
+    setEditingEntry(entry);
+  };
+
+  const handleSaveEditedEntry = async (entryData: Omit<LogEntry, "id">) => {
+    if (!user || !editingEntry) return;
+    try {
+      const token = await user.getIdToken();
+      await updateFlightEntry(
+        { ...entryData, id: editingEntry.id } as LogEntry,
+        token
+      );
+      await loadLogs();
+      setEditingEntry(null);
+    } catch (error) {
+      console.error("Failed to update entry", error);
+      throw error;
+    }
+  };
+
   if (loading || !user) {
     return null; // Or a loading spinner
   }
@@ -255,7 +277,7 @@ export default function Dashboard() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold tracking-tight text-white">
+          <h1 data-testid = "dashboard-header" className="text-3xl font-semibold tracking-tight text-white">
             Pilot Dashboard
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -310,6 +332,7 @@ export default function Dashboard() {
               onSelectionChange={handleToggleSelection}
               onSelectAll={handleSelectAll}
               verificationResults={verificationResults}
+              onEdit={handleEditEntry}
             />
           </section>
 
@@ -339,10 +362,14 @@ export default function Dashboard() {
       </main>
 
       {/* Add Entry Modal */}
-      {showAddEntry && (
+      {(showAddEntry || editingEntry) && (
         <AddEntryForm
-          onClose={() => setShowAddEntry(false)}
-          onSave={handleSaveEntry}
+          onClose={() => {
+            setShowAddEntry(false);
+            setEditingEntry(null);
+          }}
+          onSave={editingEntry ? handleSaveEditedEntry : handleSaveEntry}
+          editingEntry={editingEntry}
         />
       )}
     </div>

@@ -34,7 +34,8 @@ export const uploadLogbookFile = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`http://${OCR_API_BASE_URL}/ocr/process`, {
+  const ocrBase = String(OCR_API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${ocrBase}/ocr/process`, {
     method: "POST",
     body: formData,
   });
@@ -49,7 +50,8 @@ export const uploadLogbookFile = async (file: File) => {
 
 // NOTE: michael.smith@outlook.com is a valid email address for testing
 export const fetchLogs = async (idToken: string): Promise<Array<LogEntry>> => {
-  const response = await fetch(`http://${API_BASE_URL}/api/v1/flight_entry`, {
+  const apiBase = String(API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${apiBase}/api/v1/flight_entry`, {
     method: "GET",
     headers: genHeaders(idToken),
   });
@@ -66,8 +68,8 @@ const saveFlightEntry = async (
   id?: string,
 ) => {
   const url = id
-    ? `http://${API_BASE_URL}/api/v1/flight_entry/${id}`
-    : `http://${API_BASE_URL}/api/v1/flight_entry`;
+    ? `${String(API_BASE_URL).replace(/\/$/, "")}/api/v1/flight_entry/${id}`
+    : `${String(API_BASE_URL).replace(/\/$/, "")}/api/v1/flight_entry`;
 
   const response = await fetch(url, {
     method,
@@ -105,7 +107,8 @@ export const updateFlightEntry = (entry: LogEntry, idToken: string) =>
   saveFlightEntry("PATCH", entry, idToken, entry.id);
 
 export const deleteFlightEntry = async (id: string, idToken: string) => {
-  const response = await fetch(`http://${API_BASE_URL}/api/v1/flight_entry/${id}`, {
+  const apiBase = String(API_BASE_URL).replace(/\/$/, "");
+  const response = await fetch(`${apiBase}/api/v1/flight_entry/${id}`, {
     method: "DELETE",
     headers: genHeaders(idToken),
   });
