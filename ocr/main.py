@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from processors import AWSOCRProcessor, GeminiOCRProcessor, OCRResult, HybridOCRProcessor
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv('../.env')
 
 # Configuration
 # TODO: Use environment variables

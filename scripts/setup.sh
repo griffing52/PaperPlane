@@ -4,5 +4,4 @@ npm install
 python -m venv .venv
 source .venv/bin/activate
 pip install -r ocr/requirements.txt
-pip install -r backend/requirements.txt
 echo "Setup complete!"
