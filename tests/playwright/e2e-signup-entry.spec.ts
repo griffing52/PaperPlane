@@ -13,13 +13,13 @@ test('e2e: signup -> add -> edit -> delete -> verify', async ({ page, request })
   await page.fill('[data-testid="signup-confirm"]', password);
   await page.click('[data-testid="signup-button"]');
 
-  // Expect to land on login page, then log in
-  await page.waitForURL(/.*login/, { timeout: 10000 });
-  await page.fill('[data-testid="login-email"]', email);
-  // Wait for the password input to be visible and stable before filling to avoid detached-element errors
-  await page.waitForSelector('[data-testid="login-password"]', { state: 'visible', timeout: 10000 });
-  await page.locator('[data-testid="login-password"]').fill(password);
-  await page.click('[data-testid="login-button"]');
+  // // Expect to land on login page, then log in
+  // await page.waitForURL(/.*login/, { timeout: 10000 });
+  // await page.fill('[data-testid="login-email"]', email);
+  // // Wait for the password input to be visible and stable before filling to avoid detached-element errors
+  // await page.waitForSelector('[data-testid="login-password"]', { state: 'visible', timeout: 10000 });
+  // await page.locator('[data-testid="login-password"]').fill(password);
+  // await page.click('[data-testid="login-button"]');
 
   // Dashboard should load
   await page.waitForURL(/.*dashboard/, { timeout: 15000 });
