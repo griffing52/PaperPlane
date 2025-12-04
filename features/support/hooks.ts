@@ -11,7 +11,7 @@ const BASE_URL = 'http://localhost:3000'; // Change to your app URL
 const TEST_USER = { email: 'admin@example.com', password: 'Password123!' }; // Change to valid creds
 
 BeforeAll(async function () {
-  browser = await chromium.launch({ headless: false }); // Set true for CI
+  browser = await chromium.launch({ headless: process.env.CI === 'true' });
 });
 
 Before(async function (this: CustomWorld, scenario) {
