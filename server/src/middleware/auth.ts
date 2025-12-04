@@ -17,15 +17,22 @@ const hashString = async (email: string): Promise<string> => {
 type AuthData = {
   email: string;
   emailHash: string;
+  name: string;
 };
 
 async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
-  const { email } = await firebaseAuth.verifyIdToken(idToken);
+  const decodedToken = await firebaseAuth.verifyIdToken(idToken);
+  const { email, name } = decodedToken;
+  
   if (!email) {
     return null;
   }
   const emailHash = await hashString(email);
-  return { email, emailHash };
+  return { 
+    email, 
+    emailHash,
+    name: name || email.split("@")[0] // Default name if missing
+  };
 }
 
 // TODO: Move this to a final report. This isn't relavant anymore because
@@ -100,16 +107,29 @@ export const requireUser = async (
     return;
   }
 
-  const { emailHash } = authData;
+  const { emailHash, email, name } = authData;
 
   // for privacy we only store email hashes in the database
-  const user = await prisma.user.findUnique({
+  // Auto-create user if they don't exist (JIT provisioning)
+  let user = await prisma.user.findUnique({
     where: { emailHash },
   });
 
   if (!user) {
-    res.status(404).json({ error: "User not found" });
-    return;
+    try {
+      user = await prisma.user.create({
+        data: {
+          email,
+          emailHash,
+          name,
+        },
+      });
+      logger.info(`Created new user for ${email}`);
+    } catch (error) {
+      logger.error(`Failed to create user ${email}:`, error);
+      res.status(500).json({ error: "Failed to create user account" });
+      return;
+    }
   }
 
   req.user = user;

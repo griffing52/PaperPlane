@@ -234,6 +234,19 @@ async function seed(force: boolean) {
   }
 
   console.log("✨ Creating users...\n");
+  
+  // Create the test user from environment variables
+  const testUserEmail = process.env.TEST_USER_EMAIL || "e2e@gmail.com";
+  const testUserName = "E2E Test User";
+
+  console.log(`👤 Creating test user: ${testUserName} <${testUserEmail}>\n`)
+  const testUser = await prisma.user.create({
+    data: {
+      email: testUserEmail,
+      emailHash: generateEmailHash(testUserEmail),
+      name: testUserName,
+    },
+  });
 
   const users = [];
   for (let i = 0; i < 5; i++) {

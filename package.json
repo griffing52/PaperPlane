@@ -20,7 +20,7 @@
     "test:frontend": "npm run dev:all && npx playwright test",
     "dev:all": "concurrently --names \"SERVER,CLIENT,OCR\" \"npm run dev:server\" \"npm run dev:frontend\" \"npm run dev:ocr\"",
     "build:all": "npm run build:server && npm run build:frontend && npm run build:ocr",
-    "test:all": "concurrently --names \"SERVER,CLIENT,OCR\" \"npm run test:server\" \"npm run test:frontend\" \"npm run test:ocr\"",
+    "test:all": "concurrently --names \"CLIENT,SERVER,OCR\" \"npm run test:frontend\" \"npm run test:server\" \"npm run test:ocr\"",
     "seed": "npm --prefix server run seed --",
     "test:cucumber:run": "cucumber-js --require-module ts-node/register/transpile-only --require \"./features/step_definitions/**/*.ts\"",
     "test:cucumber": "start-server-and-test dev http://localhost:3000 dev:server http://localhost:3002/api/v1/health test:cucumber:run",
