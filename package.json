@@ -23,9 +23,9 @@
     "build:frontend": "next build",
     "test:frontend": "start-server-and-test dev:all \"http://localhost:3000|http://localhost:3002/api/v1/health\" \"npx playwright test && npm run test:e2e:run\"",
     "seed": "npm --prefix server run seed --",
-    "dev:all": "concurrently --names \"SERVER,CLIENT,OCR\" \"npm run dev:server\" \"npm run dev:frontend\" \"npm run dev:ocr\"",
+    "dev:all": "concurrently --names \"SERVER,CLIENT,OCR\" -c \"cyan,magenta,yellow\" \"npm run dev:server\" \"npm run dev:frontend\" \"npm run dev:ocr\"",
     "build:all": "npm run build:server && npm run build:frontend && npm run build:ocr",
-    "test:all": "concurrently --names \"CLIENT,SERVER,OCR\" \"npm run test:frontend\" \"npm run test:server\" \"npm run test:ocr\"",
+    "test:all": "concurrently --names \"CLIENT,SERVER,OCR\" -c \"cyan,magenta,yellow\" \"npm run test:frontend\" \"npm run test:server\" \"npm run test:ocr\"",
     "artillery": "ts-node artillery.ts"
   },
   "dependencies": {
@@ -33,7 +33,6 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "firebase": "^12.5.0",
-    "multer": "^2.0.2",
     "next": "16.0.1",
     "react": "19.2.0",
     "react-dom": "19.2.0"

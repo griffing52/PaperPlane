@@ -37,11 +37,14 @@ app.add_middleware(
 
 def get_processor():
     if OCR_PROVIDER == "GEMINI":
+        print("Using Gemini OCR Processor")
         return GeminiOCRProcessor()
 
     if OCR_PROVIDER == "HYBRID":
+        print("Using Hybrid OCR Processor")
         return HybridOCRProcessor()
     
+    print("Using AWS OCR Processor")
     return AWSOCRProcessor()
 
 @app.post(

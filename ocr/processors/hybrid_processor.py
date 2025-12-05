@@ -38,7 +38,6 @@ class HybridOCRProcessor(AWSOCRProcessor):
         if not csv_text:
              return OCRResult(
                 message="No tables found by Textract.",
-                raw_data=textract_response,
                 records=[]
             )
 
@@ -95,7 +94,6 @@ class HybridOCRProcessor(AWSOCRProcessor):
             
             return OCRResult(
                 message=f"Successfully processed {len(records)} records with Hybrid (Textract -> Gemini)",
-                raw_data={"textract": textract_response, "gemini_text": response.text},
                 records=records
             )
 
