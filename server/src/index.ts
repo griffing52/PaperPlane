@@ -34,7 +34,7 @@ export { app, prisma };
 // all the non-trivial code. This was because:
 // (1): The generated endpoints were not based on real requirements
 // (2): I needed to understand the code to add more features
-// (3): I didn't record most of their prompts.
+// (3): I didn't precisely keep track of the prompts I used.
 
 // At this point, the only code that remains from 5ec3ae7 is this 
 // server listening function, server/controllers/HealthController.ts, and 
@@ -42,7 +42,7 @@ export { app, prisma };
 // I fully undid the other two commits (except for server/middlewares/validation.ts -- see prompt there).
 // See commit ee60bc7 for the removals. 
 
-// For the sake of disclosure, what follows is the approximate prompt for the first commit.
+// For the sake of disclosure, what follows is the prompt I remember using for the first commit.
 // I don't include the other two since I reverted them. I removed the endpoints and schema it created, but kept
 // the health check endpoint.
 // I reviewed the plan it produced and told it to implement it.
