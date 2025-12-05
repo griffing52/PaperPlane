@@ -21,5 +21,5 @@ def test_ocr_endpoint(image_path: str):
 
 if __name__ == "__main__":
     # Replace use path of first cli argument with path to a test image file
-    test_image_path = sys.argv[1] if len(sys.argv) > 1 else "test_images/custom_example.png"
+    test_image_path = sys.argv[1] if len(sys.argv) > 1 else "images/example.png"
     test_ocr_endpoint(test_image_path)
