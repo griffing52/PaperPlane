@@ -16,11 +16,8 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
   await page.waitForURL(/.*dashboard/, { timeout: 15000 });
   await expect(page.getByTestId('dashboard-header')).toBeVisible();
 
-  // Upload an example image from repository test_images
-  // test_images are located under the `ocr` folder in the repo
-  const filePath = path.resolve(__dirname, '..', '..', 'ocr', 'images', 'custom_example.png');
+  const filePath = path.resolve(__dirname, '..', '..', 'ocr', 'images', 'handwritten.png');
 
-  // Set the file directly on the hidden input element. This is more reliable than the filechooser flow.
   await page.setInputFiles('input[type="file"]', filePath);
 
   // Wait for processing (uploadLogbookFile calls OCR backend — ensure it's running)
@@ -38,7 +35,6 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
   const anyRow = page.locator('tbody tr').first();
   await expect(anyRow).toBeVisible({ timeout: 15000 });
 
-  // Optionally, call verify endpoint for the first row's data
   const tailCell = anyRow.locator('td').nth(2); // tail number cell index in table
   const tail = (await tailCell.textContent())?.trim() || '';
 
@@ -51,6 +47,19 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
     });
     expect(verifyResp.ok()).toBeTruthy();
   }
+
+  // Expect the "Verify" operation to trigger a dialog notification
+  const verifyDialogPromise = page.waitForEvent('dialog');
+
+  await page.click('[data-testid="verify-button"]');
+
+  const dialog = await verifyDialogPromise;
+
+  // Assert the dialog message: handwritten had 4 valid entries, so verification message should always have valid entries in multiples of 4
+  expect(dialog.message()).toMatch(
+  /Verification complete\. Verified (?:\d*[02468][048]|\d*[13579][26]) out of \d+ checked flights\./
+  );
+
 
 // ============================================================
   // 4. DATA STABILITY CHECK 

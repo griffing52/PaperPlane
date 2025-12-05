@@ -49,7 +49,7 @@ export async function verifyFlight(
     for (const candidate of candidates) {
       const candidateDuration =
         candidate.arrivalTime.getTime() - candidate.departureTime.getTime();
-      
+
       if (Math.abs(candidateDuration - targetDuration) <= toleranceMs) {
         return candidate;
       }

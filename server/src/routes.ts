@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { upload } from "./config";
 import { validate } from "./middleware/validation";
 import { requireUser, verifyFlightEntryOwnership } from "./middleware/auth";
 import {
@@ -8,12 +7,12 @@ import {
   flightEntryPostSchema,
   flightEntryPatchSchema,
   userPostSchema,
-  ocrSchema,
   flightSchema,
 } from "./schema";
-import * as controllers from "./controllers/controllers";
+import * as healthControllers from "./controllers/HealthController";
 import * as userControllers from "./controllers/UserController";
 import * as flightControllers from "./controllers/FlightEntryController";
+import * as verifyControllers from "./controllers/VerificationController";
 
 // DESIGN DECISION:
 // I could have put separate routes into a routes/ directory,
@@ -22,7 +21,7 @@ import * as flightControllers from "./controllers/FlightEntryController";
 
 const router = Router();
 
-router.get("/api/v1/health", controllers.getHealth);
+router.get("/api/v1/health", healthControllers.getHealth);
 
 router.post(
   "/api/v1/flight_entry",
@@ -72,9 +71,7 @@ router.post(
 router.post(
   "/api/v1/verify/",
   validate(flightSchema, "body"),
-  controllers.verifyFlightHandler,
+  verifyControllers.verifyFlightHandler,
 );
-
-
 
 export default router;

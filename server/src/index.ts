@@ -6,21 +6,21 @@ import { Request, Response, NextFunction } from "express";
 
 const app = express();
 
-app.use(cors(
-  {
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  }
-));
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(router);
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  logger.error(err, 'Internal server error');
+  logger.error(err, "Internal server error");
 
   res.status(500).json({
-    error: 'Internal server error',
+    error: "Internal server error",
   });
 });
 export { app, prisma };

@@ -309,7 +309,7 @@ export default function Dashboard() {
                     Delete ({selectedIds.size})
                   </button>
                 )}
-                <button
+                <button data-testid = "verify-button"
                   onClick={handleVerify}
                   disabled={isVerifying}
                   className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/20 disabled:opacity-50"
