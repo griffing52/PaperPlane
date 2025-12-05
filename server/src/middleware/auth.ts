@@ -35,8 +35,11 @@ async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
   };
 }
 
-// TODO: Move this to a final report. This isn't relavant anymore because
-// I've manually changed the arcitecture. However, this helped me change it!
+// NOTE: There is no more code which is effected by this prompt
+// because I manually refactored it after. I keep it here for history's sake.
+
+// NOTE: I prompted this refactor before I'd refactored everything into middlware.
+// If I'd done that already, it'd been easier to have done everything manually, since the auth would be DRY.
 
 // AI Disclosure by Bolun Thompson:
 // I used Claude Code with Sonnet 4.5, to refactor the following endpoints to take a constant emailHash
@@ -65,15 +68,7 @@ async function verifyFirebaseToken(idToken: string): Promise<AuthData | null> {
 // Likewise, refactor the endpoints (GET ID, DELETE ID) to check whether the email hash matches before
 // doing the operation.
 
-// 2. Add a patch endpoint for flight_entry consistent with the others. Key it on the
-// id of the flight entry. Similarly, check the email hash before doing the operation.
-
 // Results: The refactor works as expected, and the tests look good and pass.
-// However, I had to write the endpoint wrapper functions in the front-end myself
-// since the AI generated verbose code which tried to do too many changes at once.
-//
-// NOTE: The above happened before I'd refactored everything into middlware. If I'd done that already,
-// it'd been easier to have done everything manually, since the auth would be DRY.
 
 export const getAuthData = async (
   authHeader: string,

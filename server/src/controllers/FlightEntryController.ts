@@ -35,6 +35,10 @@ export const deleteFlightEntry = async (req: Request, res: Response) => {
   res.json(deletedEntry);
 };
 
+// This was AI generated, but has been heavily refactored since. The original prompt is as follows
+// 2. Add a patch endpoint for flight_entry consistent with the others. Key it on the
+// id of the flight entry. Similarly, check the email hash before doing the operation.
+
 export const updateFlightEntry = async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body as unknown as FlightEntryPatchParams;
