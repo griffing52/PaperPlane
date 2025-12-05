@@ -126,3 +126,12 @@ To see the archived flights available for verification, you can use Prisma Studi
 cd server
 npx prisma studio
 ```
+
+## Architecture Diagrams
+
+We have two entities corresponding to a flight in our database. We have a "FlightEntry", which is what a pilot enters in their logbook.
+We also have a "Flight", which is what we get from our external flight database. When we verify a flight, a FlightEntry is associated with a Flight.
+A flight can be associated with any number of flight entries because there could be multiple pilots.
+
+<img width="951" height="1379" alt="image" src="https://github.com/user-attachments/assets/b5698b4d-e501-4b90-8990-8248e9fc628a" />
+
