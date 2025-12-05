@@ -35,3 +35,10 @@ Refactor signup page UI and extract backend user helper
 - Improved layout and styling for a more polished, professional look
 - Moved API base URL and createBackendUser logic into lib/backendUser.ts
 - Cleaned up imports and updated signup page to use shared helper
+
+
+more test account
+Kaartik
+Tejwani
+test3@gmail.com
+Jolly2331!

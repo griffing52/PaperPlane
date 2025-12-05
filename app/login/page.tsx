@@ -31,18 +31,18 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace("/dashboard");
-    } catch (err: any) {
+    } catch (err: any) { // Showing raw error messages for simplicity, TODO for production is better messages
       setError(err.message || "Login failed");
     } finally {
       setSubmitting(false);
     }
   };
-
+  //Really simple page render whule checking auth state
   if (loading) return <div className="p-6">Loading…</div>;
 
   return (
     <div className="relative min-h-screen text-white">
-      {/* Background image */}
+      {/* Background image of a plane at nigh*/}
       <Image
         src="/login-bg.jpg"
         alt="Airplane night background"
@@ -117,9 +117,9 @@ export default function LoginPage() {
                   {submitting ? "Signing in…" : "Sign in"}
                 </button>
               </form>
-
+              {/* Backup Signup link */}
               <p className="mt-4 text-sm text-center text-gray-300">
-                Don’t have an account?{" "}
+                Don't have an account?{" "}
                 <a
                   href="/signup"
                   data-testid="login-signup-link"
