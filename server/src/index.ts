@@ -25,6 +25,32 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 export { app, prisma };
 
+// AI Disclosure by Bolun Thompson. I used Claude Code with Sonnet 4.5 with Thinking enabled.
+// At the start of this project, in commit 5ec3ae7, 67fb230. and a09a751, I setup the project
+// with the help of AI and generated example endpoints. 
+
+// I found its output educational to understand the structure of a CRUD express backend
+// but I decided I'd rather write the rest, so I removed 
+// all the non-trivial code. This was because:
+// (1): The generated endpoints were not based on real requirements
+// (2): I needed to understand the code to add more features
+// (3): I didn't record most of their prompts.
+
+// At this point, the only code that remains from 5ec3ae7 is this 
+// server listening function, server/controllers/HealthController.ts, and 
+// the validation middleware in server/middlewares/validation.ts.
+// I fully undid the other two commits (except for server/middlewares/validation.ts -- see prompt there).
+// See commit ee60bc7 for the removals. 
+
+// For the sake of disclosure, what follows is the approximate prompt for the first commit.
+// I don't include the other two since I reverted them. I removed the endpoints and schema it created, but kept
+// the health check endpoint.
+// I reviewed the plan it produced and told it to implement it.
+
+// You're a skilled senior developer. Ultrathink. Plan how to setup a simple idiomatic basic express backend in
+// Typescript with the Prisma ORM in the server/ directory.
+// As an example, add a users table with a get and post request. Test that it's working.
+
 if (require.main === module) {
   process.on("SIGINT", async () => {
     await prisma.$disconnect();
