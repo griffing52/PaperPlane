@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link"
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -37,12 +36,12 @@ export default function LoginPage() {
       setSubmitting(false);
     }
   };
-  //Really simple page render whule checking auth state
+  //Really simple page render while checking auth state
   if (loading) return <div className="p-6">Loading…</div>;
 
   return (
     <div className="relative min-h-screen text-white">
-      {/* Background image of a plane at nigh*/}
+      {/* Background image of a plane at night*/}
       <Image
         src="/login-bg.jpg"
         alt="Airplane night background"
