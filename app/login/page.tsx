@@ -31,8 +31,8 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace("/dashboard");
-    } catch (err: any) { // Showing raw error messages for simplicity, TODO for production is better messages
-      setError(err.message || "Login failed");
+    } catch (err: any) { // Showing raw error messages for simplicity
+      setError(err.message || "Login failed"); //TODO: Better error messages for production
     } finally {
       setSubmitting(false);
     }
