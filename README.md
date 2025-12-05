@@ -1,4 +1,4 @@
-![Test Badge](https://github.com/griffing52/workflows/test.yml/badge.svg)
+![Test Badge](https://github.com/griffing52/paperplane/actions/workflows/test.yml/badge.svg)
 
 # PaperPlane
 
