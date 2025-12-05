@@ -35,8 +35,10 @@ export const deleteFlightEntry = async (req: Request, res: Response) => {
   res.json(deletedEntry);
 };
 
-// This was AI generated, but has been heavily refactored since. The original prompt is as follows
-// 2. Add a patch endpoint for flight_entry consistent with the others. Key it on the
+// This was AI generated, but has been heavily refactored since. The original prompt is as follows.
+// I used Claude Code with Sonnet 4.5.
+// You're a skilled senior developer developing endpoints.
+// Add a patch endpoint for flight_entry consistent with the others. Key it on the
 // id of the flight entry. Similarly, check the email hash before doing the operation.
 
 export const updateFlightEntry = async (req: Request, res: Response) => {
