@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { upload } from "./config";
 import { validate } from "./middleware/validation";
 import { requireUser, verifyFlightEntryOwnership } from "./middleware/auth";
 import {
@@ -8,7 +7,6 @@ import {
   flightEntryPostSchema,
   flightEntryPatchSchema,
   userPostSchema,
-  ocrSchema,
   flightSchema,
 } from "./schema";
 import * as healthControllers from "./controllers/HealthController";

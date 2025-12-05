@@ -18,10 +18,6 @@ export const userPostSchema = z.object({
 
 export type UserPostBodyParams = z.infer<typeof userPostSchema>;
 
-export const ocrSchema = z.object({});
-
-export type OcrBodyParams = z.infer<typeof ocrSchema>;
-
 export const flightSchema = z.object({
   tailNumber: z.string().optional(),
   aircraftModel: z.string().optional(),
