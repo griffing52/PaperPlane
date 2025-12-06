@@ -3,6 +3,7 @@ import { PrismaClient, Flight } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export async function verifyFlight(
+  id: string | undefined,
   flight: Partial<Flight>,
   timeToleranceMinutes: number = 15,
   // promise type to satisfy async JS rules
@@ -14,6 +15,14 @@ export async function verifyFlight(
     "originAirportIcao",
     "destinationAirportIcao",
   ];
+  if (id) {
+    const flightEntry = await prisma.flightEntry.findFirst({
+      where: { id }, include: { flight: true }
+    });
+    if (flightEntry?.flightId) {
+      return flightEntry.flight
+    }
+  }
 
   // to turn off the type checker since I know that the types are right
   let where: any = Object.fromEntries(
@@ -36,6 +45,8 @@ export async function verifyFlight(
     };
   }
 
+  let foundCandidate = null;
+
   const candidates = await prisma.flight.findMany({
     where,
   });
@@ -51,12 +62,20 @@ export async function verifyFlight(
         candidate.arrivalTime.getTime() - candidate.departureTime.getTime();
 
       if (Math.abs(candidateDuration - targetDuration) <= toleranceMs) {
-        return candidate;
+        foundCandidate = candidate;
+        break;
       }
     }
   } else if (candidates.length > 0) {
-    return candidates[0];
+    foundCandidate = candidates[0];
   }
 
-  return null;
+  if (id && foundCandidate) {
+    await prisma.flightEntry.update({
+      where: { id },
+      data: { flightId: foundCandidate.id }
+    });
+  }
+
+  return foundCandidate;
 }

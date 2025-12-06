@@ -167,6 +167,7 @@ export const verifyFlightEntry = async (entry: LogEntry, idToken: string) => {
     method: "POST",
     headers: genHeaders(idToken),
     body: JSON.stringify({
+      id: entry.id,
       tailNumber: entry.tailNumber,
       originAirportIcao: entry.srcIcao,
       destinationAirportIcao: entry.destIcao,
