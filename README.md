@@ -43,6 +43,13 @@ Before you begin, ensure you have the following installed:
 
 ## Configuration
 
+### TA Setup Instructions
+
+1. Put the `.env` file sent to their email in the root of the project.
+2. Put the `serviceAccountKey.json` sent in your email in the `server/` directory of the project.
+
+### Setup
+
 1.  **Environment Variables:**
     Copy the sample environment file to `.env`:
     ```bash
