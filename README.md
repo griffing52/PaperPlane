@@ -37,6 +37,7 @@ Before you begin, ensure you have the following installed:
     npm run install:ocr
     # OR manually:
     # cd ocr
+    # NOTE: May need to create a venv using 'python -m venv venv; source venv/bin/activate'
     # pip install -r requirements.txt
     ```
 
@@ -100,6 +101,8 @@ Alternatively, you can run them individually in separate terminals:
 
 ## Testing
 
+### Automatic Testing
+
 To run all tests (Frontend, Backend, OCR):
 
 ```bash
@@ -112,6 +115,22 @@ Or run them individually:
 *   **Frontend Tests:** `npm run test:frontend` (if configured)
 *   **OCR Tests:** `npm run test:ocr`
 *   **E2E Tests:** `npm run test:e2e`
+
+### Manual Testing
+
+1. Visit the home page at [localhost:3000](http://localhost:3000/).
+2. Signup and login to your account.
+3. Play around with manual entries.
+    - Incorrect entries should show the errors in the user interface.
+4. Use the provided example image in `ocr/images/handwritten.png` to import several entries.
+5. Test verification with the verify button (there is a tolerance of 60 minutes on the duration).
+6. After you do that, delete the invalid entries.
+
+#### Notes
+
+We also implemented a hybrid approach to OCR by using Textract to get raw outputs and Gemini to format into JSON.
+To test this, please change the environment variable `OCR_PROVIDER` to `HYBRID` in `.env`.
+The `ocr/images/handwritten-2.png` sample image will fail on the AWS provider but pass on the hybrid provider.
 
 ## Verification Feature
 

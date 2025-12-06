@@ -19,6 +19,7 @@ export const userPostSchema = z.object({
 export type UserPostBodyParams = z.infer<typeof userPostSchema>;
 
 export const flightSchema = z.object({
+  id: z.uuid().optional(),
   tailNumber: z.string().optional(),
   aircraftModel: z.string().optional(),
   manufacturer: z.string().optional(),
