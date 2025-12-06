@@ -106,9 +106,9 @@ const saveFlightEntry = async (
     headers: genHeaders(idToken),
     body: JSON.stringify({
       date: (entry.date ?? "").replaceAll("-", "/"),
-      tailNumber: entry.tailNumber ?? "",
-      srcIcao: entry.srcIcao,
-      destIcao: entry.destIcao,
+      tailNumber: (entry.tailNumber ?? "").toUpperCase(),
+      srcIcao: (entry.srcIcao ?? "").toUpperCase(),
+      destIcao: (entry.destIcao ?? "").toUpperCase(),
       route: entry.route,
       totalFlightTime: entry.totalFlightTime ?? 0,
       picTime: entry.picTime ?? 0,
