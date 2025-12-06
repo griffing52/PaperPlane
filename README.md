@@ -26,19 +26,20 @@ Before you begin, ensure you have the following installed:
     git clone https://github.com/griffing52/PaperPlane.git
     cd PaperPlane
     ```
-
-2.  **Install Node.js dependencies (Frontend & Backend):**
+2.  **Setup the virtual environment for the OCR Service**
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r ocr/requirements.txt
+    ```
+3.  **Install Node.js dependencies (Frontend & Backend):**
     ```bash
     npm run install:all
     ```
-
-3.  **Install Python dependencies (OCR Service):**
+4.  **Install Python dependencies (OCR Service):**
     ```bash
     npm run install:ocr
     # OR manually:
-    # cd ocr
-    # NOTE: May need to create a venv using 'python -m venv venv; source venv/bin/activate'
-    # pip install -r requirements.txt
     ```
 
 ## Configuration
