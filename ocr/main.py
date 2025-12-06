@@ -4,6 +4,24 @@
 # uvicorn main:app --reload 
 # And navigate to http://127.0.0.1:8000/docs
 
+"""
+Gemini Prompts 
+# Prompt 1
+You are an expert full-stack developer with experience using Next.js.
+
+I'm building an app where pilots-in-training can upload photos of their logbook pages and their flight data (destination & source airports, hours spent in flight, number of landings, etc) is scanned w/ OCR and digitized, allowing them to upload their entire flight history and view their cumulative number of hours, as well as progress towards their pilot's license. 
+
+The app is in Next.js and we are using the Python implementation of AWS Textract for OCR. Right now, I need to write FastAPI endpoints which the frontend can use to call AWS Textract after the use uploads an image of a logbook page to be parsed and stored. 
+
+Don't write any code yet, but provide a high-level start-to-end overview of how a PNG can be parsed with AWS Textract and the data stored in a digital database (I'm not sure which database we're using, but I know we're using Prisma), including a discussion of the role of the FastAPI endpoints.
+
+# Prompt 2
+Give me an overview of possible FastAPI endpoints for the OCR service. 
+
+# Prompt 3
+Please give me a Python FastAPI implementation. 
+"""
+
 import os
 from typing import Dict, Any, List
 from dotenv import load_dotenv
@@ -77,3 +95,4 @@ async def process_logbook(
     except Exception as e:
         print(f"Processing Error: {e}")
         raise HTTPException(status_code=500, detail=f"OCR processing failed: {str(e)}")
+
