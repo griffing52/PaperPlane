@@ -57,6 +57,9 @@ Before you begin, ensure you have the following installed:
     ```bash
     npm run install:ocr
     # OR manually:
+    cd ocr
+    # NOTE: May need to create a venv (if not already done)
+    # pip install -r requirements.txt
     ```
 
 ## Configuration
@@ -68,14 +71,15 @@ Before you begin, ensure you have the following installed:
 
 ### Setup
 
-1.  **Environment Variables:**
+1. **General Set up of Environment Variables:** <br>
+    <b>(skip if using `.env` and `serviceAccountKey.json` from email)</b> <br>
     Copy the sample environment file to `.env`:
     ```bash
     cp .env.sample .env
     ```
     Edit `.env` to add your configuration (e.g., Firebase API keys, OCR provider settings).
 
-2.  **Firebase Setup:**
+2. **Firebase Setup:**
     *   Obtain your Firebase service account private key.
     *   Save it as `serviceAccountKey.json` in the `server/` directory.
 
@@ -83,17 +87,18 @@ Before you begin, ensure you have the following installed:
 
 This project uses SQLite. You need to initialize the database and seed it with data.
 
-1.  **Run Migrations:**
+1. **Run Migrations:**
+    Change directory to root. Run:
     ```bash
     npx prisma migrate dev --name initial_migration
     ```
 
-2.  **Generate Prisma Client:**
+2. **Generate Prisma Client:**
     ```bash
     npx prisma generate
     ```
 
-3.  **Seed the Database:**
+3. **Seed the Database:**
     This populates the database with sample users and archived flight data for verification.
     ```bash
     npm run seed

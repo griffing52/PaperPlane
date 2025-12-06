@@ -329,24 +329,7 @@ export default function Dashboard() {
             />
           </section>
 
-          <section className="space-y-4">
-            <h2 className="text-lg font-semibold text-white">Pilot status</h2>
-            <StatusBar entries={entries} />
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300 space-y-1.5">
-              <p className="font-semibold text-slate-100 text-sm">
-                Quick currency notes (informational only)
-              </p>
-              <p>
-                • Day passenger currency: 3 takeoffs/landings in the last 90 days.
-                • Night passenger currency: 3 full-stop landings at night in last 90 days.
-                • IFR: 6 approaches, holding, and tracking in the last 6 months.
-              </p>
-              <p className="text-slate-500">
-                This dashboard doesn&apos;t yet auto-compute legal currency, but
-                your log entries here are set up to support that later.
-              </p>
-            </div>
-          </section>
+          
         </div>
       </main>
 
