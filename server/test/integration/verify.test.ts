@@ -1,17 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import { app } from "../../src/index";
-import { createTestUser, createTestFlight } from "../fixtures/factories";
+import { createTestFlight } from "../fixtures/factories";
 
-describe("API Endpoints", () => {
-  describe("GET /health", () => {
-    it("should return health status", async () => {
-      const response = await request(app).get("/api/v1/health");
-      expect(response.status).toBe(200);
-    });
-  });
-
-  
+describe("Verification Endpoints", () => {
   describe("POST /api/v1/verify/", () => {
     let cleanup: Awaited<ReturnType<typeof createTestFlight>>;
 
