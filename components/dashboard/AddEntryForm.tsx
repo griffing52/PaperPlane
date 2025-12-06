@@ -81,13 +81,15 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
             ✕
           </button>
         </div>
-
+        {/*THE ERROR COMPONENET BELOW WAS ChatGPT 5.1 GENERATED: 
+        PROMPT: Generate a clean React component snippet that displays an error message in a styled red alert box using Tailwind, preserving line breaks and showing the error only when it exists. Full page pasted. 
+        */}
         {error && (
           <div className="mb-4 rounded-lg border border-red-500/50 bg-red-950/50 p-4">
             <p className="text-sm font-medium text-red-200 whitespace-pre-line">{error}</p>
           </div>
         )}
-
+        {/*END OF AI GENERATED CODE*/}
         <div className="grid gap-4">
           {/* Basic Info */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
