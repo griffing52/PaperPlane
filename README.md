@@ -154,3 +154,6 @@ A flight can be associated with any number of flight entries because there could
 
 <img width="951" height="1379" alt="image" src="https://github.com/user-attachments/assets/b5698b4d-e501-4b90-8990-8248e9fc628a" />
 
+The following diagram provides a high-level overview of the app's components:
+<img width="1237" height="211" alt="Paper Plane components" src="https://github.com/user-attachments/assets/dcceca21-5b6a-4d67-9761-d68550079c5e" />
+
