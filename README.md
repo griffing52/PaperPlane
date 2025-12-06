@@ -16,7 +16,6 @@ PaperPlane is a modern aviation logbook application designed to help pilots trac
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg?style=flat-square&logo=python)](https://python.org/)
 [![OCR](https://img.shields.io/badge/OCR-Textract%20%7C%20Gemini-yellow.svg?style=flat-square&logo=aws)]()
 [![FastAPI](https://img.shields.io/badge/FastAPI-OCR%20Service-009688.svg?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange.svg?style=flat-square&logo=jupyter)](https://jupyter.org/)
 [![Testing](https://img.shields.io/badge/Testing-Playwright%20%7C%20Vitest-green.svg?style=flat-square&logo=testing-library)]()
 
 ![PaperPlane Demo](public/PaperplaneDemoVideo.gif)
