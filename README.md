@@ -4,6 +4,24 @@
 
 PaperPlane is a modern aviation logbook application designed to help pilots track their flights, currency, and proficiency. It features a Next.js frontend, an Express/Node.js backend, and a Python-based OCR service for digitizing physical logbook entries.
 
+[![Next.js](https://img.shields.io/badge/Next.js-14-black.svg?style=flat-square&logo=nextdotjs)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-18-61dafb.svg?style=flat-square&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3-38bdf8.svg?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+[![Node.js](https://img.shields.io/badge/Node.js-18-43853d.svg?style=flat-square&logo=node.js)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4-black.svg?style=flat-square&logo=express)](https://expressjs.com/)
+[![Prisma](https://img.shields.io/badge/Prisma-5-2d3748.svg?style=flat-square&logo=prisma)](https://www.prisma.io/)
+[![SQLite](https://img.shields.io/badge/SQLite-3-003b57.svg?style=flat-square&logo=sqlite)](https://www.sqlite.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-Auth-orange.svg?style=flat-square&logo=firebase)](https://firebase.google.com/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg?style=flat-square&logo=python)](https://python.org/)
+[![OCR](https://img.shields.io/badge/OCR-Textract%20%7C%20Gemini-yellow.svg?style=flat-square&logo=aws)]()
+[![FastAPI](https://img.shields.io/badge/FastAPI-OCR%20Service-009688.svg?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange.svg?style=flat-square&logo=jupyter)](https://jupyter.org/)
+[![Testing](https://img.shields.io/badge/Testing-Playwright%20%7C%20Vitest-green.svg?style=flat-square&logo=testing-library)]()
+
+![PaperPlane Demo](public/PaperplaneDemoVideo.gif)
+
+
 ## Features
 
 *   **Digital Logbook**: View, add, edit, and delete flight entries.
