@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export async function verifyFlight(
   id: string | undefined,
   flight: Partial<Flight>,
-  timeToleranceMinutes: number = 15,
+  timeToleranceMinutes: number = 60,
   // promise type to satisfy async JS rules
 ): Promise<Flight | null> {
   const exactFields: (keyof Flight)[] = [
