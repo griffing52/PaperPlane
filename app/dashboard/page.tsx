@@ -329,6 +329,10 @@ export default function Dashboard() {
             />
           </section>
 
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold text-white">Pilot status</h2>
+            <StatusBar entries={entries} />
+          </section>
           
         </div>
       </main>
