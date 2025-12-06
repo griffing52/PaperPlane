@@ -1,4 +1,4 @@
-import { test, expect, Locator} from '@playwright/test';
+import { test, expect, Locator } from '@playwright/test';
 import path from 'path';
 
 test('e2e: login -> upload file -> process OCR -> verify created entries', async ({ page, request }) => {
@@ -6,38 +6,58 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
   const email = process.env.TEST_USER_EMAIL || 'admin@example.com';
   const password = process.env.TEST_USER_PASSWORD || 'Password123!';
 
-  // Login
+  // ============================================================
+  // 1. LOGIN
+  // ============================================================
   await page.goto('/login');
   await page.fill('[data-testid="login-email"]', email);
-  // Wait for the password input to be visible and stable before filling to avoid detached-element errors
+  
+  // Wait for the password input to be visible and stable
   await page.waitForSelector('[data-testid="login-password"]', { state: 'visible', timeout: 10000 });
   await page.locator('[data-testid="login-password"]').fill(password);
   await page.click('[data-testid="login-button"]');
+  
   await page.waitForURL(/.*dashboard/, { timeout: 15000 });
   await expect(page.getByTestId('dashboard-header')).toBeVisible();
 
+  // ============================================================
+  // 2. UPLOAD & MODAL HANDLING
+  // ============================================================
   const filePath = path.resolve(__dirname, '..', '..', 'ocr', 'images', 'handwritten.png');
 
+  // Trigger the upload
   await page.setInputFiles('input[type="file"]', filePath);
 
-  // Wait for processing (uploadLogbookFile calls OCR backend — ensure it's running)
-  // We expect an alert on success; intercept dialogs just in case
-  let alertSeen = false;
-  page.on('dialog', async dialog => {
-    alertSeen = true;
-    await dialog.accept();
-  });
+  // A. Assert Modal Appears (Look for specific text in your modal header)
+  // This confirms the UI state switched to "Uploading"
+  const modalHeader = page.locator('h3', { hasText: /Processing Upload|Upload Status/ });
+  await expect(modalHeader).toBeVisible({ timeout: 5000 });
 
-  // Wait for a short while for processing to complete and page to refresh logs
-  await page.waitForTimeout(5000);
+  // B. Wait for the "OK" button to become ENABLED
+  // The button is disabled while isUploading is true. We wait for isUploading to become false.
+  // We give this a longer timeout (30s) because OCR can be slow.
+  const okButton = page.getByRole('button', { name: 'OK' });
+  await expect(okButton).toBeEnabled({ timeout: 30000 });
 
-  // Check that at least one parsed record appears (look for any row in the logbook table)
+  // C. Click OK to close the modal
+  await okButton.click();
+
+  // D. Ensure Modal is gone so it doesn't obstruct the table
+  await expect(modalHeader).not.toBeVisible();
+
+  // ============================================================
+  // 3. CHECK TABLE DATA & BACKEND VERIFICATION
+  // ============================================================
+  
+  // Check that at least one parsed record appears
+  // We wait for the table body to populate
   const anyRow = page.locator('tbody tr').first();
   await expect(anyRow).toBeVisible({ timeout: 15000 });
 
-  const tailCell = anyRow.locator('td').nth(2); // tail number cell index in table
+  const tailCell = anyRow.locator('td').nth(2); // Adjust index if tail number column changed
   const tail = (await tailCell.textContent())?.trim() || '';
 
+  // Optional: Backend direct check
   if (tail) {
     const backend = process.env.PAPERPLANE_BACKEND || process.env.NEXT_PUBLIC_PAPERPLANE_BACKEND || 'http://localhost:3002';
     const verifyResp = await request.post(`${backend}/api/v1/verify/`, {
@@ -48,48 +68,51 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
     expect(verifyResp.ok()).toBeTruthy();
   }
 
-  // Expect the "Verify" operation to trigger a dialog notification
+  // ============================================================
+  // 4. VERIFY BUTTON INTERACTION
+  // ============================================================
+
+  // Prepare to catch the alert dialog from the "Verify" button
   const verifyDialogPromise = page.waitForEvent('dialog');
 
   await page.click('[data-testid="verify-button"]');
 
   const dialog = await verifyDialogPromise;
 
-  // Assert the dialog message: handwritten had 4 valid entries, so verification message should always have valid entries in multiples of 4
+  // Assert the dialog message regex
   expect(dialog.message()).toMatch(
-  /Verification complete\. Verified (?:\d*[02468][048]|\d*[13579][26]) out of \d+ checked flights\./
+    /Verification complete\. Verified (?:\d*[02468][048]|\d*[13579][26]) out of \d+ checked flights\./
   );
+  await dialog.accept();
 
-
-// ============================================================
-  // 4. DATA STABILITY CHECK 
+  // ============================================================
+  // 5. DATA STABILITY CHECK (LOGOUT/LOGIN)
   // ============================================================
   
-  // Helper to extract text from the row cells. 
-  // Adjust the .nth() indices based on your actual table column order.
   const extractRowData = async (rowLocator: Locator) => {
     return {
-      date: await rowLocator.locator('td').nth(0).innerText(), // e.g. "2025-12-01"
-      tail: await rowLocator.locator('td').nth(1).innerText(), // e.g. "N12345A"
-      route: await rowLocator.locator('td').nth(2).innerText(), // e.g. "KJFK - KLAX"
-      totalTime: await rowLocator.locator('td').nth(3).innerText(), // e.g. "2.5"
+      date: await rowLocator.locator('td').nth(0).innerText(),
+      tail: await rowLocator.locator('td').nth(1).innerText(),
+      route: await rowLocator.locator('td').nth(2).innerText(),
+      totalTime: await rowLocator.locator('td').nth(3).innerText(),
     };
   };
 
-  // A. Snapshot data BEFORE logout
+  // Snapshot data BEFORE logout
   const dataBeforeLogout = await extractRowData(anyRow);
   console.log('Data before logout:', dataBeforeLogout);
 
-  // 5. Logout and Log back in
-  await page.click('[data-testid="logout-button"]');
+  // Logout
+  // Assuming you have a logout button test id
+  await page.click('button:has-text("Sign out"), [data-testid="logout-button"]'); 
   await page.waitForURL(/.*login/, { timeout: 10000 });
 
+  // Log back in
   await page.fill('[data-testid="login-email"]', email);
   await page.fill('[data-testid="login-password"]', password);
   await page.click('[data-testid="login-button"]');
   await page.waitForURL(/.*dashboard/, { timeout: 15000 });
 
-  // 6. Verify Persistence
+  // Verify Persistence
   await expect(anyRow).toBeVisible({ timeout: 10000 });
-
 });
