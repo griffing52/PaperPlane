@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { LogEntry } from "@/types/logbook";
+import { ApiError } from "@/lib/api/errors";
 import NumberField from "./NumberField";
 
 type AddEntryFormProps = {
@@ -25,28 +26,12 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
   const [isXC, setIsXC] = useState(editingEntry?.crossCountry || false);
   const [remarks, setRemarks] = useState(editingEntry?.remarks || "");
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
+    setError(null);
     setIsSaving(true);
     try {
-      const newEntry: Omit<LogEntry, "id"> = {
-        date,
-        tailNumber,
-        srcIcao,
-        destIcao,
-        route,
-        totalFlightTime: parseFloat(totalFlightTime) || 0,
-        nightLandings: parseInt(nightLandings) || 0,
-        dayLandings: parseInt(dayLandings) || 0, // Fix: assigned twice in original thought, correcting here
-        instrumentTime: parseFloat(instrumentTime) || 0,
-        picTime: parseFloat(picTime) || 0,
-        dualReceivedTime: parseFloat(dualReceived) || 0,
-        night: isNight,
-        solo: isSolo,
-        crossCountry: isXC,
-        remarks,
-      };
-      // Correcting the object construction
       const entryToSave: Omit<LogEntry, "id"> = {
         date,
         tailNumber,
@@ -67,8 +52,16 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
       
       await onSave(entryToSave);
       onClose();
-    } catch (error) {
-      console.error("Failed to save entry", error);
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+        console.error("Validation errors:", err.errors);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred");
+      }
+      console.error("Failed to save entry", err);
     } finally {
       setIsSaving(false);
     }
@@ -88,6 +81,12 @@ export default function AddEntryForm({ onClose, onSave, editingEntry }: AddEntry
             ✕
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-lg border border-red-500/50 bg-red-950/50 p-4">
+            <p className="text-sm font-medium text-red-200 whitespace-pre-line">{error}</p>
+          </div>
+        )}
 
         <div className="grid gap-4">
           {/* Basic Info */}

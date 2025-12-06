@@ -1,5 +1,6 @@
 import { API_BASE_URL, OCR_API_BASE_URL } from "../config";
 import { LogEntry } from "@/types/logbook";
+import { ApiError, ValidationError } from "./errors";
 
 const genHeaders = (idToken: string) => {
   return {
@@ -7,6 +8,25 @@ const genHeaders = (idToken: string) => {
     "Authorization": `Bearer ${idToken}`
   }
 }
+
+const formatErrorMessage = (errorResponse: any): { message: string; errors: ValidationError[] } => {
+  // Check if response has validation errors array
+  if (errorResponse.errors && Array.isArray(errorResponse.errors)) {
+    const errorMessages = errorResponse.errors
+      .map((err: ValidationError) => `${err.field}: ${err.message}`)
+      .join("\n");
+    return {
+      message: errorMessages,
+      errors: errorResponse.errors
+    };
+  }
+
+  // Fallback to error field or generic message
+  return {
+    message: errorResponse.error || errorResponse.detail || "An unknown error occurred",
+    errors: []
+  };
+};
 
 const parseLogEntry = (data: any): LogEntry => {
   // we use this instead of Json.parse for more flexiblity
@@ -58,7 +78,8 @@ export const fetchLogs = async (idToken: string): Promise<Array<LogEntry>> => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || "Failed to fetch logs");
+    const { message, errors } = formatErrorMessage(data);
+    throw new ApiError(message, errors);
   }
 
   if (!Array.isArray(data)) {
@@ -104,7 +125,8 @@ const saveFlightEntry = async (
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || `Failed to ${method === "POST" ? "create" : "update"} flight entry`);
+    const { message, errors } = formatErrorMessage(error);
+    throw new ApiError(message, errors);
   }
 
   return response.json();
@@ -124,7 +146,8 @@ export const deleteFlightEntry = async (id: string, idToken: string) => {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Failed to delete flight entry");
+    const { message, errors } = formatErrorMessage(error);
+    throw new ApiError(message, errors);
   }
 
   return response.json();
@@ -154,7 +177,8 @@ export const verifyFlightEntry = async (entry: LogEntry, idToken: string) => {
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || "Failed to verify flight entry");
+    const { message, errors } = formatErrorMessage(error);
+    throw new ApiError(message, errors);
   }
 
   return response.json();
