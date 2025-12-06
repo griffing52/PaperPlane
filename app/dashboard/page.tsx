@@ -35,6 +35,27 @@ export default function Dashboard() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [verificationResults, setVerificationResults] = useState<Record<string, boolean>>({});
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isStorageLoaded, setIsStorageLoaded] = useState(false);
+
+  // Load verification results from local storage
+  useEffect(() => {
+    const saved = localStorage.getItem("verificationResults");
+    if (saved) {
+      try {
+        setVerificationResults(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to parse verification results", e);
+      }
+    }
+    setIsStorageLoaded(true);
+  }, []);
+
+  // Save verification results to local storage
+  useEffect(() => {
+    if (isStorageLoaded) {
+      localStorage.setItem("verificationResults", JSON.stringify(verificationResults));
+    }
+  }, [verificationResults, isStorageLoaded]);
 
   // Auth check
   useEffect(() => {
