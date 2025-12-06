@@ -17,6 +17,7 @@ import {
 import StatusBar from "@/components/dashboard/StatusBar";
 import LogbookList from "@/components/dashboard/LogbookList";
 import AddEntryForm from "@/components/dashboard/AddEntryForm";
+import UploadPreviewModal from "@/components/dashboard/UploadPreviewModal"; 
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
@@ -25,7 +26,12 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [editingEntry, setEditingEntry] = useState<LogEntry | null>(null);
+  
+  // Upload states
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false); 
+
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [verificationResults, setVerificationResults] = useState<Record<string, boolean>>({});
   const [isVerifying, setIsVerifying] = useState(false);
@@ -61,7 +67,16 @@ export default function Dashboard() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Generate Base64 preview immediately
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        setUploadPreview(ev.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
     setIsUploading(true);
+    setShowUploadModal(true); 
+    
     try {
       const response = await uploadLogbookFile(file);
       
@@ -71,7 +86,6 @@ export default function Dashboard() {
           // Save each record
           let savedCount = 0;
           for (const record of response.records) {
-              // Map OCR record to LogEntry format
               const entry = {
                   date: record.date,
                   tailNumber: record.tailNumber,
@@ -99,7 +113,6 @@ export default function Dashboard() {
           // Refresh logs
           const data = await fetchLogs(token);
           setEntries(data);
-          alert(`Successfully imported ${savedCount} entries!`);
       }
     } catch (error) {
       console.error("Upload failed", error);
@@ -115,16 +128,7 @@ export default function Dashboard() {
     if (!user) return;
     try {
       const token = await user.getIdToken();
-      const newEntry = await createFlightEntry(entryData, token);
-      // The API returns the created entry?
-      // If so, add it to state.
-      // But createFlightEntry returns response.json().
-      // Assuming it returns the created entry.
-      // We need to cast it or ensure it matches LogEntry.
-      // Ideally we should re-fetch or append.
-      // Let's append for now, assuming the response is the entry.
-      // But wait, the response might be different.
-      // Safest is to reload logs.
+      await createFlightEntry(entryData, token);
       await loadLogs();
     } catch (error) {
       console.error("Failed to save entry", error);
@@ -157,8 +161,6 @@ export default function Dashboard() {
     
     try {
       const token = await user.getIdToken();
-      // Verify all entries or selected entries?
-      // If selectedIds has items, verify those. Else verify all.
       const entriesToVerify = selectedIds.size > 0 
         ? entries.filter(e => e.id && selectedIds.has(e.id))
         : entries;
@@ -199,8 +201,6 @@ export default function Dashboard() {
     
     try {
       const token = await user.getIdToken();
-      
-      // Delete each selected entry
       for (const id of selectedIds) {
         try {
           await deleteFlightEntry(id, token);
@@ -208,8 +208,6 @@ export default function Dashboard() {
           console.error(`Failed to delete entry ${id}`, error);
         }
       }
-      
-      // Refresh logs and clear selection
       await loadLogs();
       setSelectedIds(new Set());
       alert(`Successfully deleted ${selectedIds.size} entries!`);
@@ -240,12 +238,12 @@ export default function Dashboard() {
   };
 
   if (loading || !user) {
-    return null; // Or a loading spinner
+    return null;
   }
 
+  // FIXED: Single return statement merging the UI and the Modals
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200">
-      {/* Navigation */}
       <nav className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-8">
@@ -254,12 +252,6 @@ export default function Dashboard() {
               <button className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white">
                 Logbook
               </button>
-              {/*<button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
-                Reports
-              </button>
-              <button className="rounded-lg px-3 py-2 text-sm font-medium text-slate-400 hover:text-white">
-                Aircraft
-              </button>*/}
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -275,9 +267,8 @@ export default function Dashboard() {
       </nav>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* Page Header */}
         <div className="mb-8">
-          <h1 data-testid = "dashboard-header" className="text-3xl font-semibold tracking-tight text-white">
+          <h1 data-testid="dashboard-header" className="text-3xl font-semibold tracking-tight text-white">
             Pilot Dashboard
           </h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -286,11 +277,27 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.3fr,1fr]">
-          {/* Logbook Section */}
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-white">Logbook</h2>
               <div className="flex gap-3">
+                <button data-testid="verify-button"
+                  onClick={handleVerify}
+                  disabled={isVerifying}
+                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/20 disabled:opacity-50"
+                >
+                  {isVerifying ? "Verifying..." : "Verify"}
+                </button>
+
+                {selectedIds.size > 0 && (
+                  <button
+                    onClick={handleDeleteSelected}
+                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition-colors shadow-lg shadow-red-900/20"
+                  >
+                    Delete ({selectedIds.size})
+                  </button>
+                )}
+
                 <label className="cursor-pointer rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700 hover:text-white transition-colors">
                   {isUploading ? "Processing..." : "Upload logbook file"}
                   <input
@@ -301,21 +308,7 @@ export default function Dashboard() {
                     disabled={isUploading}
                   />
                 </label>
-                {selectedIds.size > 0 && (
-                  <button
-                    onClick={handleDeleteSelected}
-                    className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition-colors shadow-lg shadow-red-900/20"
-                  >
-                    Delete ({selectedIds.size})
-                  </button>
-                )}
-                <button data-testid = "verify-button"
-                  onClick={handleVerify}
-                  disabled={isVerifying}
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-900/20 disabled:opacity-50"
-                >
-                  {isVerifying ? "Verifying..." : "Verify"}
-                </button>
+
                 <button
                   onClick={() => setShowAddEntry(true)}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20"
@@ -336,13 +329,9 @@ export default function Dashboard() {
             />
           </section>
 
-          {/* Pilot Status Section */}
           <section className="space-y-4">
             <h2 className="text-lg font-semibold text-white">Pilot status</h2>
-            
             <StatusBar entries={entries} />
-
-            {/* Currency notes */}
             <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300 space-y-1.5">
               <p className="font-semibold text-slate-100 text-sm">
                 Quick currency notes (informational only)
@@ -361,7 +350,15 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Add Entry Modal */}
+      {}
+      <UploadPreviewModal
+        isOpen={showUploadModal}
+        isUploading={isUploading}
+        imageSrc={uploadPreview}
+        onClose={() => setShowUploadModal(false)}
+      />
+
+      {}
       {(showAddEntry || editingEntry) && (
         <AddEntryForm
           onClose={() => {
