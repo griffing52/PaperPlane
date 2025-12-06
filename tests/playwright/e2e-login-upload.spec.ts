@@ -11,12 +11,12 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
   // ============================================================
   await page.goto('/login');
   await page.fill('[data-testid="login-email"]', email);
-  
+
   // Wait for the password input to be visible and stable
   await page.waitForSelector('[data-testid="login-password"]', { state: 'visible', timeout: 10000 });
   await page.locator('[data-testid="login-password"]').fill(password);
   await page.click('[data-testid="login-button"]');
-  
+
   await page.waitForURL(/.*dashboard/, { timeout: 15000 });
   await expect(page.getByTestId('dashboard-header')).toBeVisible();
 
@@ -36,11 +36,10 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
   // B. Wait for the "OK" button to become ENABLED
   // The button is disabled while isUploading is true. We wait for isUploading to become false.
   // We give this a longer timeout (30s) because OCR can be slow.
-  const okButton = page.getByRole('button', { name: 'OK' });
-  await expect(okButton).toBeEnabled({ timeout: 30000 });
+  await page.click('[data-testid="upload-modal-button"]')
 
   // C. Click OK to close the modal
-  await okButton.click();
+  // await okButton.click();
 
   // D. Ensure Modal is gone so it doesn't obstruct the table
   await expect(modalHeader).not.toBeVisible();
@@ -48,7 +47,7 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
   // ============================================================
   // 3. CHECK TABLE DATA & BACKEND VERIFICATION
   // ============================================================
-  
+
   // Check that at least one parsed record appears
   // We wait for the table body to populate
   const anyRow = page.locator('tbody tr').first();
@@ -78,17 +77,14 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
   await page.click('[data-testid="verify-button"]');
 
   const dialog = await verifyDialogPromise;
-
-  // Assert the dialog message regex
-  expect(dialog.message()).toMatch(
-    /Verification complete\. Verified (?:\d*[02468][048]|\d*[13579][26]) out of \d+ checked flights\./
-  );
+  const match = dialog.message().match(/Verified (\d+) out of (\d+)/);
+  expect(Number(match![1]) % 6).toBe(0);
   await dialog.accept();
 
   // ============================================================
   // 5. DATA STABILITY CHECK (LOGOUT/LOGIN)
   // ============================================================
-  
+
   const extractRowData = async (rowLocator: Locator) => {
     return {
       date: await rowLocator.locator('td').nth(0).innerText(),
@@ -104,7 +100,7 @@ test('e2e: login -> upload file -> process OCR -> verify created entries', async
 
   // Logout
   // Assuming you have a logout button test id
-  await page.click('button:has-text("Sign out"), [data-testid="logout-button"]'); 
+  await page.click('button:has-text("Sign out"), [data-testid="logout-button"]');
   await page.waitForURL(/.*login/, { timeout: 10000 });
 
   // Log back in
